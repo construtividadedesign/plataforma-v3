@@ -5,9 +5,11 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCircle, Clock } from "lucide-react";
+import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCircle, Clock, Printer, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useTurma } from "@/contexts/TurmaContext";
+import { module1MaterialsData, LessonMaterial } from "@/data/module1Materials";
+import PrintableLessonModal from "@/components/PrintableLessonModal";
 
 const modulesInfo = {
   "mod-1": { title: "Fundamentos de Climatização", description: "Conceitos de calor, temperatura, pressão, ciclo frigorífico e manuseio seguro de fluidos." },
@@ -29,6 +31,7 @@ export default function ModuleDetailsPage() {
   const [activeLesson, setActiveLesson] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchLessons() {
@@ -86,6 +89,17 @@ export default function ModuleDetailsPage() {
     return url;
   };
 
+  // Localiza o material didático estruturado da aula ativa (Módulo 1)
+  const currentMaterial: LessonMaterial | null = (() => {
+    if (moduleId !== "mod-1" || !activeLesson) return null;
+    const byOrder = module1MaterialsData.find(
+      (m) => m.lessonOrder === Number(activeLesson.lesson_order)
+    );
+    if (byOrder) return byOrder;
+    const titleLower = (activeLesson.title || "").toLowerCase();
+    return module1MaterialsData.find((m) => titleLower.includes(m.titleKey)) || null;
+  })();
+
   const isCurrentLessonCompleted = activeLesson ? aulasConcluidas.includes(activeLesson.id) : false;
   
   // Conta apenas as aulas deste módulo específico que estão concluídas
@@ -95,7 +109,7 @@ export default function ModuleDetailsPage() {
     return (
       <div className="flex flex-col items-center justify-center w-full min-h-[60vh] text-gray-400">
         <Loader2 className="w-10 h-10 animate-spin mb-4 text-red-500" />
-        <p>A carregar aulas...</p>
+        <p>Carregando aulas...</p>
       </div>
     );
   }
@@ -120,7 +134,7 @@ export default function ModuleDetailsPage() {
           <AlertCircle className="w-5 h-5 shrink-0" />
           <span>
             {isProfessor
-              ? "Atenção: Não tem nenhuma turma selecionada. O progresso não será guardado."
+              ? "Atenção: Não há nenhuma turma selecionada. O progresso não será salvo."
               : "Atenção: Selecione a sua turma no menu lateral para acompanhar o progresso das aulas."}
           </span>
         </div>
@@ -148,43 +162,84 @@ export default function ModuleDetailsPage() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         
-        {/* COLUNA ESQUERDA: Reprodutor e Detalhes */}
+        {/* COLUNA ESQUERDA: Reprodutor / Painel de Estudo e Detalhes */}
         <div className="flex-1 space-y-6 min-w-0">
           
           <div className="relative w-full aspect-video bg-black/80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex flex-col items-center justify-center group">
             
-            {activeLesson.has_video ? (
-              activeLesson.video_url ? (
-                isYouTube ? (
-                  <iframe
-                    className="w-full h-full border-0"
-                    src={getEmbedUrl(activeLesson.video_url)}
-                    title={activeLesson.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video 
-                    controls 
-                    controlsList="nodownload"
-                    className="w-full h-full object-cover"
-                    src={activeLesson.video_url}
-                  >
-                    O seu navegador não suporta a reprodução de vídeo.
-                  </video>
-                )
+            {activeLesson.has_video && activeLesson.video_url ? (
+              isYouTube ? (
+                <iframe
+                  className="w-full h-full border-0"
+                  src={getEmbedUrl(activeLesson.video_url)}
+                  title={activeLesson.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
               ) : (
-                <div className="flex flex-col items-center justify-center h-full p-4">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
-                  <PlayCircle className="w-12 h-12 sm:w-16 sm:h-16 text-red-500/70 z-20 transition-transform group-hover:scale-110 duration-300" />
-                  <p className="z-20 mt-4 text-white font-medium text-base sm:text-lg text-center px-4">
+                <video 
+                  controls 
+                  controlsList="nodownload"
+                  className="w-full h-full object-cover"
+                  src={activeLesson.video_url}
+                >
+                  O seu navegador não suporta a reprodução de vídeo.
+                </video>
+              )
+            ) : currentMaterial ? (
+              /* Painel Técnico Interativo quando a aula possui apostila estruturada e ainda não tem vídeo */
+              <div className="flex flex-col justify-between h-full w-full p-5 sm:p-8 bg-gradient-to-br from-zinc-950 via-zinc-900/95 to-red-950/20 overflow-y-auto">
+                <div className="space-y-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Resumo Técnico de Aula • Material de Apoio Oficial</span>
+                  </div>
+                  <h2 className="text-lg sm:text-2xl font-bold text-white">
                     Aula {activeLesson.lesson_order}: {activeLesson.title}
-                  </p>
-                  <p className="z-20 mt-2 px-3 py-1 bg-white/10 border border-white/10 text-gray-300 text-xs rounded-full backdrop-blur-md">
-                    A aguardar link do vídeo na Base de Dados
+                  </h2>
+                  <p className="text-xs sm:text-sm text-gray-200 leading-relaxed bg-black/40 border-l-4 border-red-600 p-3.5 rounded-r-xl">
+                    {currentMaterial.shortSummary}
                   </p>
                 </div>
-              )
+
+                <div className="my-4 space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Pontos-Chave de Estudo:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {currentMaterial.keyPoints.map((pt, index) => (
+                      <div key={index} className="bg-white/5 border border-white/10 rounded-lg p-2.5 text-xs text-gray-300 flex items-start gap-2">
+                        <span className="text-red-500 font-bold">•</span>
+                        <span>{pt}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/10">
+                  <span className="text-xs text-gray-400">
+                    Documento completo com diagramas técnicos, tabelas e normas pronto para impressão.
+                  </span>
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer shadow-lg shadow-red-900/30"
+                  >
+                    <Printer className="w-4 h-4" />
+                    Abrir Apostila Imprimível (PDF)
+                  </button>
+                </div>
+              </div>
+            ) : activeLesson.has_video ? (
+              <div className="flex flex-col items-center justify-center h-full p-4">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
+                <PlayCircle className="w-12 h-12 sm:w-16 sm:h-16 text-red-500/70 z-20 transition-transform group-hover:scale-110 duration-300" />
+                <p className="z-20 mt-4 text-white font-medium text-base sm:text-lg text-center px-4">
+                  Aula {activeLesson.lesson_order}: {activeLesson.title}
+                </p>
+                <p className="z-20 mt-2 px-3 py-1 bg-white/10 border border-white/10 text-gray-300 text-xs rounded-full backdrop-blur-md">
+                  Aguardando link do vídeo no Banco de Dados
+                </p>
+              </div>
             ) : (
               <div className="flex flex-col items-center text-gray-400 w-full h-full justify-center p-6 text-center">
                 <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 mb-4 text-red-500/50" />
@@ -196,64 +251,89 @@ export default function ModuleDetailsPage() {
           </div>
 
           <Card className="bg-black/40 backdrop-blur-md border border-white/10 shadow-xl rounded-2xl">
-            <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg sm:text-xl font-bold text-white">{activeLesson.title}</h3>
-                <p className="text-xs sm:text-sm text-gray-400 mt-1 flex items-center gap-2">
-                  <span>Carga Horária: {activeLesson.duration}</span>
-                  <span>•</span>
-                  <span>Aula {activeLesson.lesson_order} de {lessons.length}</span>
-                </p>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full sm:w-auto bg-transparent border border-white/20 text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
-                  disabled={!activeLesson.pdf_url}
-                  onClick={() => activeLesson.pdf_url && window.open(activeLesson.pdf_url, '_blank')}
-                >
-                  <FileDown className="w-4 h-4 mr-2" />
-                  {activeLesson.pdf_url ? "Baixar Manual" : "Sem Manual"}
-                </Button>
+            <CardContent className="p-5 sm:p-6 flex flex-col gap-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white">{activeLesson.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-400 mt-1 flex items-center gap-2">
+                    <span>Carga Horária: {activeLesson.duration}</span>
+                    <span>•</span>
+                    <span>Aula {activeLesson.lesson_order} de {lessons.length}</span>
+                  </p>
+                </div>
                 
-                {/* Se for Professor, exibe o botão de marcar conclusão. Se for Aluno, exibe apenas o status da aula */}
-                {isProfessor ? (
-                  <Button 
-                    onClick={handleToggleComplete}
-                    disabled={isUpdatingProgress || !turmaAtiva}
-                    className={`w-full sm:w-auto cursor-pointer transition-all duration-300 border-0 ${
-                      !turmaAtiva 
-                        ? "bg-gray-800 text-gray-500" 
-                        : isCurrentLessonCompleted 
-                          ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 shadow-lg shadow-emerald-900/20" 
-                          : "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-900/30"
-                    }`}
-                  >
-                    {isUpdatingProgress ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> A guardar...</>
-                    ) : isCurrentLessonCompleted ? (
-                      <><CheckCircle2 className="w-4 h-4 mr-2" /> Concluída</>
-                    ) : (
-                      <><Circle className="w-4 h-4 mr-2" /> Marcar Conclusão</>
-                    )}
-                  </Button>
-                ) : (
-                  <div
-                    className={`inline-flex items-center justify-center px-4 py-2 rounded-md text-xs sm:text-sm font-medium border select-none ${
-                      isCurrentLessonCompleted
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                        : "bg-white/5 text-gray-400 border-white/10"
-                    }`}
-                  >
-                    {isCurrentLessonCompleted ? (
-                      <><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-400" /> Aula Ministrada</>
-                    ) : (
-                      <><Clock className="w-4 h-4 mr-2 text-gray-400" /> Aguardando Instrutor</>
-                    )}
-                  </div>
-                )}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+                  {currentMaterial ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsModalOpen(true)}
+                      className="w-full sm:w-auto bg-white/5 border border-red-500/40 text-white hover:bg-red-600 hover:border-red-600 cursor-pointer transition-all"
+                    >
+                      <BookOpen className="w-4 h-4 mr-2 text-red-400" />
+                      Apostila Técnica (PDF)
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      className="w-full sm:w-auto bg-transparent border border-white/20 text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
+                      disabled={!activeLesson.pdf_url}
+                      onClick={() => activeLesson.pdf_url && window.open(activeLesson.pdf_url, '_blank')}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      {activeLesson.pdf_url ? "Baixar Manual" : "Sem Manual"}
+                    </Button>
+                  )}
+                  
+                  {/* Se for Professor, exibe o botão de marcar conclusão. Se for Aluno, exibe apenas o status da aula */}
+                  {isProfessor ? (
+                    <Button 
+                      onClick={handleToggleComplete}
+                      disabled={isUpdatingProgress || !turmaAtiva}
+                      className={`w-full sm:w-auto cursor-pointer transition-all duration-300 border-0 ${
+                        !turmaAtiva 
+                          ? "bg-gray-800 text-gray-500" 
+                          : isCurrentLessonCompleted 
+                            ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 shadow-lg shadow-emerald-900/20" 
+                            : "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-900/30"
+                      }`}
+                    >
+                      {isUpdatingProgress ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando...</>
+                      ) : isCurrentLessonCompleted ? (
+                        <><CheckCircle2 className="w-4 h-4 mr-2" /> Concluída</>
+                      ) : (
+                        <><Circle className="w-4 h-4 mr-2" /> Marcar Conclusão</>
+                      )}
+                    </Button>
+                  ) : (
+                    <div
+                      className={`inline-flex items-center justify-center px-4 py-2 rounded-md text-xs sm:text-sm font-medium border select-none ${
+                        isCurrentLessonCompleted
+                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                          : "bg-white/5 text-gray-400 border-white/10"
+                      }`}
+                    >
+                      {isCurrentLessonCompleted ? (
+                        <><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-400" /> Aula Ministrada</>
+                      ) : (
+                        <><Clock className="w-4 h-4 mr-2 text-gray-400" /> Aguardando Instrutor</>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Explicação Técnica Direta no Card Inferior */}
+              {currentMaterial && (
+                <div className="border-t border-white/10 pt-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-red-400 mb-1">
+                    Conceito Técnico Fundamental:
+                  </p>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    {currentMaterial.shortSummary}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -320,6 +400,15 @@ export default function ModuleDetailsPage() {
         </div>
 
       </div>
+
+      {/* Modal de Apostila Imprimível A4 */}
+      {isModalOpen && currentMaterial && (
+        <PrintableLessonModal
+          material={currentMaterial}
+          moduleTitle={currentModuleInfo.title}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
