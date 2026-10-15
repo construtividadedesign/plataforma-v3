@@ -1,16 +1,19 @@
 "use client";
 
 import React from "react";
-import { X, Printer, Users, Award, ShieldAlert, BookOpen, Lock } from "lucide-react";
-import { module1ChallengeData } from "@/data/module1Challenge";
+import { X, Printer, Users, Award, Lock } from "lucide-react";
+import { module1ChallengeData, ModuleChallengeData } from "@/data/module1Challenge";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  challengeData?: ModuleChallengeData;
 };
 
-export default function PrintableChallengeModal({ isOpen, onClose }: Props) {
+export default function PrintableChallengeModal({ isOpen, onClose, challengeData }: Props) {
   if (!isOpen) return null;
+
+  const data = challengeData || module1ChallengeData;
 
   const handlePrint = () => {
     window.print();
@@ -18,7 +21,6 @@ export default function PrintableChallengeModal({ isOpen, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto print:static print:bg-white print:p-0 print:block">
-      {/* Estilos globais para formatação perfeita em A4 na impressão */}
       <style jsx global>{`
         @media print {
           body * {
@@ -47,11 +49,10 @@ export default function PrintableChallengeModal({ isOpen, onClose }: Props) {
 
       <div className="bg-zinc-950 border border-white/15 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden print:max-w-none print:max-h-none print:border-none print:rounded-none print:bg-white">
         
-        {/* Barra de Ferramentas Superior (Oculta na Impressão) */}
         <div className="no-print flex items-center justify-between px-6 py-4 bg-black/80 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-2.5">
             <Users className="w-5 h-5 text-red-500" />
-            <span className="text-sm font-semibold text-white">Desafio Prático Oficial • Encerramento do Módulo 1</span>
+            <span className="text-sm font-semibold text-white">Desafio Prático Oficial • Formato A4 Imprimível</span>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -71,23 +72,21 @@ export default function PrintableChallengeModal({ isOpen, onClose }: Props) {
           </div>
         </div>
 
-        {/* FOLHA A4 DO DESAFIO */}
         <div className="overflow-y-auto p-4 sm:p-8 bg-zinc-900/60 print:p-0 print:bg-white">
           <div
             id="printable-challenge-sheet"
             className="bg-white text-slate-900 rounded-xl p-6 sm:p-10 shadow-xl max-w-3xl mx-auto space-y-6 border border-slate-200"
           >
-            {/* CABEÇALHO */}
             <div className="border-b-2 border-red-600 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wider text-red-600">
                   Plataforma de Climatização • Atividade Prática de Oficina
                 </p>
                 <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">
-                  {module1ChallengeData.title}
+                  {data.title}
                 </h1>
                 <p className="text-xs text-slate-600 font-medium mt-1">
-                  {module1ChallengeData.subtitle} • Autor: Prof. Cleverson Leonardo
+                  {data.subtitle} • Autor: Prof. Cleverson Leonardo
                 </p>
               </div>
               <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-right shrink-0">
@@ -96,7 +95,6 @@ export default function PrintableChallengeModal({ isOpen, onClose }: Props) {
               </div>
             </div>
 
-            {/* AVISO LEGAL */}
             <div className="bg-red-50 border border-red-200 rounded-lg px-3.5 py-2 flex items-center gap-2 text-[11px] text-red-900 font-medium">
               <Lock className="w-3.5 h-3.5 text-red-600 shrink-0" />
               <span>
@@ -104,19 +102,18 @@ export default function PrintableChallengeModal({ isOpen, onClose }: Props) {
               </span>
             </div>
 
-            {/* OBJETIVO E DINÂMICA */}
             <div className="bg-slate-50 border-l-4 border-red-600 p-4 rounded-r-lg space-y-3">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Objetivo Pedagógico da Atividade
               </h2>
               <p className="text-sm font-medium text-slate-800 leading-relaxed">
-                {module1ChallengeData.objective}
+                {data.objective}
               </p>
               <div className="border-t border-slate-200 pt-3 space-y-1.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
                   Dinâmica de Execução em Aula:
                 </span>
-                {module1ChallengeData.dynamics.map((d, dIdx) => (
+                {data.dynamics.map((d, dIdx) => (
                   <p key={dIdx} className="text-xs text-slate-700 leading-relaxed flex items-start gap-2">
                     <span className="text-red-600 font-bold">•</span>
                     <span>{d}</span>
@@ -125,14 +122,13 @@ export default function PrintableChallengeModal({ isOpen, onClose }: Props) {
               </div>
             </div>
 
-            {/* DOSSIÊS DOS 4 GRUPOS */}
             <div className="space-y-4">
               <h3 className="text-base font-bold text-slate-900 border-b border-slate-200 pb-1.5 flex items-center gap-2">
                 <Award className="w-5 h-5 text-red-600" />
                 Dossiês Técnicos para as 4 Equipes
               </h3>
 
-              {module1ChallengeData.groups.map((g) => (
+              {data.groups.map((g) => (
                 <div key={g.groupNumber} className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-extrabold px-2.5 py-1 rounded bg-red-600 text-white">
@@ -163,7 +159,6 @@ export default function PrintableChallengeModal({ isOpen, onClose }: Props) {
               ))}
             </div>
 
-            {/* RODAPÉ */}
             <div className="border-t-2 border-slate-300 pt-4 mt-8 text-center space-y-1">
               <p className="text-xs font-bold text-slate-800">
                 © {new Date().getFullYear()} Direitos Intelectuais Reservados • Criado por Prof. Cleverson Leonardo.

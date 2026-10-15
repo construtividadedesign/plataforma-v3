@@ -9,6 +9,8 @@ import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCir
 import { toast } from "sonner";
 import { useTurma } from "@/contexts/TurmaContext";
 import { module1MaterialsData, LessonMaterial } from "@/data/module1Materials";
+import { module1ChallengeData } from "@/data/module1Challenge";
+import { module2MaterialsData, module2ChallengeData } from "@/data/module2Materials";
 import PrintableLessonModal from "@/components/PrintableLessonModal";
 import PrintableChallengeModal from "@/components/PrintableChallengeModal";
 
@@ -90,15 +92,32 @@ export default function ModuleDetailsPage() {
     return url;
   };
 
+  // Seleciona a base de apostilas e o desafio conforme o módulo ativo (mod-1 ou mod-2)
   const currentMaterial: LessonMaterial | null = (() => {
-    if (moduleId !== "mod-1" || !activeLesson) return null;
-    const byOrder = module1MaterialsData.find(
+    if (!activeLesson) return null;
+    const materialsSource =
+      moduleId === "mod-1"
+        ? module1MaterialsData
+        : moduleId === "mod-2"
+        ? module2MaterialsData
+        : null;
+
+    if (!materialsSource) return null;
+
+    const byOrder = materialsSource.find(
       (m) => m.lessonOrder === Number(activeLesson.lesson_order)
     );
     if (byOrder) return byOrder;
     const titleLower = (activeLesson.title || "").toLowerCase();
-    return module1MaterialsData.find((m) => titleLower.includes(m.titleKey)) || null;
+    return materialsSource.find((m) => titleLower.includes(m.titleKey)) || null;
   })();
+
+  const activeChallengeData =
+    moduleId === "mod-1"
+      ? module1ChallengeData
+      : moduleId === "mod-2"
+      ? module2ChallengeData
+      : null;
 
   const isCurrentLessonCompleted = activeLesson ? aulasConcluidas.includes(activeLesson.id) : false;
   const moduleCompletedLessons = lessons.filter(l => aulasConcluidas.includes(l.id)).length;
@@ -150,8 +169,7 @@ export default function ModuleDetailsPage() {
           </div>
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-            {/* BOTÃO DO DESAFIO PRÁTICO (Aparece apenas no Módulo 1) */}
-            {moduleId === "mod-1" && (
+            {activeChallengeData && (
               <button
                 onClick={() => setIsChallengeModalOpen(true)}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-500 text-sm font-bold rounded-lg transition-all shadow-lg shadow-amber-900/10 cursor-pointer"
@@ -418,9 +436,10 @@ export default function ModuleDetailsPage() {
         />
       )}
 
-      {isChallengeModalOpen && (
+      {isChallengeModalOpen && activeChallengeData && (
         <PrintableChallengeModal
           isOpen={isChallengeModalOpen}
+          challengeData={activeChallengeData}
           onClose={() => setIsChallengeModalOpen(false)}
         />
       )}

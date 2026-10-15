@@ -10,13 +10,12 @@ type Props = {
   onClose: () => void;
 };
 
-export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"] }) {
+export function TechnicalDiagram({ type }: { type: string }) {
   switch (type) {
     case "calor":
       return (
         <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
           <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
-          {/* Parte 1: Fluxo de Calor */}
           <text x="175" y="35" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
             1. Fluxo Espontâneo de Calor (2ª Lei)
           </text>
@@ -40,7 +39,6 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
 
           <line x1="355" y1="25" x2="355" y2="195" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4" />
 
-          {/* Parte 2: Curva Sensível vs Latente */}
           <text x="520" y="35" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
             2. Calor Sensível vs. Calor Latente
           </text>
@@ -68,7 +66,6 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
             Comparativo de Escalas Termométricas
           </text>
 
-          {/* Escala Celsius */}
           <rect x="65" y="55" width="16" height="125" rx="8" fill="#e2e8f0" stroke="#475569" strokeWidth="1.5" />
           <rect x="68" y="95" width="10" height="82" rx="5" fill="#dc2626" />
           <text x="73" y="50" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">°C</text>
@@ -76,7 +73,6 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
           <text x="90" y="125" fill="#0284c7" fontSize="11" fontWeight="bold">0 °C (Fusão)</text>
           <text x="90" y="175" fill="#475569" fontSize="10">-273,15 °C (Zero Abs.)</text>
 
-          {/* Escala Fahrenheit */}
           <rect x="215" y="55" width="16" height="125" rx="8" fill="#e2e8f0" stroke="#475569" strokeWidth="1.5" />
           <rect x="218" y="95" width="10" height="82" rx="5" fill="#ea580c" />
           <text x="223" y="50" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">°F</text>
@@ -84,7 +80,6 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
           <text x="240" y="125" fill="#0284c7" fontSize="11" fontWeight="bold">32 °F</text>
           <text x="240" y="175" fill="#475569" fontSize="10">-459,67 °F</text>
 
-          {/* Escala Kelvin */}
           <rect x="330" y="55" width="16" height="125" rx="8" fill="#e2e8f0" stroke="#475569" strokeWidth="1.5" />
           <rect x="333" y="95" width="10" height="82" rx="5" fill="#0284c7" />
           <text x="338" y="50" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">K</text>
@@ -94,7 +89,6 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
 
           <line x1="425" y1="25" x2="425" y2="195" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4" />
 
-          {/* Medição de Contato */}
           <text x="555" y="35" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
             Aferição Correta na Tubulação
           </text>
@@ -120,26 +114,21 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
             Escala Referencial de Pressões: Absoluta, Manométrica e Vácuo (Microns)
           </text>
 
-          {/* Barra Horizontal de Pressão */}
           <rect x="50" y="85" width="220" height="36" fill="#e0f2fe" stroke="#0284c7" strokeWidth="2" />
           <rect x="270" y="85" width="380" height="36" fill="#fee2e2" stroke="#dc2626" strokeWidth="2" />
 
-          {/* Marco Zero Absoluto */}
           <line x1="50" y1="60" x2="50" y2="145" stroke="#0f172a" strokeWidth="3" />
           <text x="50" y="55" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">VÁCUO ABSOLUTO</text>
           <text x="50" y="162" textAnchor="middle" fill="#334155" fontSize="10">0 PSIA / 0 Microns</text>
 
-          {/* Meta 500 Microns */}
           <line x1="115" y1="75" x2="115" y2="135" stroke="#059669" strokeWidth="2.5" strokeDasharray="3" />
           <text x="115" y="70" textAnchor="middle" fill="#059669" fontSize="10" fontWeight="bold">Meta: &lt; 500 μmHg</text>
 
-          {/* Marco Pressão Atmosférica */}
           <line x1="270" y1="55" x2="270" y2="150" stroke="#1e293b" strokeWidth="3" />
           <text x="270" y="50" textAnchor="middle" fill="#1e293b" fontSize="11" fontWeight="bold">PRESSÃO ATMOSFÉRICA (1 atm)</text>
           <text x="270" y="165" textAnchor="middle" fill="#0284c7" fontSize="11" fontWeight="bold">0 PSIG (Manômetro) = 14,7 PSIA</text>
           <text x="270" y="182" textAnchor="middle" fill="#475569" fontSize="10">(760.000 Microns / 1,013 Bar)</text>
 
-          {/* Textos Internos */}
           <text x="165" y="108" textAnchor="middle" fill="#0369a1" fontSize="11" fontWeight="bold">ZONA DE VÁCUO (Vacuômetro)</text>
           <text x="460" y="108" textAnchor="middle" fill="#991b1b" fontSize="12" fontWeight="bold">
             PRESSÃO POSITIVA DE TRABALHO (PSIG / Bar / MPa)
@@ -154,47 +143,37 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
       return (
         <svg viewBox="0 0 700 240" className="w-full h-auto max-h-64 mx-auto">
           <rect x="10" y="10" width="680" height="220" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
-          {/* Divisão Alta / Baixa */}
           <line x1="350" y1="20" x2="350" y2="220" stroke="#94a3b8" strokeWidth="2" strokeDasharray="6" />
           <text x="180" y="32" textAnchor="middle" fill="#dc2626" fontSize="12" fontWeight="bold">LADO DE ALTA PRESSÃO</text>
           <text x="520" y="32" textAnchor="middle" fill="#0284c7" fontSize="12" fontWeight="bold">LADO DE BAIXA PRESSÃO</text>
 
-          {/* 1. Compressor (Topo) */}
           <circle cx="350" cy="65" r="28" fill="#1e293b" stroke="#0f172a" strokeWidth="2.5" />
           <text x="350" y="63" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">1. COMPRESSOR</text>
           <text x="350" y="75" textAnchor="middle" fill="#94a3b8" fontSize="8">Inverter</text>
 
-          {/* 2. Condensador (Esquerda) */}
           <rect x="55" y="95" width="130" height="65" rx="8" fill="#fee2e2" stroke="#dc2626" strokeWidth="2" />
           <text x="120" y="122" textAnchor="middle" fill="#991b1b" fontSize="12" fontWeight="bold">2. CONDENSADOR</text>
           <text x="120" y="138" textAnchor="middle" fill="#7f1d1d" fontSize="10">(Unidade Externa)</text>
           <text x="120" y="152" textAnchor="middle" fill="#dc2626" fontSize="9">Rejeita Calor p/ Ambiente</text>
 
-          {/* 4. Evaporador (Direita) */}
           <rect x="515" y="95" width="130" height="65" rx="8" fill="#e0f2fe" stroke="#0284c7" strokeWidth="2" />
           <text x="580" y="122" textAnchor="middle" fill="#075985" fontSize="12" fontWeight="bold">4. EVAPORADOR</text>
           <text x="580" y="138" textAnchor="middle" fill="#0c4a6e" fontSize="10">(Unidade Interna)</text>
           <text x="580" y="152" textAnchor="middle" fill="#0284c7" fontSize="9">Absorve Calor da Sala</text>
 
-          {/* 3. Expansão EEV (Base) */}
           <rect x="295" y="170" width="110" height="40" rx="6" fill="#fef3c7" stroke="#d97706" strokeWidth="2" />
           <text x="350" y="188" textAnchor="middle" fill="#92400e" fontSize="11" fontWeight="bold">3. EXPANSÃO (EEV)</text>
           <text x="350" y="202" textAnchor="middle" fill="#b45309" fontSize="9">Queda de Pressão</text>
 
-          {/* Linhas de Interligação */}
-          {/* Descarga */}
           <path d="M 322 65 L 120 65 L 120 95" fill="none" stroke="#dc2626" strokeWidth="3.5" />
           <text x="220" y="57" textAnchor="middle" fill="#dc2626" fontSize="10" fontWeight="bold">Descarga (Vapor Alta P.)</text>
 
-          {/* Linha de Líquido */}
           <path d="M 120 160 L 120 190 L 295 190" fill="none" stroke="#ea580c" strokeWidth="3.5" />
           <text x="205" y="206" textAnchor="middle" fill="#c2410c" fontSize="10" fontWeight="bold">Líquido Subresfriado</text>
 
-          {/* Expansão -> Evaporador */}
           <path d="M 405 190 L 580 190 L 580 160" fill="none" stroke="#38bdf8" strokeWidth="3.5" />
           <text x="495" y="206" textAnchor="middle" fill="#0284c7" fontSize="10" fontWeight="bold">Líquido + Vapor (Baixa P.)</text>
 
-          {/* Sucção */}
           <path d="M 580 95 L 580 65 L 378 65" fill="none" stroke="#0284c7" strokeWidth="3.5" />
           <text x="480" y="57" textAnchor="middle" fill="#0369a1" fontSize="10" fontWeight="bold">Sucção (Vapor Superaquecido)</text>
         </svg>
@@ -204,7 +183,6 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
       return (
         <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
           <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
-          {/* Alerta Proibido O2 */}
           <rect x="30" y="30" width="290" height="160" rx="10" fill="#fef2f2" stroke="#dc2626" strokeWidth="2.5" />
           <circle cx="175" cy="75" r="24" fill="#dc2626" />
           <text x="175" y="82" textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="bold">O₂</text>
@@ -219,7 +197,6 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
             ✔ Use Exclusivamente NITROGÊNIO (N₂)
           </text>
 
-          {/* Esquema Carga com Balança */}
           <rect x="345" y="30" width="325" height="160" rx="10" fill="#f0f9ff" stroke="#0284c7" strokeWidth="2" />
           <text x="507" y="55" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
             Arranjo Seguro de Carga por Massa
@@ -250,7 +227,6 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
             Matriz de Classificação de Segurança ASHRAE Standard 34 (Inflamabilidade × Toxicidade)
           </text>
 
-          {/* Cabeçalhos da Matriz */}
           <rect x="130" y="55" width="130" height="45" fill="#dcfce7" stroke="#16a34a" strokeWidth="1.5" />
           <text x="195" y="75" textAnchor="middle" fill="#166534" fontSize="12" fontWeight="bold">CLASSE A1</text>
           <text x="195" y="92" textAnchor="middle" fill="#15803d" fontSize="10">Não Inflamável (R-410A)</text>
@@ -269,7 +245,6 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
 
           <text x="75" y="82" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">Baixa Toxic. (A)</text>
 
-          {/* Barra Comparativa GWP */}
           <text x="350" y="130" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">
             Redução do Impacto no Aquecimento Global (Índice GWP — 100 anos)
           </text>
@@ -281,6 +256,165 @@ export function TechnicalDiagram({ type }: { type: LessonMaterial["diagramType"]
 
           <rect x="130" y="192" width="12" height="14" rx="2" fill="#16a34a" />
           <text x="150" y="203" fill="#166534" fontSize="11" fontWeight="bold">R-290 Propano (GWP = 3)</text>
+        </svg>
+      );
+
+    case "eletricidade_fundamentos":
+      return (
+        <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
+          <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+          {/* Triângulo da Lei de Ohm */}
+          <text x="135" y="35" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
+            1. Triângulo da Lei de Ohm
+          </text>
+          <polygon points="135,52 65,165 205,165" fill="#fef2f2" stroke="#dc2626" strokeWidth="2.5" />
+          <line x1="100" y1="108" x2="170" y2="108" stroke="#dc2626" strokeWidth="2" />
+          <line x1="135" y1="108" x2="135" y2="165" stroke="#dc2626" strokeWidth="2" />
+          <text x="135" y="96" textAnchor="middle" fill="#991b1b" fontSize="18" fontWeight="bold">V</text>
+          <text x="112" y="148" textAnchor="middle" fill="#0284c7" fontSize="16" fontWeight="bold">R</text>
+          <text x="158" y="148" textAnchor="middle" fill="#ea580c" fontSize="16" fontWeight="bold">I</text>
+          <text x="135" y="188" textAnchor="middle" fill="#334155" fontSize="11" fontWeight="bold">
+            V = R × I  |  I = V / R  |  P = V × I
+          </text>
+
+          <line x1="255" y1="25" x2="255" y2="195" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4" />
+
+          {/* Circuito Exclusivo NBR 5410 + Retificação DC */}
+          <text x="470" y="35" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
+            2. Circuito Dedicado NBR 5410 e Barramento DC Inverter
+          </text>
+          <rect x="280" y="65" width="95" height="65" rx="6" fill="#1e293b" />
+          <text x="327" y="92" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="bold">DISJUNTOR</text>
+          <text x="327" y="108" textAnchor="middle" fill="#38bdf8" fontSize="10">Bipolar 220V</text>
+
+          <line x1="375" y1="82" x2="445" y2="82" stroke="#dc2626" strokeWidth="3" />
+          <line x1="375" y1="108" x2="445" y2="108" stroke="#0284c7" strokeWidth="3" />
+          <line x1="375" y1="145" x2="555" y2="145" stroke="#16a34a" strokeWidth="3" strokeDasharray="5" />
+          <text x="465" y="162" textAnchor="middle" fill="#15803d" fontSize="10" fontWeight="bold">
+            Condutor de Proteção Terra (PE) Obrigatório
+          </text>
+
+          <rect x="445" y="65" width="105" height="65" rx="6" fill="#fef3c7" stroke="#d97706" strokeWidth="2" />
+          <text x="497" y="90" textAnchor="middle" fill="#92400e" fontSize="10" fontWeight="bold">PONTE DIODOS</text>
+          <text x="497" y="106" textAnchor="middle" fill="#b45309" fontSize="9">CA 220V → CC</text>
+
+          <path d="M 550 95 L 585 95" stroke="#dc2626" strokeWidth="3.5" />
+          <rect x="585" y="65" width="85" height="65" rx="6" fill="#fee2e2" stroke="#dc2626" strokeWidth="2" />
+          <text x="627" y="92" textAnchor="middle" fill="#991b1b" fontSize="11" fontWeight="bold">LINK DC</text>
+          <text x="627" y="110" textAnchor="middle" fill="#dc2626" fontSize="11" fontWeight="bold">~310 VDC</text>
+        </svg>
+      );
+
+    case "eletricidade_instrumentos":
+      return (
+        <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
+          <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+          {/* Lado Esquerdo: ERRADO */}
+          <rect x="30" y="30" width="300" height="160" rx="10" fill="#fef2f2" stroke="#dc2626" strokeWidth="2" />
+          <text x="180" y="52" textAnchor="middle" fill="#991b1b" fontSize="12" fontWeight="bold">
+            ✖ ERRADO: Garra no Cabo PP Inteiro
+          </text>
+          <rect x="60" y="95" width="240" height="26" rx="12" fill="#334155" />
+          <line x1="65" y1="103" x2="295" y2="103" stroke="#dc2626" strokeWidth="3" />
+          <line x1="65" y1="113" x2="295" y2="113" stroke="#38bdf8" strokeWidth="3" />
+          <circle cx="180" cy="108" r="32" fill="none" stroke="#dc2626" strokeWidth="5" />
+          <text x="180" y="160" textAnchor="middle" fill="#dc2626" fontSize="12" fontWeight="bold">
+            Leitura no Visor = 0,0 A
+          </text>
+          <text x="180" y="177" textAnchor="middle" fill="#7f1d1d" fontSize="10">
+            (Campos magnéticos de Ida e Volta se anulam)
+          </text>
+
+          {/* Lado Direito: CERTO */}
+          <rect x="365" y="30" width="305" height="160" rx="10" fill="#f0fdf4" stroke="#16a34a" strokeWidth="2" />
+          <text x="517" y="52" textAnchor="middle" fill="#166534" fontSize="12" fontWeight="bold">
+            ✔ CORRETO: Garra em Apenas 1 Condutor (Fase)
+          </text>
+          <line x1="395" y1="90" x2="640" y2="90" stroke="#dc2626" strokeWidth="4" />
+          <line x1="395" y1="130" x2="640" y2="130" stroke="#0284c7" strokeWidth="4" />
+          <circle cx="517" cy="90" r="22" fill="none" stroke="#16a34a" strokeWidth="5" />
+          <text x="517" y="160" textAnchor="middle" fill="#15803d" fontSize="12" fontWeight="bold">
+            Leitura Real True RMS = 5,4 A
+          </text>
+          <text x="517" y="177" textAnchor="middle" fill="#166534" fontSize="10">
+            (Instrumento Categoria CAT III • Isolar 1 via)
+          </text>
+        </svg>
+      );
+
+    case "eletricidade_testes":
+      return (
+        <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
+          <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+          {/* Compressor C-S-R */}
+          <text x="170" y="35" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">
+            1. Bornes On/Off (C - S - R)
+          </text>
+          <circle cx="170" cy="115" r="58" fill="#f1f5f9" stroke="#334155" strokeWidth="2" />
+          <circle cx="170" cy="78" r="10" fill="#1e293b" />
+          <text x="170" y="82" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">C</text>
+          <circle cx="138" cy="138" r="10" fill="#0284c7" />
+          <text x="138" y="142" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">S</text>
+          <circle cx="202" cy="138" r="10" fill="#dc2626" />
+          <text x="202" y="142" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">R</text>
+          <text x="170" y="192" textAnchor="middle" fill="#334155" fontSize="10" fontWeight="bold">
+            Soma: R(C-S) + R(C-R) = R(S-R)
+          </text>
+
+          <line x1="340" y1="25" x2="340" y2="195" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4" />
+
+          {/* Compressor Inverter U-V-W */}
+          <text x="515" y="35" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">
+            2. Bornes Inverter BLDC (U - V - W)
+          </text>
+          <circle cx="515" cy="115" r="58" fill="#fef2f2" stroke="#dc2626" strokeWidth="2" />
+          <circle cx="515" cy="78" r="10" fill="#dc2626" />
+          <text x="515" y="82" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">U</text>
+          <circle cx="483" cy="138" r="10" fill="#dc2626" />
+          <text x="483" y="142" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">V</text>
+          <circle cx="547" cy="138" r="10" fill="#dc2626" />
+          <text x="547" y="142" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">W</text>
+          <text x="515" y="192" textAnchor="middle" fill="#991b1b" fontSize="10" fontWeight="bold">
+            Bobinas Simétricas: R(U-V) = R(V-W) = R(U-W)
+          </text>
+        </svg>
+      );
+
+    case "eletricidade_diagrama":
+    default:
+      return (
+        <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
+          <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+          <text x="350" y="35" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
+            Diagrama de Interligação Elétrica e Sinal Serial — Split Inverter (L, N, S, PE)
+          </text>
+
+          {/* Borneira Evaporadora */}
+          <rect x="40" y="55" width="150" height="135" rx="8" fill="#e0f2fe" stroke="#0284c7" strokeWidth="2" />
+          <text x="115" y="75" textAnchor="middle" fill="#075985" fontSize="11" fontWeight="bold">EVAPORADORA</text>
+          <text x="155" y="100" textAnchor="end" fill="#dc2626" fontSize="11" fontWeight="bold">Borne L (1)</text>
+          <text x="155" y="125" textAnchor="end" fill="#0284c7" fontSize="11" fontWeight="bold">Borne N (2)</text>
+          <text x="155" y="150" textAnchor="end" fill="#d97706" fontSize="11" fontWeight="bold">Borne S (3)</text>
+          <text x="155" y="175" textAnchor="end" fill="#16a34a" fontSize="11" fontWeight="bold">Terra (PE)</text>
+
+          {/* Borneira Condensadora */}
+          <rect x="510" y="55" width="150" height="135" rx="8" fill="#fee2e2" stroke="#dc2626" strokeWidth="2" />
+          <text x="585" y="75" textAnchor="middle" fill="#991b1b" fontSize="11" fontWeight="bold">CONDENSADORA</text>
+          <text x="545" y="100" textAnchor="start" fill="#dc2626" fontSize="11" fontWeight="bold">Borne L (1)</text>
+          <text x="545" y="125" textAnchor="start" fill="#0284c7" fontSize="11" fontWeight="bold">Borne N (2)</text>
+          <text x="545" y="150" textAnchor="start" fill="#d97706" fontSize="11" fontWeight="bold">Borne S (3)</text>
+          <text x="545" y="175" textAnchor="start" fill="#16a34a" fontSize="11" fontWeight="bold">Terra (PE)</text>
+
+          {/* Cabos de Interligação */}
+          <line x1="165" y1="96" x2="535" y2="96" stroke="#dc2626" strokeWidth="3" />
+          <line x1="165" y1="121" x2="535" y2="121" stroke="#0284c7" strokeWidth="3" />
+          <line x1="165" y1="146" x2="535" y2="146" stroke="#d97706" strokeWidth="3" />
+          <line x1="165" y1="171" x2="535" y2="171" stroke="#16a34a" strokeWidth="3" strokeDasharray="5" />
+
+          {/* Multímetro medindo Comunicação N e S */}
+          <rect x="285" y="110" width="130" height="50" rx="6" fill="#1e293b" />
+          <text x="350" y="130" textAnchor="middle" fill="#38bdf8" fontSize="10" fontWeight="bold">TESTE SERIAL (VDC)</text>
+          <text x="350" y="146" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="bold">N ↔ S: 0V a 24V (Oscila)</text>
         </svg>
       );
   }
@@ -295,7 +429,6 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto print:static print:bg-white print:p-0 print:block">
-      {/* Estilos globais dedicados exclusivamente para formatação de página A4 limpa no momento da impressão/PDF */}
       <style jsx global>{`
         @media print {
           body * {
@@ -322,10 +455,8 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
         }
       `}</style>
 
-      {/* Container Principal do Modal */}
       <div className="bg-zinc-950 border border-white/15 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden print:max-w-none print:max-h-none print:border-none print:rounded-none print:bg-white">
         
-        {/* Barra de Ferramentas Superior (Oculta na Impressão) */}
         <div className="no-print flex items-center justify-between px-6 py-4 bg-black/80 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-2.5">
             <BookOpen className="w-5 h-5 text-red-500" />
@@ -349,13 +480,11 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
           </div>
         </div>
 
-        {/* FOLHA TÉCNICA A4 (Fundo claro de alta legibilidade técnica tanto na tela quanto no PDF) */}
         <div className="overflow-y-auto p-4 sm:p-8 bg-zinc-900/60 print:p-0 print:bg-white">
           <div
             id="printable-technical-sheet"
             className="bg-white text-slate-900 rounded-xl p-6 sm:p-10 shadow-xl max-w-3xl mx-auto space-y-6 border border-slate-200"
           >
-            {/* CABEÇALHO TÉCNICO E AVISO DE DIREITOS AUTORAIS */}
             <div className="border-b-2 border-red-600 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wider text-red-600">
@@ -374,7 +503,6 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
               </div>
             </div>
 
-            {/* Aviso Legal no Topo */}
             <div className="bg-red-50 border border-red-200 rounded-lg px-3.5 py-2 flex items-center gap-2 text-[11px] text-red-900 font-medium">
               <Lock className="w-3.5 h-3.5 text-red-600 shrink-0" />
               <span>
@@ -382,7 +510,6 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
               </span>
             </div>
 
-            {/* SÍNTESE CONCEITUAL */}
             <div className="bg-slate-50 border-l-4 border-red-600 p-4 rounded-r-lg">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
                 Definição Técnica Fundamental
@@ -392,7 +519,6 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
               </p>
             </div>
 
-            {/* ILUSTRAÇÃO TÉCNICA DE EXEMPLIFICAÇÃO */}
             <div className="border border-slate-200 rounded-xl p-4 bg-white">
               <TechnicalDiagram type={material.diagramType} />
               <p className="text-xs text-center text-slate-600 font-medium mt-2 italic">
@@ -400,7 +526,6 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
               </p>
             </div>
 
-            {/* SEÇÕES DE CONTEÚDO TÉCNICO */}
             <div className="space-y-6">
               {material.sections.map((sec, idx) => (
                 <div key={idx} className="space-y-3">
@@ -451,45 +576,3 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
                           ))}
                         </tbody>
                       </table>
-                    </div>
-                  )}
-
-                  {sec.highlightBox && (
-                    <div
-                      className={`p-4 rounded-lg border text-sm ${
-                        sec.highlightBox.type === "danger"
-                          ? "bg-red-50 border-red-300 text-red-950"
-                          : sec.highlightBox.type === "practical"
-                          ? "bg-amber-50 border-amber-300 text-amber-950"
-                          : "bg-sky-50 border-sky-300 text-sky-950"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 font-bold mb-1">
-                        {sec.highlightBox.type === "danger" && <ShieldAlert className="w-4 h-4 text-red-600" />}
-                        {sec.highlightBox.type === "practical" && <Wrench className="w-4 h-4 text-amber-600" />}
-                        {sec.highlightBox.type === "info" && <Info className="w-4 h-4 text-sky-600" />}
-                        <span>{sec.highlightBox.title}</span>
-                      </div>
-                      <p className="text-xs sm:text-sm leading-relaxed">{sec.highlightBox.content}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* RODAPÉ OFICIAL DE DIREITOS AUTORAIS */}
-            <div className="border-t-2 border-slate-300 pt-4 mt-8 text-center space-y-1">
-              <p className="text-xs font-bold text-slate-800">
-                © {new Date().getFullYear()} Direitos Intelectuais Reservados • Criado por Prof. Cleverson Leonardo.
-              </p>
-              <p className="text-[11px] text-red-700 font-semibold">
-                PROIBIDA A VENDA, REPRODUÇÃO OU DISTRIBUIÇÃO SEM DEVIDA AUTORIZAÇÃO PRÉVIA DO AUTOR.
-              </p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-}
