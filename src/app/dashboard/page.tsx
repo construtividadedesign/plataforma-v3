@@ -1,20 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { Zap, Pin, Plus, ShieldCheck } from "lucide-react";
+import { Zap, Pin, Plus, ShieldCheck, CheckCircle2, XCircle, Clock, Archive, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTurma } from "@/contexts/TurmaContext";
+import { toast } from "sonner";
 
 export default function DashboardPage() {
   const {
     turmas,
+    turmasArquivadas,
     turmaAtiva,
     aulasConcluidas,
     isLoadingTurmas,
     isProfessor,
     userName,
+    userEmail,
+    alunoStatusAprovacao,
+    alunosPendentes,
     selecionarTurma,
+    solicitarAcessoTurma,
+    aprovarAluno,
+    rejeitarAluno,
     criarTurma,
+    arquivarTurma,
+    excluirTurma,
   } = useTurma();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -32,18 +42,33 @@ export default function DashboardPage() {
     if (sucesso) {
       setIsCreating(false);
       setNovaTurmaNome("");
+      toast.success("Turma criada com sucesso!");
+    } else {
+      toast.error("Erro ao criar a turma.");
+    }
+  };
+
+  const handleExcluir = async (turmaId: string, nomeTurma: string) => {
+    if (confirm(`Tem certeza que deseja excluir permanentemente a turma "${nomeTurma}"?`)) {
+      await excluirTurma(turmaId);
+      toast.success("Turma excluída com sucesso.");
     }
   };
 
   // Cálculos Dinâmicos da Turma
-  const totalAulasCurso = 22; // 6 (mod1) + 4 (mod2) + 12 (mod3)
+  const totalAulasCurso = 22;
   const totalHorasCurso = 80;
-
   const aulasFeitas = aulasConcluidas.length;
   const horasFeitas = Math.round((aulasFeitas / totalAulasCurso) * totalHorasCurso);
 
+  // Alunos pendentes para a turma ativa (se houver)
+  const pendentesDestaTurma = turmaAtiva 
+    ? alunosPendentes.filter(s => s.turmaId === turmaAtiva.id && s.status === "pendente")
+    : [];
+
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-700">
+      
       {/* Cartão de Boas-vindas */}
       <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-2xl">
         <div>
@@ -56,8 +81,8 @@ export default function DashboardPage() {
           </h2>
           <p className="text-gray-300 max-w-2xl text-sm leading-relaxed">
             {isProfessor
-              ? "Bem-vindo ao seu painel de controlo. Aqui tem uma visão geral do progresso da sua turma atual."
-              : "Bem-vindo ao painel da sua turma. Acompanhe abaixo o andamento das aulas ministradas pelo Instrutor Leonardo e acesse o material técnico."}
+              ? "Gerencie as turmas, aprove os acessos dos alunos e acompanhe o progresso geral da climatização."
+              : "Acompanhe o andamento das aulas ministradas pelo Instrutor e consulte os guias técnicos e módulos."}
           </p>
         </div>
         <Link
@@ -68,34 +93,92 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      {/* AVISO DE APROVAÇÃO PARA ALUNOS */}
+      {!isProfessor && turmaAtiva && alunoStatusAprovacao !== "aprovado" && (
+        <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center shrink-0">
+              <Clock className="w-6 h-6 text-orange-400" />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">
+                {alunoStatusAprovacao === "pendente" ? "Acesso Pendente de Aprovação" : "Solicitar Acesso à Turma"}
+              </h3>
+              <p className="text-sm text-gray-300 mt-0.5">
+                {alunoStatusAprovacao === "pendente"
+                  ? `Sua solicitação para a turma "${turmaAtiva.nome}" foi enviada e aguarda liberação do Instrutor.`
+                  : `Clique no botão ao lado para solicitar o seu acesso oficial à turma "${turmaAtiva.nome}".`}
+              </p>
+            </div>
+          </div>
+
+          {alunoStatusAprovacao === "nao_solicitado" && (
+            <button
+              onClick={() => {
+                solicitarAcessoTurma(turmaAtiva.id);
+                toast.success("Solicitação enviada ao instrutor!");
+              }}
+              className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition-colors cursor-pointer shrink-0 shadow-lg shadow-red-900/30"
+            >
+              Solicitar Acesso
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        
         {/* Coluna Esquerda: Turma e Acesso Rápido */}
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
+          
           {/* GESTÃO DE TURMA ATIVA */}
-          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-white mb-1">Turma Ativa</h3>
 
                 {isLoadingTurmas ? (
                   <p className="text-sm text-gray-400">A carregar turmas...</p>
                 ) : turmas.length > 0 ? (
-                  <select
-                    value={turmaAtiva?.id || ""}
-                    onChange={(e) => selecionarTurma(e.target.value)}
-                    className="bg-black/50 border border-white/20 text-gray-200 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full max-w-sm p-2.5 mt-2 outline-none appearance-none cursor-pointer"
-                  >
-                    {turmas.map((t) => (
-                      <option key={t.id} value={t.id} className="bg-gray-900 text-white">
-                        {t.nome}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-2">
+                    <select
+                      value={turmaAtiva?.id || ""}
+                      onChange={(e) => selecionarTurma(e.target.value)}
+                      className="bg-black/50 border border-white/20 text-gray-200 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full max-w-sm p-2.5 outline-none appearance-none cursor-pointer"
+                    >
+                      {turmas.map((t) => (
+                        <option key={t.id} value={t.id} className="bg-gray-900 text-white">
+                          {t.nome}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Botões de Ação do Professor na Turma Ativa */}
+                    {isProfessor && turmaAtiva && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            arquivarTurma(turmaAtiva.id);
+                            toast.info("Turma arquivada com sucesso.");
+                          }}
+                          title="Arquivar Turma"
+                          className="px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Archive className="w-3.5 h-3.5" /> Arquivar
+                        </button>
+                        <button
+                          onClick={() => handleExcluir(turmaAtiva.id, turmaAtiva.nome)}
+                          title="Excluir Turma"
+                          className="px-3 py-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Excluir
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <p className="text-sm text-red-400 mt-1">
-                    {isProfessor
-                      ? "Ainda não tem turmas cadastradas."
-                      : "Nenhuma turma ativa disponível no momento."}
+                    {isProfessor ? "Ainda não tem turmas cadastradas." : "Nenhuma turma ativa disponível."}
                   </p>
                 )}
               </div>
@@ -111,10 +194,7 @@ export default function DashboardPage() {
             </div>
 
             {isProfessor && isCreating && (
-              <form
-                onSubmit={handleCriarTurma}
-                className="mb-6 p-4 bg-black/50 border border-white/5 rounded-xl flex flex-col sm:flex-row gap-3"
-              >
+              <form onSubmit={handleCriarTurma} className="p-4 bg-black/50 border border-white/5 rounded-xl flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
                   placeholder="Ex: Instalação Split - Noturno"
@@ -124,64 +204,111 @@ export default function DashboardPage() {
                   autoFocus
                 />
                 <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    disabled={isSaving || !novaTurmaNome.trim()}
-                    className="flex-1 sm:flex-none px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
-                  >
+                  <button type="submit" disabled={isSaving || !novaTurmaNome.trim()} className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer">
                     {isSaving ? "A guardar..." : "Guardar"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsCreating(false)}
-                    className="flex-1 sm:flex-none px-4 py-2 bg-transparent border border-white/10 text-gray-300 hover:text-white text-sm rounded-lg transition-colors cursor-pointer"
-                  >
+                  <button type="button" onClick={() => setIsCreating(false)} className="px-4 py-2 bg-transparent border border-white/10 text-gray-300 hover:text-white text-sm rounded-lg transition-colors cursor-pointer">
                     Cancelar
                   </button>
                 </div>
               </form>
             )}
 
-            {/* ESTATÍSTICAS DINÂMICAS DA TURMA */}
+            {/* PAINEL DE APROVAÇÃO DE ALUNOS (EXCLUSIVO PARA O PROFESSOR) */}
+            {isProfessor && turmaAtiva && (
+              <div className="border-t border-white/5 pt-4">
+                <h4 className="text-sm font-semibold text-white mb-3 flex items-center justify-between">
+                  <span>Alunos Solicitantes Pendentes</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400">
+                    {pendentesDestaTurma.length} pendente(s)
+                  </span>
+                </h4>
+
+                {pendentesDestaTurma.length > 0 ? (
+                  <div className="space-y-2">
+                    {pendentesDestaTurma.map((aluno, i) => (
+                      <div key={i} className="flex items-center justify-between bg-black/50 border border-white/5 p-3 rounded-xl">
+                        <div>
+                          <p className="text-white text-sm font-medium">{aluno.nome}</p>
+                          <p className="text-xs text-gray-400">{aluno.email}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              aprovarAluno(aluno.email, turmaAtiva.id);
+                              toast.success(`Aluno ${aluno.nome} aprovado com sucesso!`);
+                            }}
+                            className="p-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-colors cursor-pointer"
+                            title="Aprovar Aluno"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              rejeitarAluno(aluno.email, turmaAtiva.id);
+                              toast.info("Solicitação rejeitada.");
+                            }}
+                            className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors cursor-pointer"
+                            title="Rejeitar"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 italic">Nenhum aluno pendente de aprovação nesta turma no momento.</p>
+                )}
+              </div>
+            )}
+
+            {/* ESTATÍSTICAS DA TURMA */}
             {turmaAtiva ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-black/40 border border-white/5 rounded-xl p-5">
                   <p className="text-sm text-gray-400 mb-1">Carga Horária Concluída</p>
-                  <p className="text-2xl font-bold text-white">
-                    {horasFeitas}h{" "}
-                    <span className="text-sm font-normal text-gray-500">/ {totalHorasCurso}h</span>
-                  </p>
+                  <p className="text-2xl font-bold text-white">{horasFeitas}h <span className="text-sm font-normal text-gray-500">/ {totalHorasCurso}h</span></p>
                 </div>
                 <div className="bg-black/40 border border-white/5 rounded-xl p-5">
                   <p className="text-sm text-gray-400 mb-1">Aulas Registadas</p>
-                  <p className="text-2xl font-bold text-white">
-                    {aulasFeitas}{" "}
-                    <span className="text-sm font-normal text-gray-500">/ {totalAulasCurso}</span>
-                  </p>
+                  <p className="text-2xl font-bold text-white">{aulasFeitas} <span className="text-sm font-normal text-gray-500">/ {totalAulasCurso}</span></p>
                 </div>
               </div>
-            ) : (
-              !isCreating && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-5 text-center">
-                  <p className="text-sm text-red-400 font-medium">
-                    {isProfessor
-                      ? "Crie a sua primeira turma para começar a registar progresso."
-                      : "Aguarde o instrutor ativar a turma no sistema."}
-                  </p>
-                </div>
-              )
+            ) : !isCreating && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-5 text-center">
+                <p className="text-sm text-red-400 font-medium">Crie a sua primeira turma para começar.</p>
+              </div>
             )}
           </div>
 
-          {/* Próximo Passo Recomendado */}
+          {/* TURMAS ARQUIVADAS (Se houver e for Professor) */}
+          {isProfessor && turmasArquivadas.length > 0 && (
+            <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Archive className="w-5 h-5 text-gray-400" /> Turmas Arquivadas ({turmasArquivadas.length})
+              </h3>
+              <div className="space-y-3">
+                {turmasArquivadas.map(t => (
+                  <div key={t.id} className="flex items-center justify-between bg-black/50 border border-white/5 p-3.5 rounded-xl">
+                    <span className="text-sm text-gray-300 font-medium">{t.nome}</span>
+                    <button
+                      onClick={() => handleExcluir(t.id, t.nome)}
+                      className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Excluir Definitivamente
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Acesso Rápido */}
           <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl">
             <h3 className="text-lg font-semibold text-white mb-1">Acesso Rápido</h3>
-            <p className="text-sm text-gray-400 mb-6">
-              {isProfessor
-                ? "Navegue para o conteúdo técnico para continuar a registar o avanço da turma."
-                : "Acesse o conteúdo técnico, apostilas interativas e guias práticos das aulas."}
-            </p>
-
+            <p className="text-sm text-gray-400 mb-6">Navegue para o conteúdo técnico para continuar.</p>
+            
             <div className="bg-black/40 border border-white/5 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0">
@@ -192,10 +319,7 @@ export default function DashboardPage() {
                   <p className="text-sm text-gray-400 mt-0.5">Gestão de aulas e manuais técnicos</p>
                 </div>
               </div>
-              <Link
-                href="/dashboard/modules"
-                className="px-4 py-2 border border-white/20 rounded-lg text-sm text-white hover:bg-white/10 transition-colors whitespace-nowrap text-center"
-              >
+              <Link href="/dashboard/modules" className="px-4 py-2 border border-white/20 rounded-lg text-sm text-white hover:bg-white/10 transition-colors text-center">
                 Ver Módulos
               </Link>
             </div>
@@ -218,6 +342,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
