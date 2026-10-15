@@ -3,6 +3,12 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+// Lista oficial de e-mails com permissão de Professor / Instrutor
+const ADMIN_EMAILS = [
+  "instrutorleonardosenai@gmail.com",
+  "designtecnologia.2026@gmail.com",
+];
+
 type Turma = {
   id: string;
   nome: string;
@@ -15,6 +21,9 @@ type TurmaContextType = {
   turmaAtiva: Turma | null;
   aulasConcluidas: string[];
   isLoadingTurmas: boolean;
+  isProfessor: boolean;
+  userEmail: string | null;
+  userName: string | null;
   selecionarTurma: (id: string) => void;
   criarTurma: (nome: string) => Promise<boolean>;
   alternarConclusaoAula: (moduloId: string, aulaId: string, isConcluida: boolean) => Promise<void>;
@@ -27,8 +36,11 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
   const [turmaAtiva, setTurmaAtiva] = useState<Turma | null>(null);
   const [aulasConcluidas, setAulasConcluidas] = useState<string[]>([]);
   const [isLoadingTurmas, setIsLoadingTurmas] = useState(true);
+  const [isProfessor, setIsProfessor] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
 
-  // 1. Carregar Turmas
+  // 1. Carregar Utilizador e Turmas
   useEffect(() => {
     const supabase = createClient();
     async function carregarTurmas() {
@@ -39,6 +51,14 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         setIsLoadingTurmas(false);
         return;
       }
+
+      const emailAtual = user.email?.toLowerCase() || null;
+      setUserEmail(emailAtual);
+      setUserName(user.user_metadata?.full_name || user.email?.split("@")[0] || "Utilizador");
+
+      // Verifica se o utilizador autenticado está na lista de professores
+      const ehProf = emailAtual ? ADMIN_EMAILS.includes(emailAtual) : false;
+      setIsProfessor(ehProf);
 
       const { data, error } = await supabase
         .from("turmas")
@@ -86,6 +106,9 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
   };
 
   const criarTurma = async (nome: string) => {
+    // Trava de segurança: apenas professores podem criar turmas
+    if (!isProfessor) return false;
+
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
@@ -105,7 +128,8 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
   };
 
   const alternarConclusaoAula = async (moduloId: string, aulaId: string, isConcluida: boolean) => {
-    if (!turmaAtiva) return;
+    // Trava de segurança: apenas professores podem alterar o progresso da turma
+    if (!turmaAtiva || !isProfessor) return;
     const turmaId = turmaAtiva.id;
 
     if (isConcluida) {
@@ -141,7 +165,10 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
       turmas, 
       turmaAtiva, 
       aulasConcluidas, 
-      isLoadingTurmas, 
+      isLoadingTurmas,
+      isProfessor,
+      userEmail,
+      userName,
       selecionarTurma, 
       criarTurma,
       alternarConclusaoAula 

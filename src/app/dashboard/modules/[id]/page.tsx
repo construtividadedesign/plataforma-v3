@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCircle } from "lucide-react";
+import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useTurma } from "@/contexts/TurmaContext";
 
@@ -22,8 +22,8 @@ export default function ModuleDetailsPage() {
 
   const supabase = createClient();
   
-  // Usamos o nosso Cérebro para gerir o progresso
-  const { turmaAtiva, aulasConcluidas, alternarConclusaoAula } = useTurma();
+  // Usamos o nosso Cérebro para gerir o progresso e saber se é Professor ou Aluno
+  const { turmaAtiva, aulasConcluidas, isProfessor, alternarConclusaoAula } = useTurma();
   
   const [lessons, setLessons] = useState<any[]>([]);
   const [activeLesson, setActiveLesson] = useState<any>(null);
@@ -33,7 +33,6 @@ export default function ModuleDetailsPage() {
   useEffect(() => {
     async function fetchLessons() {
       setIsLoading(true);
-      // Vamos buscar apenas as aulas (o progresso já vem do TurmaContext)
       const { data: lessonsData } = await supabase
         .from('lessons')
         .select('*')
@@ -50,7 +49,7 @@ export default function ModuleDetailsPage() {
   }, [moduleId, supabase]);
 
   const handleToggleComplete = async () => {
-    if (!activeLesson || isUpdatingProgress) return;
+    if (!activeLesson || isUpdatingProgress || !isProfessor) return;
     
     if (!turmaAtiva) {
       toast.error("Selecione ou crie uma turma no painel principal primeiro.");
@@ -61,7 +60,6 @@ export default function ModuleDetailsPage() {
     const isCurrentlyCompleted = aulasConcluidas.includes(activeLesson.id);
 
     try {
-      // Chama a função mágica do nosso contexto
       await alternarConclusaoAula(moduleId, activeLesson.id, !isCurrentlyCompleted);
       
       if (isCurrentlyCompleted) {
@@ -120,12 +118,16 @@ export default function ModuleDetailsPage() {
       {!turmaAtiva && (
         <div className="bg-orange-500/10 border border-orange-500/20 text-orange-400 p-4 rounded-xl flex items-center gap-3 text-sm font-medium">
           <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>Atenção: Não tem nenhuma turma selecionada. O seu progresso não será guardado.</span>
+          <span>
+            {isProfessor
+              ? "Atenção: Não tem nenhuma turma selecionada. O progresso não será guardado."
+              : "Atenção: Selecione a sua turma no menu lateral para acompanhar o progresso das aulas."}
+          </span>
         </div>
       )}
 
       <div className="mb-2">
-        <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+        <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-400 mb-2">
           <span>Módulos de Aulas</span>
           <span>/</span>
           <span className="text-white font-medium">{currentModuleInfo.title}</span>
@@ -133,10 +135,10 @@ export default function ModuleDetailsPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-white">{currentModuleInfo.title}</h1>
-            <p className="text-gray-400 mt-1 max-w-3xl">{currentModuleInfo.description}</p>
+            <p className="text-gray-400 mt-1 max-w-3xl text-sm md:text-base">{currentModuleInfo.description}</p>
           </div>
           {turmaAtiva && (
-            <div className="bg-black/40 border border-white/10 px-4 py-2 rounded-lg backdrop-blur-md shrink-0">
+            <div className="bg-black/40 border border-white/10 px-4 py-2 rounded-lg backdrop-blur-md shrink-0 self-start md:self-auto">
               <span className="text-xs text-gray-500 block">Turma atual:</span>
               <span className="text-sm font-semibold text-red-500">{turmaAtiva.nome}</span>
             </div>
@@ -147,7 +149,7 @@ export default function ModuleDetailsPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         
         {/* COLUNA ESQUERDA: Reprodutor e Detalhes */}
-        <div className="flex-1 space-y-6">
+        <div className="flex-1 space-y-6 min-w-0">
           
           <div className="relative w-full aspect-video bg-black/80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex flex-col items-center justify-center group">
             
@@ -172,10 +174,10 @@ export default function ModuleDetailsPage() {
                   </video>
                 )
               ) : (
-                <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex flex-col items-center justify-center h-full p-4">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
-                  <PlayCircle className="w-16 h-16 text-red-500/70 z-20 transition-transform group-hover:scale-110 duration-300" />
-                  <p className="z-20 mt-4 text-white font-medium text-lg text-center px-4">
+                  <PlayCircle className="w-12 h-12 sm:w-16 sm:h-16 text-red-500/70 z-20 transition-transform group-hover:scale-110 duration-300" />
+                  <p className="z-20 mt-4 text-white font-medium text-base sm:text-lg text-center px-4">
                     Aula {activeLesson.lesson_order}: {activeLesson.title}
                   </p>
                   <p className="z-20 mt-2 px-3 py-1 bg-white/10 border border-white/10 text-gray-300 text-xs rounded-full backdrop-blur-md">
@@ -185,29 +187,29 @@ export default function ModuleDetailsPage() {
               )
             ) : (
               <div className="flex flex-col items-center text-gray-400 w-full h-full justify-center p-6 text-center">
-                <BookOpen className="w-16 h-16 mb-4 text-red-500/50" />
-                <h3 className="text-lg font-medium text-white">Aula Teórica / Prática</h3>
-                <p className="text-sm mt-1">Utilize o material de apoio em anexo para acompanhar a leitura.</p>
+                <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 mb-4 text-red-500/50" />
+                <h3 className="text-base sm:text-lg font-medium text-white">Aula Teórica / Prática</h3>
+                <p className="text-xs sm:text-sm mt-1">Utilize o material de apoio em anexo para acompanhar a leitura.</p>
               </div>
             )}
             
           </div>
 
           <Card className="bg-black/40 backdrop-blur-md border border-white/10 shadow-xl rounded-2xl">
-            <CardContent className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold text-white">{activeLesson.title}</h3>
-                <p className="text-sm text-gray-400 mt-1 flex items-center gap-2">
+                <h3 className="text-lg sm:text-xl font-bold text-white">{activeLesson.title}</h3>
+                <p className="text-xs sm:text-sm text-gray-400 mt-1 flex items-center gap-2">
                   <span>Carga Horária: {activeLesson.duration}</span>
                   <span>•</span>
                   <span>Aula {activeLesson.lesson_order} de {lessons.length}</span>
                 </p>
               </div>
               
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <Button 
                   variant="outline" 
-                  className="bg-transparent border border-white/20 text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
+                  className="w-full sm:w-auto bg-transparent border border-white/20 text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer transition-colors"
                   disabled={!activeLesson.pdf_url}
                   onClick={() => activeLesson.pdf_url && window.open(activeLesson.pdf_url, '_blank')}
                 >
@@ -215,25 +217,42 @@ export default function ModuleDetailsPage() {
                   {activeLesson.pdf_url ? "Baixar Manual" : "Sem Manual"}
                 </Button>
                 
-                <Button 
-                  onClick={handleToggleComplete}
-                  disabled={isUpdatingProgress || !turmaAtiva}
-                  className={`cursor-pointer transition-all duration-300 border-0 ${
-                    !turmaAtiva 
-                      ? "bg-gray-800 text-gray-500" 
-                      : isCurrentLessonCompleted 
-                        ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 shadow-lg shadow-emerald-900/20" 
-                        : "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-900/30"
-                  }`}
-                >
-                  {isUpdatingProgress ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> A guardar...</>
-                  ) : isCurrentLessonCompleted ? (
-                    <><CheckCircle2 className="w-4 h-4 mr-2" /> Concluída</>
-                  ) : (
-                    <><Circle className="w-4 h-4 mr-2" /> Marcar Conclusão</>
-                  )}
-                </Button>
+                {/* Se for Professor, exibe o botão de marcar conclusão. Se for Aluno, exibe apenas o status da aula */}
+                {isProfessor ? (
+                  <Button 
+                    onClick={handleToggleComplete}
+                    disabled={isUpdatingProgress || !turmaAtiva}
+                    className={`w-full sm:w-auto cursor-pointer transition-all duration-300 border-0 ${
+                      !turmaAtiva 
+                        ? "bg-gray-800 text-gray-500" 
+                        : isCurrentLessonCompleted 
+                          ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 shadow-lg shadow-emerald-900/20" 
+                          : "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-900/30"
+                    }`}
+                  >
+                    {isUpdatingProgress ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> A guardar...</>
+                    ) : isCurrentLessonCompleted ? (
+                      <><CheckCircle2 className="w-4 h-4 mr-2" /> Concluída</>
+                    ) : (
+                      <><Circle className="w-4 h-4 mr-2" /> Marcar Conclusão</>
+                    )}
+                  </Button>
+                ) : (
+                  <div
+                    className={`inline-flex items-center justify-center px-4 py-2 rounded-md text-xs sm:text-sm font-medium border select-none ${
+                      isCurrentLessonCompleted
+                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                        : "bg-white/5 text-gray-400 border-white/10"
+                    }`}
+                  >
+                    {isCurrentLessonCompleted ? (
+                      <><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-400" /> Aula Ministrada</>
+                    ) : (
+                      <><Clock className="w-4 h-4 mr-2 text-gray-400" /> Aguardando Instrutor</>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -255,7 +274,7 @@ export default function ModuleDetailsPage() {
               </div>
             </CardHeader>
             
-            <CardContent className="p-0 flex-1 overflow-y-auto max-h-[500px]">
+            <CardContent className="p-0 flex-1 overflow-y-auto max-h-[420px] lg:max-h-[500px]">
               <div className="flex flex-col divide-y divide-white/5">
                 {lessons.map((lesson) => {
                   const isActive = activeLesson?.id === lesson.id;
