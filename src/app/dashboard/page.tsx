@@ -89,7 +89,7 @@ export default function DashboardPage() {
           href="/dashboard/modules"
           className="w-full md:w-auto text-center bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 shrink-0 shadow-lg shadow-red-900/30"
         >
-          Aceder aos Módulos
+          Acessar os Módulos
         </Link>
       </div>
 
@@ -138,7 +138,7 @@ export default function DashboardPage() {
                 <h3 className="text-lg font-semibold text-white mb-1">Turma Ativa</h3>
 
                 {isLoadingTurmas ? (
-                  <p className="text-sm text-gray-400">A carregar turmas...</p>
+                  <p className="text-sm text-gray-400">Carregando turmas...</p>
                 ) : turmas.length > 0 ? (
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-2">
                     <select
@@ -205,7 +205,7 @@ export default function DashboardPage() {
                 />
                 <div className="flex gap-2">
                   <button type="submit" disabled={isSaving || !novaTurmaNome.trim()} className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer">
-                    {isSaving ? "A guardar..." : "Guardar"}
+                    {isSaving ? "Salvando..." : "Salvar"}
                   </button>
                   <button type="button" onClick={() => setIsCreating(false)} className="px-4 py-2 bg-transparent border border-white/10 text-gray-300 hover:text-white text-sm rounded-lg transition-colors cursor-pointer">
                     Cancelar
@@ -271,7 +271,7 @@ export default function DashboardPage() {
                   <p className="text-2xl font-bold text-white">{horasFeitas}h <span className="text-sm font-normal text-gray-500">/ {totalHorasCurso}h</span></p>
                 </div>
                 <div className="bg-black/40 border border-white/5 rounded-xl p-5">
-                  <p className="text-sm text-gray-400 mb-1">Aulas Registadas</p>
+                  <p className="text-sm text-gray-400 mb-1">Aulas Registradas</p>
                   <p className="text-2xl font-bold text-white">{aulasFeitas} <span className="text-sm font-normal text-gray-500">/ {totalAulasCurso}</span></p>
                 </div>
               </div>
