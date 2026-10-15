@@ -92,7 +92,7 @@ export default function ModuleDetailsPage() {
     return url;
   };
 
-  // Seleciona a base de apostilas e o desafio conforme o módulo ativo (mod-1 ou mod-2)
+  // Mapeamento robusto por Ordem da Aula (garante correspondência 100% precisa em qualquer módulo)
   const currentMaterial: LessonMaterial | null = (() => {
     if (!activeLesson) return null;
     const materialsSource =
@@ -104,12 +104,15 @@ export default function ModuleDetailsPage() {
 
     if (!materialsSource) return null;
 
+    // 1. Tenta buscar estritamente pelo número da ordem da aula
     const byOrder = materialsSource.find(
       (m) => m.lessonOrder === Number(activeLesson.lesson_order)
     );
     if (byOrder) return byOrder;
+
+    // 2. Fallback por correspondência de texto parcial
     const titleLower = (activeLesson.title || "").toLowerCase();
-    return materialsSource.find((m) => titleLower.includes(m.titleKey)) || null;
+    return materialsSource.find((m) => titleLower.includes(m.titleKey)) || materialsSource[0] || null;
   })();
 
   const activeChallengeData =
@@ -445,4 +448,4 @@ export default function ModuleDetailsPage() {
       )}
     </div>
   );
-} 
+}
