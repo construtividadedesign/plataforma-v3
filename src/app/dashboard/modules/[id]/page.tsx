@@ -5,11 +5,12 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCircle, Clock, Printer, Sparkles } from "lucide-react";
+import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCircle, Clock, Printer, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useTurma } from "@/contexts/TurmaContext";
 import { module1MaterialsData, LessonMaterial } from "@/data/module1Materials";
 import PrintableLessonModal from "@/components/PrintableLessonModal";
+import PrintableChallengeModal from "@/components/PrintableChallengeModal";
 
 const modulesInfo = {
   "mod-1": { title: "Fundamentos de Climatização", description: "Conceitos de calor, temperatura, pressão, ciclo frigorífico e manuseio seguro de fluidos." },
@@ -24,7 +25,6 @@ export default function ModuleDetailsPage() {
 
   const supabase = createClient();
   
-  // Usamos o nosso Cérebro para gerir o progresso e saber se é Professor ou Aluno
   const { turmaAtiva, aulasConcluidas, isProfessor, alternarConclusaoAula } = useTurma();
   
   const [lessons, setLessons] = useState<any[]>([]);
@@ -32,6 +32,7 @@ export default function ModuleDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchLessons() {
@@ -89,7 +90,6 @@ export default function ModuleDetailsPage() {
     return url;
   };
 
-  // Localiza o material didático estruturado da aula ativa (Módulo 1)
   const currentMaterial: LessonMaterial | null = (() => {
     if (moduleId !== "mod-1" || !activeLesson) return null;
     const byOrder = module1MaterialsData.find(
@@ -101,8 +101,6 @@ export default function ModuleDetailsPage() {
   })();
 
   const isCurrentLessonCompleted = activeLesson ? aulasConcluidas.includes(activeLesson.id) : false;
-  
-  // Conta apenas as aulas deste módulo específico que estão concluídas
   const moduleCompletedLessons = lessons.filter(l => aulasConcluidas.includes(l.id)).length;
 
   if (isLoading) {
@@ -128,7 +126,6 @@ export default function ModuleDetailsPage() {
   return (
     <div className="flex flex-col p-4 md:p-6 lg:p-8 w-full max-w-[1400px] mx-auto space-y-6 animate-in fade-in duration-700">
       
-      {/* Aviso de Turma (Aparece se não houver turma selecionada) */}
       {!turmaAtiva && (
         <div className="bg-orange-500/10 border border-orange-500/20 text-orange-400 p-4 rounded-xl flex items-center gap-3 text-sm font-medium">
           <AlertCircle className="w-5 h-5 shrink-0" />
@@ -151,18 +148,32 @@ export default function ModuleDetailsPage() {
             <h1 className="text-2xl md:text-3xl font-bold text-white">{currentModuleInfo.title}</h1>
             <p className="text-gray-400 mt-1 max-w-3xl text-sm md:text-base">{currentModuleInfo.description}</p>
           </div>
-          {turmaAtiva && (
-            <div className="bg-black/40 border border-white/10 px-4 py-2 rounded-lg backdrop-blur-md shrink-0 self-start md:self-auto">
-              <span className="text-xs text-gray-500 block">Turma atual:</span>
-              <span className="text-sm font-semibold text-red-500">{turmaAtiva.nome}</span>
-            </div>
-          )}
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+            {/* BOTÃO DO DESAFIO PRÁTICO (Aparece apenas no Módulo 1) */}
+            {moduleId === "mod-1" && (
+              <button
+                onClick={() => setIsChallengeModalOpen(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-500 text-sm font-bold rounded-lg transition-all shadow-lg shadow-amber-900/10 cursor-pointer"
+              >
+                <Users className="w-4 h-4" />
+                Desafio das 4 Equipes
+              </button>
+            )}
+
+            {turmaAtiva && (
+              <div className="bg-black/40 border border-white/10 px-4 py-2 rounded-lg backdrop-blur-md self-start md:self-auto">
+                <span className="text-xs text-gray-500 block">Turma atual:</span>
+                <span className="text-sm font-semibold text-red-500">{turmaAtiva.nome}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         
-        {/* COLUNA ESQUERDA: Reprodutor / Painel de Estudo e Detalhes */}
+        {/* COLUNA ESQUERDA */}
         <div className="flex-1 space-y-6 min-w-0">
           
           <div className="relative w-full aspect-video bg-black/80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex flex-col items-center justify-center group">
@@ -187,7 +198,6 @@ export default function ModuleDetailsPage() {
                 </video>
               )
             ) : currentMaterial ? (
-              /* Painel Técnico Interativo quando a aula possui apostila estruturada e ainda não tem vídeo */
               <div className="flex flex-col justify-between h-full w-full p-5 sm:p-8 bg-gradient-to-br from-zinc-950 via-zinc-900/95 to-red-950/20 overflow-y-auto">
                 <div className="space-y-3">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
@@ -284,7 +294,6 @@ export default function ModuleDetailsPage() {
                     </Button>
                   )}
                   
-                  {/* Se for Professor, exibe o botão de marcar conclusão. Se for Aluno, exibe apenas o status da aula */}
                   {isProfessor ? (
                     <Button 
                       onClick={handleToggleComplete}
@@ -323,7 +332,6 @@ export default function ModuleDetailsPage() {
                 </div>
               </div>
 
-              {/* Explicação Técnica Direta no Card Inferior */}
               {currentMaterial && (
                 <div className="border-t border-white/10 pt-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-red-400 mb-1">
@@ -338,7 +346,7 @@ export default function ModuleDetailsPage() {
           </Card>
         </div>
 
-        {/* COLUNA DIREITA: Playlist */}
+        {/* COLUNA DIREITA */}
         <div className="w-full lg:w-[380px] shrink-0">
           <Card className="bg-black/40 backdrop-blur-md border border-white/10 shadow-xl h-full flex flex-col rounded-2xl">
             <CardHeader className="pb-4 border-b border-white/5">
@@ -401,12 +409,19 @@ export default function ModuleDetailsPage() {
 
       </div>
 
-      {/* Modal de Apostila Imprimível A4 */}
+      {/* Modais */}
       {isModalOpen && currentMaterial && (
         <PrintableLessonModal
           material={currentMaterial}
           moduleTitle={currentModuleInfo.title}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {isChallengeModalOpen && (
+        <PrintableChallengeModal
+          isOpen={isChallengeModalOpen}
+          onClose={() => setIsChallengeModalOpen(false)}
         />
       )}
     </div>
