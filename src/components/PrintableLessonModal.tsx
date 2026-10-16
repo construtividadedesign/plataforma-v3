@@ -606,4 +606,4 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
       </div>
     </div>
   );
-}
+} 
