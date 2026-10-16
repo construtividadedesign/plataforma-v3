@@ -263,7 +263,6 @@ export function TechnicalDiagram({ type }: { type: string }) {
       return (
         <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
           <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
-          {/* Triângulo da Lei de Ohm */}
           <text x="135" y="35" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
             1. Triângulo da Lei de Ohm
           </text>
@@ -279,7 +278,6 @@ export function TechnicalDiagram({ type }: { type: string }) {
 
           <line x1="255" y1="25" x2="255" y2="195" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4" />
 
-          {/* Circuito Exclusivo NBR 5410 + Retificação DC */}
           <text x="470" y="35" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
             2. Circuito Dedicado NBR 5410 e Barramento DC Inverter
           </text>
@@ -309,7 +307,6 @@ export function TechnicalDiagram({ type }: { type: string }) {
       return (
         <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
           <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
-          {/* Lado Esquerdo: ERRADO */}
           <rect x="30" y="30" width="300" height="160" rx="10" fill="#fef2f2" stroke="#dc2626" strokeWidth="2" />
           <text x="180" y="52" textAnchor="middle" fill="#991b1b" fontSize="12" fontWeight="bold">
             ✖ ERRADO: Garra no Cabo PP Inteiro
@@ -325,7 +322,6 @@ export function TechnicalDiagram({ type }: { type: string }) {
             (Campos magnéticos de Ida e Volta se anulam)
           </text>
 
-          {/* Lado Direito: CERTO */}
           <rect x="365" y="30" width="305" height="160" rx="10" fill="#f0fdf4" stroke="#16a34a" strokeWidth="2" />
           <text x="517" y="52" textAnchor="middle" fill="#166534" fontSize="12" fontWeight="bold">
             ✔ CORRETO: Garra em Apenas 1 Condutor (Fase)
@@ -346,7 +342,6 @@ export function TechnicalDiagram({ type }: { type: string }) {
       return (
         <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
           <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
-          {/* Compressor C-S-R */}
           <text x="170" y="35" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">
             1. Bornes On/Off (C - S - R)
           </text>
@@ -363,7 +358,6 @@ export function TechnicalDiagram({ type }: { type: string }) {
 
           <line x1="340" y1="25" x2="340" y2="195" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4" />
 
-          {/* Compressor Inverter U-V-W */}
           <text x="515" y="35" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">
             2. Bornes Inverter BLDC (U - V - W)
           </text>
@@ -389,7 +383,6 @@ export function TechnicalDiagram({ type }: { type: string }) {
             Diagrama de Interligação Elétrica e Sinal Serial — Split Inverter (L, N, S, PE)
           </text>
 
-          {/* Borneira Evaporadora */}
           <rect x="40" y="55" width="150" height="135" rx="8" fill="#e0f2fe" stroke="#0284c7" strokeWidth="2" />
           <text x="115" y="75" textAnchor="middle" fill="#075985" fontSize="11" fontWeight="bold">EVAPORADORA</text>
           <text x="155" y="100" textAnchor="end" fill="#dc2626" fontSize="11" fontWeight="bold">Borne L (1)</text>
@@ -397,7 +390,6 @@ export function TechnicalDiagram({ type }: { type: string }) {
           <text x="155" y="150" textAnchor="end" fill="#d97706" fontSize="11" fontWeight="bold">Borne S (3)</text>
           <text x="155" y="175" textAnchor="end" fill="#16a34a" fontSize="11" fontWeight="bold">Terra (PE)</text>
 
-          {/* Borneira Condensadora */}
           <rect x="510" y="55" width="150" height="135" rx="8" fill="#fee2e2" stroke="#dc2626" strokeWidth="2" />
           <text x="585" y="75" textAnchor="middle" fill="#991b1b" fontSize="11" fontWeight="bold">CONDENSADORA</text>
           <text x="545" y="100" textAnchor="start" fill="#dc2626" fontSize="11" fontWeight="bold">Borne L (1)</text>
@@ -405,13 +397,11 @@ export function TechnicalDiagram({ type }: { type: string }) {
           <text x="545" y="150" textAnchor="start" fill="#d97706" fontSize="11" fontWeight="bold">Borne S (3)</text>
           <text x="545" y="175" textAnchor="start" fill="#16a34a" fontSize="11" fontWeight="bold">Terra (PE)</text>
 
-          {/* Cabos de Interligação */}
           <line x1="165" y1="96" x2="535" y2="96" stroke="#dc2626" strokeWidth="3" />
           <line x1="165" y1="121" x2="535" y2="121" stroke="#0284c7" strokeWidth="3" />
           <line x1="165" y1="146" x2="535" y2="146" stroke="#d97706" strokeWidth="3" />
           <line x1="165" y1="171" x2="535" y2="171" stroke="#16a34a" strokeWidth="3" strokeDasharray="5" />
 
-          {/* Multímetro medindo Comunicação N e S */}
           <rect x="285" y="110" width="130" height="50" rx="6" fill="#1e293b" />
           <text x="350" y="130" textAnchor="middle" fill="#38bdf8" fontSize="10" fontWeight="bold">TESTE SERIAL (VDC)</text>
           <text x="350" y="146" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="bold">N ↔ S: 0V a 24V (Oscila)</text>
@@ -576,3 +566,44 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                  )}
+
+                  {sec.highlightBox && (
+                    <div
+                      className={`p-4 rounded-lg border text-sm ${
+                        sec.highlightBox.type === "danger"
+                          ? "bg-red-50 border-red-300 text-red-950"
+                          : sec.highlightBox.type === "practical"
+                          ? "bg-amber-50 border-amber-300 text-amber-950"
+                          : "bg-sky-50 border-sky-300 text-sky-950"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 font-bold mb-1">
+                        {sec.highlightBox.type === "danger" && <ShieldAlert className="w-4 h-4 text-red-600" />}
+                        {sec.highlightBox.type === "practical" && <Wrench className="w-4 h-4 text-amber-600" />}
+                        {sec.highlightBox.type === "info" && <Info className="w-4 h-4 text-sky-600" />}
+                        <span>{sec.highlightBox.title}</span>
+                      </div>
+                      <p className="text-xs sm:text-sm leading-relaxed">{sec.highlightBox.content}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t-2 border-slate-300 pt-4 mt-8 text-center space-y-1">
+              <p className="text-xs font-bold text-slate-800">
+                © {new Date().getFullYear()} Direitos Intelectuais Reservados • Criado por Prof. Cleverson Leonardo.
+              </p>
+              <p className="text-[11px] text-red-700 font-semibold">
+                PROIBIDA A VENDA, REPRODUÇÃO OU DISTRIBUIÇÃO SEM DEVIDA AUTORIZAÇÃO PRÉVIA DO AUTOR.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
