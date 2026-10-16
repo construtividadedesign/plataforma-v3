@@ -92,27 +92,25 @@ export default function ModuleDetailsPage() {
     return url;
   };
 
-  // Mapeamento robusto por Ordem da Aula (garante correspondência 100% precisa em qualquer módulo)
+  // Lógica Robusta de Mapeamento de Materiais
   const currentMaterial: LessonMaterial | null = (() => {
     if (!activeLesson) return null;
-    const materialsSource =
-      moduleId === "mod-1"
-        ? module1MaterialsData
-        : moduleId === "mod-2"
-        ? module2MaterialsData
-        : null;
+    
+    let materialsSource: LessonMaterial[] | null = null;
+    
+    if (moduleId === "mod-1") materialsSource = module1MaterialsData;
+    if (moduleId === "mod-2") materialsSource = module2MaterialsData;
+    // O Módulo 3 entrará aqui futuramente
 
     if (!materialsSource) return null;
 
-    // 1. Tenta buscar estritamente pelo número da ordem da aula
+    // Busca pela Ordem Numérica da Aula (INFALÍVEL)
     const byOrder = materialsSource.find(
       (m) => m.lessonOrder === Number(activeLesson.lesson_order)
     );
     if (byOrder) return byOrder;
 
-    // 2. Fallback por correspondência de texto parcial
-    const titleLower = (activeLesson.title || "").toLowerCase();
-    return materialsSource.find((m) => titleLower.includes(m.titleKey)) || materialsSource[0] || null;
+    return null; // Se não achar pela ordem, não força erro
   })();
 
   const activeChallengeData =
