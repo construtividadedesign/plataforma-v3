@@ -3,24 +3,65 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-const ADMIN_EMAILS = [
+/**
+ * Lista de e-mails autorizados com perfil de Instrutor / Administrador
+ * Contém o criador original (Cleverson Leonardo) e os novos instrutores (Prof. Josué e Prof. Júlio)
+ */
+export const ADMIN_EMAILS: string[] = [
   "instrutorleonardosenai@gmail.com",
   "designtecnologia.2026@gmail.com",
+  "engeletricojosue@gmail.com",
+  "julioangeloxavier@gmail.com",
 ];
 
-type Turma = {
+/**
+ * Verifica se um determinado e-mail possui permissões de Instrutor
+ */
+export function isProfessorEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase().trim());
+}
+
+/**
+ * Retorna a saudação/título personalizado para cada professor
+ */
+export function getProfessorDisplayName(email?: string | null, name?: string | null): string {
+  if (!email) return name ? `Prof. ${name}` : "Instrutor";
+  const em = email.toLowerCase().trim();
+  if (em.includes("josue")) return "Prof. Josué";
+  if (em.includes("julio")) return "Prof. Júlio";
+  if (em.includes("leonardo") || em.includes("designtecnologia")) return "Instrutor Leonardo";
+  if (name && name !== "Utilizador") return `Prof. ${name}`;
+  return "Instrutor";
+}
+
+/**
+ * Retorna a letra inicial para o avatar do professor
+ */
+export function getProfessorInitial(email?: string | null, name?: string | null): string {
+  if (!email) return name ? name.charAt(0).toUpperCase() : "P";
+  const em = email.toLowerCase().trim();
+  if (em.includes("josue")) return "J";
+  if (em.includes("julio")) return "J";
+  if (em.includes("leonardo") || em.includes("designtecnologia")) return "L";
+  return name ? name.charAt(0).toUpperCase() : "P";
+}
+
+export type Turma = {
   id: string;
   nome: string;
   instrutor_id: string;
+  professor_email?: string;
   created_at: string;
   status?: "ativa" | "arquivada";
 };
 
-type AlunoSolicitacao = {
+export type AlunoSolicitacao = {
   turmaId: string;
   email: string;
   nome: string;
   status: "pendente" | "aprovado";
+  professor_email?: string;
 };
 
 type TurmaContextType = {
@@ -59,7 +100,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
   const [alunoStatusAprovacao, setAlunoStatusAprovacao] = useState<"pendente" | "aprovado" | "nao_solicitado">("nao_solicitado");
   const [alunosPendentes, setAlunosPendentes] = useState<AlunoSolicitacao[]>([]);
 
-  // 1. Carregar Utilizador, Turmas e Estado de Aprovação
+  // 1. Carregar Utilizador, Turmas com Isolamento Multi-Tenant e Estado de Aprovação
   useEffect(() => {
     const supabase = createClient();
     async function carregarDados() {
@@ -71,32 +112,80 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const emailAtual = user.email?.toLowerCase() || null;
+      const emailAtual = user.email?.toLowerCase().trim() || null;
       setUserEmail(emailAtual);
       const nomeAtual = user.user_metadata?.full_name || user.email?.split("@")[0] || "Utilizador";
       setUserName(nomeAtual);
 
-      const ehProf = emailAtual ? ADMIN_EMAILS.includes(emailAtual) : false;
+      const ehProf = isProfessorEmail(emailAtual);
       setIsProfessor(ehProf);
 
-      // Carrega turmas do Supabase
-      const { data, error } = await supabase
+      // Carrega turmas do Supabase com query multi-tenant
+      let query = supabase
         .from("turmas")
         .select("*")
         .order("created_at", { ascending: false });
 
+      if (ehProf && user) {
+        // Se for professor, busca apenas as turmas pertencentes a este instrutor
+        query = query.or(`instrutor_id.eq.${user.id},professor_email.eq.${emailAtual}`);
+      }
+
+      let { data, error } = await query;
+
+      // Fallback de compatibilidade caso a coluna professor_email ainda não exista no schema remoto
+      if (error && ehProf && user) {
+        const fallbackRes = await supabase
+          .from("turmas")
+          .select("*")
+          .eq("instrutor_id", user.id)
+          .order("created_at", { ascending: false });
+        data = fallbackRes.data;
+        error = fallbackRes.error;
+      }
+
+      // Se ainda der erro, busca genérica para posterior filtragem segura em memória
+      if (error) {
+        const fallbackAll = await supabase
+          .from("turmas")
+          .select("*")
+          .order("created_at", { ascending: false });
+        data = fallbackAll.data;
+        error = fallbackAll.error;
+      }
+
       if (!error && data) {
-        // Separa ativas e arquivadas (salvas no localStorage por simplicidade robusta)
-        const arquivadasIds = JSON.parse(localStorage.getItem("hvac_turmas_arquivadas") || "[]");
+        let turmasFiltradas = data;
+
+        // Se for professor, isola estritamente em memória: cada professor vê APENAS as suas turmas
+        if (ehProf) {
+          turmasFiltradas = data.filter((t: Turma) => {
+            const matchId = t.instrutor_id === user.id;
+            const matchEmail = Boolean(
+              t.professor_email && emailAtual && t.professor_email.toLowerCase().trim() === emailAtual
+            );
+            return matchId || matchEmail;
+          });
+        }
+
+        // Separa ativas e arquivadas (salvas no localStorage isoladas pelo e-mail do professor)
+        const storageKeyArquivadas = `hvac_turmas_arquivadas_${emailAtual || "default"}`;
+        const arquivadasIds = JSON.parse(
+          localStorage.getItem(storageKeyArquivadas) ||
+          localStorage.getItem("hvac_turmas_arquivadas") ||
+          "[]"
+        );
         
-        const ativasList = data.filter(t => !arquivadasIds.includes(t.id));
-        const arquivadasList = data.filter(t => arquivadasIds.includes(t.id));
+        const ativasList = turmasFiltradas.filter((t: Turma) => !arquivadasIds.includes(t.id));
+        const arquivadasList = turmasFiltradas.filter((t: Turma) => arquivadasIds.includes(t.id));
 
         setTurmas(ativasList);
         setTurmasArquivadas(arquivadasList);
 
         if (ativasList.length > 0) {
           setTurmaAtiva(ativasList[0]);
+        } else {
+          setTurmaAtiva(null);
         }
       }
 
@@ -160,14 +249,16 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
 
   const solicitarAcessoTurma = (turmaId: string) => {
     if (!userEmail || isProfessor) return;
+    const turmaAlvo = turmas.find(t => t.id === turmaId);
     const novaSolicitacao: AlunoSolicitacao = {
       turmaId,
       email: userEmail,
       nome: userName || "Aluno",
-      status: "pendente"
+      status: "pendente",
+      professor_email: turmaAlvo?.professor_email
     };
 
-    const atualizadas = [...alunosPendentes.filter(s => s.email !== userEmail), novaSolicitacao];
+    const atualizadas = [...alunosPendentes.filter(s => !(s.email === userEmail && s.turmaId === turmaId)), novaSolicitacao];
     setAlunosPendentes(atualizadas);
     localStorage.setItem("hvac_alunos_solicitacoes", JSON.stringify(atualizadas));
     setAlunoStatusAprovacao("pendente");
@@ -199,15 +290,40 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
 
-    const { data, error } = await supabase
+    const emailAtual = user.email?.toLowerCase().trim() || "";
+
+    // Tenta inserir vinculando tanto o instrutor_id (UUID) quanto o professor_email
+    let { data, error } = await supabase
       .from("turmas")
-      .insert([{ nome, instrutor_id: user.id }])
+      .insert([{ 
+        nome: nome.trim(), 
+        instrutor_id: user.id,
+        professor_email: emailAtual 
+      }])
       .select()
       .single();
 
+    // Fallback gracioso caso a coluna professor_email ainda não tenha sido criada no banco
+    if (error && (error.message?.includes("professor_email") || error.code === "PGRST204" || error.code === "42703")) {
+      const fallback = await supabase
+        .from("turmas")
+        .insert([{ 
+          nome: nome.trim(), 
+          instrutor_id: user.id 
+        }])
+        .select()
+        .single();
+      data = fallback.data;
+      error = fallback.error;
+    }
+
     if (!error && data) {
-      setTurmas([data, ...turmas]);
-      setTurmaAtiva(data);
+      const turmaCompleta: Turma = {
+        ...data,
+        professor_email: data.professor_email || emailAtual
+      };
+      setTurmas(prev => [turmaCompleta, ...prev]);
+      setTurmaAtiva(turmaCompleta);
       return true;
     }
     return false;
@@ -225,6 +341,10 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     setTurmasArquivadas(novasArquivadas);
 
     const arquivadasIds = novasArquivadas.map(t => t.id);
+    const emailAtual = userEmail?.toLowerCase().trim();
+    if (emailAtual) {
+      localStorage.setItem(`hvac_turmas_arquivadas_${emailAtual}`, JSON.stringify(arquivadasIds));
+    }
     localStorage.setItem("hvac_turmas_arquivadas", JSON.stringify(arquivadasIds));
 
     if (turmaAtiva?.id === turmaId) {
@@ -235,17 +355,24 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
   const excluirTurma = async (turmaId: string) => {
     if (!isProfessor) return;
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // Apaga do Supabase
-    const { error } = await supabase.from("turmas").delete().eq("id", turmaId);
+    // Apaga do Supabase garantindo que só exclui a turma do próprio professor
+    let deleteQuery = supabase.from("turmas").delete().eq("id", turmaId);
+    if (user?.id) {
+      deleteQuery = deleteQuery.eq("instrutor_id", user.id);
+    }
+    const { error } = await deleteQuery;
 
     if (!error) {
-      setTurmas(turmas.filter(t => t.id !== turmaId));
-      setTurmasArquivadas(turmasArquivadas.filter(t => t.id !== turmaId));
+      setTurmas(prev => prev.filter(t => t.id !== turmaId));
+      setTurmasArquivadas(prev => prev.filter(t => t.id !== turmaId));
 
       if (turmaAtiva?.id === turmaId) {
-        const restantes = turmas.filter(t => t.id !== turmaId);
-        setTurmaAtiva(restantes.length > 0 ? restantes[0] : null);
+        setTurmaAtiva(prev => {
+          const restantes = turmas.filter(t => t.id !== turmaId);
+          return restantes.length > 0 ? restantes[0] : null;
+        });
       }
     }
   };

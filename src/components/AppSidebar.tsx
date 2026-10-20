@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Library, LineChart, Home, Users, ChevronDown, Menu, X, Cpu, Stethoscope, Calculator, Wind } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useTurma } from "@/contexts/TurmaContext";
+import { useTurma, getProfessorDisplayName, getProfessorInitial } from "@/contexts/TurmaContext";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function AppSidebar() {
@@ -13,7 +13,7 @@ export default function AppSidebar() {
   const router = useRouter();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const { turmas, turmaAtiva, selecionarTurma, isProfessor, userName } = useTurma();
+  const { turmas, turmaAtiva, selecionarTurma, isProfessor, userName, userEmail } = useTurma();
 
   // Fecha o menu mobile automaticamente ao trocar de rota
   useEffect(() => {
@@ -38,8 +38,12 @@ export default function AppSidebar() {
   };
 
   const inicialNome = isProfessor
-    ? "L"
+    ? getProfessorInitial(userEmail, userName)
     : (userName ? userName.charAt(0).toUpperCase() : "A");
+
+  const nomeExibicao = isProfessor
+    ? getProfessorDisplayName(userEmail, userName)
+    : (userName || "Aluno");
 
   return (
     <>
@@ -183,10 +187,10 @@ export default function AppSidebar() {
             </div>
             <div className="flex flex-col items-start overflow-hidden text-left">
               <span className="text-slate-900 dark:text-white font-medium truncate w-full">
-                {isProfessor ? "Instrutor Leonardo" : userName || "Aluno"}
+                {nomeExibicao}
               </span>
               <span className="text-slate-500 dark:text-gray-500 text-xs">
-                {isProfessor ? "Terminar Sessão" : "Modo Aluno • Sair"}
+                {isProfessor ? "Sessão do Instrutor • Sair" : "Modo Aluno • Sair"}
               </span>
             </div>
           </button>

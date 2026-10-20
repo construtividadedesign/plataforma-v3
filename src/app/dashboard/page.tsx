@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Zap, Pin, Plus, ShieldCheck, CheckCircle2, XCircle, Clock, Archive, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useTurma } from "@/contexts/TurmaContext";
+import { useTurma, getProfessorDisplayName } from "@/contexts/TurmaContext";
 import { toast } from "sonner";
 
 export default function DashboardPage() {
@@ -81,7 +81,7 @@ export default function DashboardPage() {
             <span>{isProfessor ? "Painel do Instrutor" : "Ambiente do Aluno (Consulta)"}</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-            {isProfessor ? "Olá, Prof.! 👋" : `Olá, ${userName || "Aluno"}! 👋`}
+            {isProfessor ? `Olá, ${getProfessorDisplayName(userEmail, userName)}! 👋` : `Olá, ${userName || "Aluno"}! 👋`}
           </h2>
           <p className="text-gray-300 max-w-2xl text-sm leading-relaxed">
             {isProfessor
