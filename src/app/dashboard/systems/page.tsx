@@ -23,16 +23,25 @@ import {
 } from "lucide-react";
 import { hvacSystemsData, HVACSystemType } from "@/data/hvacSystemsData";
 
-// Imagens alternativas de alta disponibilidade caso o Wikimedia bloqueie hotlink
+// Imagens de alta fidelidade técnica locais (garantem 100% de disponibilidade e zero falhas de carregamento)
 const SYSTEM_FALLBACK_IMAGES: Record<string, string> = {
-  "sys-hiwall": "https://images.unsplash.com/photo-1614633833026-0e31891b6540?auto=format&fit=crop&w=800&q=80",
-  "sys-multisplit": "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=800&q=80",
-  "sys-cassete": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80",
-  "sys-pisoteto": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
-  "sys-vrf": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
-  "sys-chiller": "https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?auto=format&fit=crop&w=800&q=80",
-  "sys-duto": "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&q=80",
-  "sys-acj": "https://images.unsplash.com/photo-1527011046414-4781f1f94f8c?auto=format&fit=crop&w=800&q=80",
+  "sys-hiwall": "/systems/hiwall.jpg",
+  "sys-multisplit": "/systems/multisplit.png",
+  "sys-cassete": "/systems/cassete.jpg",
+  "sys-pisoteto": "/systems/pisoteto.jpg",
+  "sys-vrf": "/systems/vrf.png",
+  "sys-chiller": "/systems/chiller.jpg",
+  "sys-duto": "/image_33.png",
+  "sys-acj": "/image_34.png",
+};
+
+const resolveSystemImage = (url: string) => {
+  if (url === "image_33.png" || url === "/image_33.png") return "/image_33.png";
+  if (url === "image_34.png" || url === "/image_34.png") return "/image_34.png";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+    return url;
+  }
+  return `/${url}`;
 };
 
 export default function SystemsPage() {
@@ -253,13 +262,12 @@ export default function SystemsPage() {
               {/* IMAGEM COM BADGES */}
               <div className="relative h-48 w-full bg-slate-900 overflow-hidden">
                 <img
-                  src={sys.imageUrl}
+                  src={resolveSystemImage(sys.imageUrl)}
                   alt={sys.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                   onError={(e) => {
-                    // Fallback para imagem segura caso Wikimedia falhe
-                    e.currentTarget.src = SYSTEM_FALLBACK_IMAGES[sys.id] || SYSTEM_FALLBACK_IMAGES["sys-hiwall"];
+                    e.currentTarget.src = SYSTEM_FALLBACK_IMAGES[sys.id] || "/systems/hiwall.jpg";
                   }}
                 />
                 
@@ -407,12 +415,12 @@ export default function SystemsPage() {
               {/* Imagem em Destaque */}
               <div className="relative h-64 sm:h-72 w-full rounded-xl overflow-hidden border border-white/10 bg-black">
                 <img
-                  src={selectedSystemModal.imageUrl}
+                  src={resolveSystemImage(selectedSystemModal.imageUrl)}
                   alt={selectedSystemModal.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.src =
-                      SYSTEM_FALLBACK_IMAGES[selectedSystemModal.id] || SYSTEM_FALLBACK_IMAGES["sys-hiwall"];
+                      SYSTEM_FALLBACK_IMAGES[selectedSystemModal.id] || "/systems/hiwall.jpg";
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />

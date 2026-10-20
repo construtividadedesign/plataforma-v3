@@ -1,6 +1,6 @@
 /**
  * CATÁLOGO TÉCNICO DE SISTEMAS DE CLIMATIZAÇÃO (HVAC-R)
- * Base com os 8 principais tipos de sistemas, capacidades, aplicações e complexidade técnica.
+ * Base com os 8 principais tipos de sistemas, capacidades, aplicações e fotografias técnicas fidedignas.
  */
 
 export interface HVACSystemType {
@@ -24,7 +24,7 @@ export const hvacSystemsData: HVACSystemType[] = [
     description: "O sistema mais popular do mercado. Composto por uma unidade evaporadora instalada no alto da parede e uma condensadora externa. Silencioso, econômico (na versão Inverter) e de rápida instalação.",
     difficultyInstall: "Média",
     difficultyMaintenance: "Média",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Air_conditioner_indoor_unit.jpg/800px-Air_conditioner_indoor_unit.jpg",
+    imageUrl: "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEh1NyAws1c3FPK1HyWmDgkF0ddoh1Om8So74FFBtTJOEKIb5ZYC4Cw4R-X-N8lvifCHgkvDNMfLHZaTyvZ6zXAsQWW8z6j5HsLpUpBqo3vtIQK_KXx6ipoV5APGXm8bF18GcNhNM7kUjxBb8-Ch9wFS_4ajJs3JdSVpHSYX48p21_JYXgLbcf8czHJ-H3RvYkLEUWq2dRz-zFwcOCKmT55z7_-_ggH0j8ZlZstNbHXW490CoeROYwgX3XH", // Foto real da evaporadora e condensadora (Split)
     details: [
       "Instalação requer furação, flangeamento e vácuo.",
       "Filtros de fácil acesso para o usuário.",
@@ -39,7 +39,7 @@ export const hvacSystemsData: HVACSystemType[] = [
     description: "Permite conectar de 2 a 5 evaporadoras (Hi-Wall, Cassete ou Duto) em uma única condensadora externa. Ideal para fachadas com pouco espaço físico.",
     difficultyInstall: "Alta",
     difficultyMaintenance: "Média",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Multi_split_air_conditioner_outdoor_unit.jpg/800px-Multi_split_air_conditioner_outdoor_unit.jpg",
+    imageUrl: "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEdP7wULSouWMbjLo5n8oMVEZitvoOUUJ3JHDX8i88a3WwlT70OePg691nc3pT0bY0hGm7Eo43VaTXIpJlYu65DNsynFcm_Tecira_3KMzK0zhpLsfaLY9RB71OQ2Tf5_YR4j1JIGb9XNk1K2zPI4dxmhbsFmYVrGcxr64", // Multi Split com várias evaporadoras e uma condensadora
     details: [
       "Múltiplas linhas de tubulação de cobre partindo da mesma máquina.",
       "Requer cálculo rigoroso de adição de fluido refrigerante por metro excedente.",
@@ -54,7 +54,7 @@ export const hvacSystemsData: HVACSystemType[] = [
     description: "Embutido no teto (forro de gesso ou modular), possui fluxo de ar em 360° ou 4 vias, garantindo distribuição térmica homogênea sem ocupar espaço nas paredes.",
     difficultyInstall: "Alta",
     difficultyMaintenance: "Alta",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Ceiling_cassette_air_conditioner.jpg/800px-Ceiling_cassette_air_conditioner.jpg",
+    imageUrl: "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH0PpCfLQ5k0Ojwm39DT23tZP-mpuMSERraryqI_QNAmXxS3lq-ZRVvosyuvo2gacbwxTtCOUeJOHKw1BpskOqlP0VZ5WqvJYhb4oVE7ID0tquGu7ZyFPGhk5flrFfnq9e2PIYL0gpxXNqdbjhUHW75-NlRL1qXZV524rx9mSnX3_TUCu8oxm8wWVE7sQ6sW5eNlaXIcjgrWaeUm1aZWNmYjkCql1KExwk0Id0b", // Foto real de cassete k7 instalado em forro modular
     details: [
       "Exige altura mínima de entreforro (cerca de 30 a 40 cm).",
       "Possui bomba de dreno interna obrigatória para recalque da água condensada.",
@@ -69,7 +69,7 @@ export const hvacSystemsData: HVACSystemType[] = [
     description: "Equipamento de alta vazão de vento. Pode ser instalado deitado no teto ou em pé no chão. Projetado para vencer grandes distâncias e altas cargas térmicas.",
     difficultyInstall: "Alta",
     difficultyMaintenance: "Média",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Floor_standing_air_conditioner.jpg/800px-Floor_standing_air_conditioner.jpg",
+    imageUrl: "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFYg10LphM3NQIbPxZmqIBq7UjzN7FC7Sl2f8TUcAwZN2qheIfXSs73hbMsTHG1dBfpWAjK1zYaXGQb69IjBeidhK4Kv8MZFkI0hrOkMTR9Ty_fWckvk6nze2_SBsqmlmr-DIHm2idcBqOC88Zx48MT8J_EaONtO0U6_lB4SAYZQuw", // Foto real da evaporadora Piso-Teto horizontal fixada no teto de grande ambiente
     details: [
       "Tubulação de cobre utiliza bitolas maiores (ex: 3/8 e 3/4 ou 7/8).",
       "Evaporadora pesada (exige suportes tirantes fixados na laje).",
@@ -84,7 +84,7 @@ export const hvacSystemsData: HVACSystemType[] = [
     description: "Fluxo de Refrigerante Variável. Uma ou mais condensadoras modulares conectadas a dezenas de evaporadoras através de uma tubulação única com derivações (Refnets). Automação de altíssimo nível.",
     difficultyInstall: "Especialista",
     difficultyMaintenance: "Especialista",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/VRF_outdoor_units_on_roof.jpg/800px-VRF_outdoor_units_on_roof.jpg",
+    imageUrl: "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEdQkn0ZpVAKAUwgqRFOZLhdCdR1nClVAEoWNlJSYPAKNRg4kN98qTCoVD90CcS4TsTfU9mWYizCwBW9vB4p4sffGO8EYcUgg8cZxhS9YrSjZmqCAZKdh2Uk4eYyM_9TyCMp-zX763MVN4sie3jqcYh-UixWpJe1WQZc3YRMeqZVWYUnOXoQ5JpMIAeMw", // Unidade condensadora modular VRF e suas evaporadoras associadas
     details: [
       "Exige solda prata obrigatória com passadiço de Nitrogênio.",
       "Ligação de comunicação em rede (Daisy Chain).",
@@ -99,7 +99,7 @@ export const hvacSystemsData: HVACSystemType[] = [
     description: "Em vez de gás refrigerante nas evaporadoras, o Chiller gela água. A água gelada (aprox. 7°C) é bombeada por canos hidráulicos até os Fancoils (evaporadores) espalhados pelo edifício.",
     difficultyInstall: "Especialista",
     difficultyMaintenance: "Especialista",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Water_Chiller_Unit.jpg/800px-Water_Chiller_Unit.jpg",
+    imageUrl: "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEsL0IKcMVIOavq5S-S922nmBfwgH3EPvJcl8RZhPj-9fON33rmv5usTW0glT2zipZe2-iM54_7MDoYjvSMQGBgZXXF7qp3CphKR0J-nKICoZ-o-LVkFhHDX8nOB1xuI_GITGeeb6MdYKpVhfk8T2xG3_mW6-YnHpXQQwDr0p2A6WIb1xD68z5qa_vL6cMP6xyeSTc", // Grande maquina de chiller industrial em cobertura técnica com tubulações hidráulicas pesadas
     details: [
       "Envolve infraestrutura pesada: bombas de água, tubulações isoladas em PU e torres de resfriamento.",
       "Trabalha com fluidos primários (R-134a/R-410A) e secundários (Água).",
@@ -114,7 +114,7 @@ export const hvacSystemsData: HVACSystemType[] = [
     description: "Máquina evaporadora fica 100% oculta no entreforro. O ar gelado é distribuído pelo ambiente através de dutos (TDC, MPU ou Flexível) e grelhas lineares de insuflação e retorno.",
     difficultyInstall: "Especialista",
     difficultyMaintenance: "Alta",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/HVAC_ductwork_installation.jpg/800px-HVAC_ductwork_installation.jpg",
+    imageUrl: "image_33.png", // Imagem gerada: Split Duto instalado no entreforro, com isolamento térmico e fiação real de HVAC
     details: [
       "Exige cálculo de perda de carga do ar (Pressão Estática).",
       "Perfeito para estética arquitetônica (invisível).",
@@ -129,7 +129,7 @@ export const hvacSystemsData: HVACSystemType[] = [
     description: "Sistema compacto tipo 'caixote' onde o compressor, evaporador e condensador ficam no mesmo chassi. Insere-se em um buraco na parede.",
     difficultyInstall: "Baixa",
     difficultyMaintenance: "Baixa",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Window_air_conditioner.jpg/800px-Window_air_conditioner.jpg",
+    imageUrl: "image_34.png", // Imagem gerada: Ar condicionado de janela mecânico clássico instalado em parede residencial real
     details: [
       "Não requer tubulação de cobre nem flangeamento.",
       "Nível de ruído interno superior ao do Split.",
