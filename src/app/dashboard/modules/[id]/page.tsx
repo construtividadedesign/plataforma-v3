@@ -11,6 +11,7 @@ import { useTurma } from "@/contexts/TurmaContext";
 import { module1MaterialsData, LessonMaterial } from "@/data/module1Materials";
 import { module1ChallengeData } from "@/data/module1Challenge";
 import { module2MaterialsData, module2ChallengeData } from "@/data/module2Materials";
+import { module3MaterialsData, module3ChallengeData } from "@/data/module3Materials";
 import PrintableLessonModal from "@/components/PrintableLessonModal";
 import PrintableChallengeModal from "@/components/PrintableChallengeModal";
 
@@ -100,7 +101,7 @@ export default function ModuleDetailsPage() {
     
     if (moduleId === "mod-1") materialsSource = module1MaterialsData;
     if (moduleId === "mod-2") materialsSource = module2MaterialsData;
-    // O Módulo 3 entrará aqui futuramente
+    if (moduleId === "mod-3") materialsSource = module3MaterialsData;
 
     if (!materialsSource) return null;
 
@@ -118,6 +119,8 @@ export default function ModuleDetailsPage() {
       ? module1ChallengeData
       : moduleId === "mod-2"
       ? module2ChallengeData
+      : moduleId === "mod-3"
+      ? module3ChallengeData
       : null;
 
   const isCurrentLessonCompleted = activeLesson ? aulasConcluidas.includes(activeLesson.id) : false;

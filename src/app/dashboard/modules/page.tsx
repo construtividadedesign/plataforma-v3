@@ -30,7 +30,7 @@ export default function ModulesPage() {
       title: "Instalação e Manutenção em Climatização",
       description: "Procedimentos de carga de fluido, vácuo, interligação elétrica e mecânica, e manutenção preventiva.",
       duration: "48 Horas",
-      lessonCount: 12,
+      lessonCount: 11,
     }
   ];
 
