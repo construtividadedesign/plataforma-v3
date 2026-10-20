@@ -114,7 +114,7 @@ export const hvacSystemsData: HVACSystemType[] = [
     description: "Máquina evaporadora fica 100% oculta no entreforro. O ar gelado é distribuído pelo ambiente através de dutos (TDC, MPU ou Flexível) e grelhas lineares de insuflação e retorno.",
     difficultyInstall: "Especialista",
     difficultyMaintenance: "Alta",
-    imageUrl: "image_33.png", // Imagem gerada: Split Duto instalado no entreforro, com isolamento térmico e fiação real de HVAC
+    imageUrl: "/systems/duto.jpg",
     details: [
       "Exige cálculo de perda de carga do ar (Pressão Estática).",
       "Perfeito para estética arquitetônica (invisível).",

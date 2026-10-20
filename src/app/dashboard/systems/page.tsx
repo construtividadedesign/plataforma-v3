@@ -31,7 +31,7 @@ const SYSTEM_FALLBACK_IMAGES: Record<string, string> = {
   "sys-pisoteto": "/systems/pisoteto.jpg",
   "sys-vrf": "/systems/vrf.png",
   "sys-chiller": "/systems/chiller.jpg",
-  "sys-duto": "/image_33.png",
+  "sys-duto": "/systems/duto.jpg",
   "sys-acj": "/image_34.png",
 };
 
