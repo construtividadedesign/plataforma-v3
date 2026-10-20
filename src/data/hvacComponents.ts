@@ -3,6 +3,7 @@ export type ComponentItem = {
   name: string;
   description: string;
   category: string;
+  imageUrl?: string;
 };
 
 export const hvacComponentsData: { categoryName: string; description: string; items: ComponentItem[] }[] = [
