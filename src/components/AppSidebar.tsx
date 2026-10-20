@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Library, LineChart, Home, Users, ChevronDown, Menu, X, Cpu } from "lucide-react";
+import { LayoutDashboard, Library, LineChart, Home, Users, ChevronDown, Menu, X, Cpu, Stethoscope } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useTurma } from "@/contexts/TurmaContext";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -25,6 +25,7 @@ export default function AppSidebar() {
     { name: "Painel da Turma", href: "/dashboard", icon: LayoutDashboard },
     { name: "Módulos de Aulas", href: "/dashboard/modules", icon: Library },
     { name: "Guia de Componentes", href: "/dashboard/components", icon: Cpu },
+    { name: "Diagnóstico e Falhas", href: "/dashboard/troubleshooting", icon: Stethoscope },
     { name: "Meu Progresso", href: "/dashboard/progress", icon: LineChart },
   ];
 
