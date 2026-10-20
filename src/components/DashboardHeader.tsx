@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function DashboardHeader() {
   return (
@@ -16,11 +17,15 @@ export default function DashboardHeader() {
           </p>
         </div>
         
-        <div className="flex items-center gap-3 bg-background/50 px-4 py-3 rounded-lg border border-border/40">
-          <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
-          <div className="text-left">
-            <p className="text-xs text-muted-foreground">Estado da Plataforma</p>
-            <p className="text-sm font-medium text-foreground">Online & Seguro</p>
+        <div className="flex items-center gap-3">
+          <ThemeToggle variant="header" />
+
+          <div className="flex items-center gap-3 bg-background/50 px-4 py-2.5 rounded-lg border border-border/40">
+            <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div className="text-left">
+              <p className="text-xs text-muted-foreground">Estado da Plataforma</p>
+              <p className="text-sm font-medium text-foreground">Online & Seguro</p>
+            </div>
           </div>
         </div>
       </CardHeader>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { X, Printer, ShieldAlert, Info, Wrench, BookOpen, Lock } from "lucide-react";
+import { X, Printer, ShieldAlert, Info, Wrench, BookOpen } from "lucide-react";
 import { LessonMaterial } from "@/data/module1Materials";
 
 type Props = {
@@ -491,13 +491,6 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
                 <span className="text-[10px] font-bold uppercase text-slate-700 block">Documento Técnico</span>
                 <span className="text-xs font-extrabold text-red-700">USO EXCLUSIVO EM AULA</span>
               </div>
-            </div>
-
-            <div className="bg-red-50 border border-red-200 rounded-lg px-3.5 py-2 flex items-center gap-2 text-[11px] text-red-900 font-medium">
-              <Lock className="w-3.5 h-3.5 text-red-600 shrink-0" />
-              <span>
-                <strong>AVISO LEGAL:</strong> Material protegido por direitos intelectuais (Prof. Cleverson Leonardo). É estritamente proibida a venda, reprodução ou distribuição sem autorização prévia.
-              </span>
             </div>
 
             <div className="bg-slate-50 border-l-4 border-red-600 p-4 rounded-r-lg">

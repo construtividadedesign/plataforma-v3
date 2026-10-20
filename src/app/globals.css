@@ -46,24 +46,24 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 222 47% 11%;
     --primary: 356 100% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
     --ring: 356 100% 45%;
     --radius: 0.5rem;
   }
@@ -98,4 +98,76 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+}
+
+/* ============================================================ */
+/* ADAPTAÇÃO GLOBAL INTELIGENTE PARA MODO CLARO (LIGHT THEME)   */
+/* ============================================================ */
+html:not(.dark) {
+  color-scheme: light;
+}
+
+html:not(.dark) body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Painéis de vidro e cartões no modo claro */
+html:not(.dark) .bg-black\/40,
+html:not(.dark) .bg-black\/50,
+html:not(.dark) .bg-black\/60,
+html:not(.dark) .bg-black\/70,
+html:not(.dark) .bg-black\/80,
+html:not(.dark) .bg-black\/90 {
+  background-color: rgba(255, 255, 255, 0.90) !important;
+  border-color: rgba(203, 213, 225, 0.85) !important;
+}
+
+/* Cartões secundários e itens */
+html:not(.dark) .bg-white\/5,
+html:not(.dark) .bg-white\/10 {
+  background-color: rgba(241, 245, 249, 0.9) !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+}
+
+/* Bordas suaves */
+html:not(.dark) .border-white\/5,
+html:not(.dark) .border-white\/10,
+html:not(.dark) .border-white\/20 {
+  border-color: rgba(203, 213, 225, 0.75) !important;
+}
+
+/* Textos no modo claro (preservando botões e badges de destaque) */
+html:not(.dark) .text-white:not(.bg-red-600 *):not(.bg-red-700 *):not([class*="bg-red-"] *):not(.bg-black *):not(button.bg-red-600):not(button.bg-red-700) {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .text-gray-300:not(.bg-red-600 *):not([class*="bg-red-"] *),
+html:not(.dark) .text-gray-400:not(.bg-red-600 *):not([class*="bg-red-"] *) {
+  color: #475569 !important;
+}
+
+/* Preserva texto branco em botões e elementos com fundo vermelho/escuro */
+html:not(.dark) .bg-red-600,
+html:not(.dark) .bg-red-700,
+html:not(.dark) [class*="bg-red-600"],
+html:not(.dark) [class*="bg-red-700"] {
+  color: #ffffff !important;
+}
+html:not(.dark) .bg-red-600 *,
+html:not(.dark) .bg-red-700 *,
+html:not(.dark) [class*="bg-red-600"] *,
+html:not(.dark) [class*="bg-red-700"] * {
+  color: #ffffff !important;
+}
+
+/* Campos de entrada e seleção no modo claro */
+html:not(.dark) input.bg-black\/50,
+html:not(.dark) select.bg-black\/50 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+html:not(.dark) input.bg-black\/50::placeholder {
+  color: #94a3b8 !important;
 }

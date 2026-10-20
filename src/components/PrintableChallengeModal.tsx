@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { X, Printer, Users, Award, Lock } from "lucide-react";
+import { X, Printer, Users, Award } from "lucide-react";
 import { module1ChallengeData, ModuleChallengeData } from "@/data/module1Challenge";
 
 type Props = {
@@ -93,13 +93,6 @@ export default function PrintableChallengeModal({ isOpen, onClose, challengeData
                 <span className="text-[10px] font-bold uppercase text-slate-700 block">Atividade em Grupo</span>
                 <span className="text-xs font-extrabold text-red-700">ATÉ 4 EQUIPES</span>
               </div>
-            </div>
-
-            <div className="bg-red-50 border border-red-200 rounded-lg px-3.5 py-2 flex items-center gap-2 text-[11px] text-red-900 font-medium">
-              <Lock className="w-3.5 h-3.5 text-red-600 shrink-0" />
-              <span>
-                <strong>DIREITOS INTELECTUAIS:</strong> Material protegido por direitos de autor (Prof. Cleverson Leonardo). Proibida a venda ou reprodução sem autorização prévia.
-              </span>
             </div>
 
             <div className="bg-slate-50 border-l-4 border-red-600 p-4 rounded-r-lg space-y-3">
