@@ -49,6 +49,10 @@ export default function DashboardPage() {
   };
 
   const handleExcluir = async (turmaId: string, nomeTurma: string) => {
+    if (!isProfessor) {
+      toast.error("Ação restrita ao Instrutor.");
+      return;
+    }
     if (confirm(`Tem certeza que deseja excluir permanentemente a turma "${nomeTurma}"?`)) {
       await excluirTurma(turmaId);
       toast.success("Turma excluída com sucesso.");

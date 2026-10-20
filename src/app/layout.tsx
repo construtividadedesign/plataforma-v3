@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import SecurityShield from "@/components/SecurityShield";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,6 +42,8 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-background text-foreground antialiased min-h-screen transition-colors duration-300`}>
         <ThemeProvider>
+          {/* Blindagem de Propriedade Intelectual e Anti-Cópia */}
+          <SecurityShield />
           {children}
           {/* Notificações flutuantes */}
           <Toaster position="top-right" richColors />

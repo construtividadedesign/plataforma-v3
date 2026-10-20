@@ -63,6 +63,10 @@ export default function ComponentsPage() {
   }, []);
 
   const handleToggleLiberacao = () => {
+    if (!isProfessor) {
+      toast.error("Ação restrita ao Instrutor.");
+      return;
+    }
     setIsLiberadoTurma(!isLiberadoTurma);
     if (!isLiberadoTurma) {
       toast.success("Guia de Componentes liberado para a turma!");
@@ -128,6 +132,10 @@ export default function ComponentsPage() {
 
   // Handlers do Modal de Upload
   const openEditModal = (item: ComponentItem) => {
+    if (!isProfessor) {
+      toast.error("Ação restrita ao Instrutor.");
+      return;
+    }
     setEditingItem(item);
     const existing = customImages[String(item.id)] || customImages[item.name] || "";
     setPendingPreview(existing || getComponentRealImage(item, customImages));
@@ -168,6 +176,10 @@ export default function ComponentsPage() {
   };
 
   const handleSaveCustomImage = () => {
+    if (!isProfessor) {
+      toast.error("Ação restrita ao Instrutor.");
+      return;
+    }
     if (!editingItem || !pendingPreview) return;
     const updated = saveCustomComponentImage(String(editingItem.id), pendingPreview);
     setCustomImages(updated);
@@ -176,6 +188,10 @@ export default function ComponentsPage() {
   };
 
   const handleRestoreDefaultImage = () => {
+    if (!isProfessor) {
+      toast.error("Ação restrita ao Instrutor.");
+      return;
+    }
     if (!editingItem) return;
     const updated = removeCustomComponentImage(String(editingItem.id));
     setCustomImages(updated);
@@ -499,7 +515,7 @@ export default function ComponentsPage() {
       {/* ============================================================ */}
       {/* MODAL DE UPLOAD / SUBSTITUIÇÃO DE FOTO DO PROFESSOR          */}
       {/* ============================================================ */}
-      {editingItem && (
+      {editingItem && isProfessor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
           <div className="relative w-full max-w-xl bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
             
