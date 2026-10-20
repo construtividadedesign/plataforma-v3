@@ -30,9 +30,117 @@ import {
   Trash2,
   Link as LinkIcon,
   Check,
-  Eye
+  Eye,
+  Wind,
+  Zap,
+  Wrench,
+  Activity,
+  ThermometerSnowflake,
+  Gauge,
+  Layers,
+  Flame
 } from "lucide-react";
 import { toast } from "sonner";
+
+const TECHNICAL_PRESETS = [
+  { label: "Serpentina de Cobre / Alumínio", url: "/components/serpentina.jpg" },
+  { label: "Válvula de Expansão Eletrônica (EEV)", url: "/components/valvula-expansao.jpg" },
+  { label: "Placa Eletrônica / IPM Inverter", url: "/components/placa-inverter.jpg" },
+  { label: "Split Hi-Wall Inverter", url: "/systems/hiwall.jpg" },
+  { label: "Split Duto (Built-in)", url: "/systems/duto.jpg" },
+  { label: "Split Cassete 4 Vias (K7)", url: "/systems/cassete.jpg" },
+  { label: "Split Piso-Teto Comercial", url: "/systems/pisoteto.jpg" },
+  { label: "Sistema Multi-Split", url: "/systems/multisplit.png" },
+  { label: "Sistema VRF / Condensador", url: "/systems/vrf.png" },
+  { label: "Chiller de Água Gelada", url: "/systems/chiller.jpg" },
+];
+
+function getComponentTechnicalIcon(category: string, name: string) {
+  const cat = (category || "").toLowerCase();
+  const n = (name || "").toLowerCase();
+
+  if (
+    n.includes("sensor") ||
+    n.includes("ntc") ||
+    n.includes("termistor") ||
+    n.includes("termopar") ||
+    cat.includes("sensor")
+  ) {
+    return <Activity className="w-8 h-8 text-amber-400" />;
+  }
+  if (
+    n.includes("placa") ||
+    n.includes("ipm") ||
+    n.includes("microcontrolador") ||
+    n.includes("pfc") ||
+    n.includes("igbt") ||
+    n.includes("driver") ||
+    cat.includes("eletrônica") ||
+    cat.includes("eletronica")
+  ) {
+    return <Cpu className="w-8 h-8 text-cyan-400" />;
+  }
+  if (
+    n.includes("cabo") ||
+    n.includes("disjuntor") ||
+    n.includes("fio") ||
+    n.includes("borne") ||
+    n.includes("fusível") ||
+    n.includes("varistor") ||
+    n.includes("capacitor") ||
+    n.includes("alimentação")
+  ) {
+    return <Zap className="w-8 h-8 text-yellow-400" />;
+  }
+  if (
+    n.includes("ventilador") ||
+    n.includes("turbina") ||
+    n.includes("hélice") ||
+    n.includes("helice") ||
+    n.includes("aleta")
+  ) {
+    return <Wind className="w-8 h-8 text-sky-400" />;
+  }
+  if (
+    n.includes("manômetro") ||
+    n.includes("manometro") ||
+    n.includes("pressostato") ||
+    n.includes("vácuo") ||
+    n.includes("vacuo") ||
+    n.includes("pressão")
+  ) {
+    return <Gauge className="w-8 h-8 text-rose-400" />;
+  }
+  if (
+    cat.includes("frigorífico") ||
+    cat.includes("frigorifico") ||
+    n.includes("refrigerante") ||
+    n.includes("válvula") ||
+    n.includes("valvula") ||
+    n.includes("expansão") ||
+    n.includes("compressor")
+  ) {
+    return <ThermometerSnowflake className="w-8 h-8 text-blue-400" />;
+  }
+  if (
+    cat.includes("quente") ||
+    n.includes("reversora") ||
+    n.includes("aquecimento") ||
+    n.includes("degelo")
+  ) {
+    return <Flame className="w-8 h-8 text-orange-400" />;
+  }
+  if (
+    cat.includes("instalação") ||
+    cat.includes("manutenção") ||
+    n.includes("suporte") ||
+    n.includes("ferramenta") ||
+    n.includes("dreno")
+  ) {
+    return <Wrench className="w-8 h-8 text-emerald-400" />;
+  }
+  return <Layers className="w-8 h-8 text-zinc-400" />;
+}
 
 export default function ComponentsPage() {
   const { turmaAtiva, isProfessor } = useTurma();
@@ -224,7 +332,7 @@ export default function ComponentsPage() {
             <Cpu className="w-3.5 h-3.5 text-red-500" />
             <span>Material Técnico Oficial • Split Hi-Wall Inverter</span>
             <span className="hidden sm:inline text-gray-600">•</span>
-            <span className="hidden sm:inline text-amber-400 font-medium">152 Itens com Fotografia Real</span>
+            <span className="hidden sm:inline text-amber-400 font-medium">152 Itens Catalogados • Fotos Reais e Diagramas Técnicos</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Guia de Componentes do Sistema</h2>
           <p className="text-gray-300 max-w-3xl text-sm leading-relaxed">
@@ -300,24 +408,44 @@ export default function ComponentsPage() {
                     key={item.id}
                     className="bg-zinc-900/60 border border-white/10 hover:border-red-500/40 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between group shadow-lg hover:shadow-red-950/20"
                   >
-                    {/* CONTAINER DA FOTOGRAFIA REAL */}
+                    {/* CONTAINER DA FOTOGRAFIA REAL OU DIAGRAMA TÉCNICO */}
                     <div className="relative aspect-video w-full bg-zinc-950 overflow-hidden">
-                      <img
-                        src={imageUrl}
-                        alt={item.name}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.src = HVAC_STOCK_IMAGES.evaporadora_unit;
-                        }}
-                      />
+                      {imageUrl ? (
+                        <>
+                          <img
+                            src={imageUrl}
+                            alt={item.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              const fallback = e.currentTarget.parentElement?.querySelector(".technical-fallback");
+                              if (fallback) (fallback as HTMLElement).style.display = "flex";
+                            }}
+                          />
+                          {/* Gradiente de Proteção e Leitura */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+                        </>
+                      ) : null}
 
-                      {/* Gradiente de Proteção e Leitura */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+                      {/* Card Técnico de Engenharia (quando sem foto ou em erro) */}
+                      <div
+                        className={`technical-fallback w-full h-full ${
+                          imageUrl ? "hidden" : "flex"
+                        } flex-col items-center justify-center bg-gradient-to-b from-zinc-900/90 to-zinc-950 p-4 text-center border-b border-white/5 relative overflow-hidden select-none`}
+                      >
+                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff07_1px,transparent_1px),linear-gradient(to_bottom,#ffffff07_1px,transparent_1px)] bg-[size:14px_14px] pointer-events-none" />
+                        <div className="p-3 rounded-2xl bg-white/5 border border-white/10 shadow-inner mb-2 relative z-10 group-hover:scale-110 group-hover:border-red-500/30 transition-transform">
+                          {getComponentTechnicalIcon(item.category, item.name)}
+                        </div>
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 relative z-10">
+                          Diagrama Técnico
+                        </span>
+                      </div>
 
                       {/* Badges de Identificação */}
                       <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
-                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-red-400 border border-red-500/30">
+                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-red-400 border border-red-500/30">
                           #{item.id}
                         </span>
                         {hasCustomPhoto && (
@@ -326,33 +454,38 @@ export default function ComponentsPage() {
                             Foto do Instrutor
                           </span>
                         )}
+                        {!hasCustomPhoto && imageUrl && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+                            Foto Real
+                          </span>
+                        )}
                       </div>
 
                       <div className="absolute top-2.5 right-2.5 z-10">
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-gray-300 border border-white/10 uppercase tracking-wider">
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-gray-300 border border-white/10 uppercase tracking-wider">
                           {item.category}
                         </span>
                       </div>
 
                       {/* Ações Rápidas ao passar o mouse */}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-3">
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2 p-3 z-20">
                         <button
                           onClick={() => openLightbox(item)}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-semibold cursor-pointer transition-transform hover:scale-105"
-                          title="Ampliar Foto Real"
+                          title="Visualizar Detalhes"
                         >
                           <Maximize2 className="w-3.5 h-3.5" />
-                          <span>Ver Foto</span>
+                          <span>{imageUrl ? "Ver Foto" : "Detalhes"}</span>
                         </button>
 
                         {isProfessor && (
                           <button
                             onClick={() => openEditModal(item)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600/90 hover:bg-red-600 text-white text-xs font-semibold cursor-pointer shadow-lg transition-transform hover:scale-105"
-                            title="Trocar Foto Real"
+                            title="Personalizar Foto"
                           >
                             <Camera className="w-3.5 h-3.5" />
-                            <span>Trocar</span>
+                            <span>{imageUrl ? "Trocar" : "Foto"}</span>
                           </button>
                         )}
                       </div>
@@ -371,8 +504,17 @@ export default function ComponentsPage() {
 
                       <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-500">
                         <span className="flex items-center gap-1">
-                          <ImageIcon className="w-3 h-3 text-red-500/80" />
-                          Foto Real
+                          {imageUrl ? (
+                            <>
+                              <ImageIcon className="w-3 h-3 text-red-500/80" />
+                              Foto Real
+                            </>
+                          ) : (
+                            <>
+                              <Cpu className="w-3 h-3 text-zinc-500" />
+                              Diagrama
+                            </>
+                          )}
                         </span>
                         <button
                           onClick={() => openLightbox(item)}
@@ -462,34 +604,75 @@ export default function ComponentsPage() {
               </div>
             </div>
 
-            {/* Área Central da Imagem com Zoom */}
-            <div className="relative flex-1 bg-black/95 flex items-center justify-center p-4 overflow-auto min-h-[300px] sm:min-h-[440px]">
-              <img
-                src={getComponentRealImage(lightboxItem, customImages)}
-                alt={lightboxItem.name}
-                style={{ transform: `scale(${zoomLevel})` }}
-                className="max-h-[60vh] max-w-full object-contain rounded-lg transition-transform duration-200 select-none shadow-2xl"
-                onError={(e) => {
-                  e.currentTarget.src = HVAC_STOCK_IMAGES.evaporadora_unit;
-                }}
-              />
+            {/* Área Central da Imagem com Zoom ou Diagrama de Engenharia */}
+            {(() => {
+              const lightboxImg = getComponentRealImage(lightboxItem, customImages);
+              return (
+                <div className="relative flex-1 bg-black/95 flex items-center justify-center p-4 overflow-auto min-h-[300px] sm:min-h-[440px]">
+                  {lightboxImg ? (
+                    <img
+                      src={lightboxImg}
+                      alt={lightboxItem.name}
+                      style={{ transform: `scale(${zoomLevel})` }}
+                      className="max-h-[60vh] max-w-full object-contain rounded-lg transition-transform duration-200 select-none shadow-2xl"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const fallback = e.currentTarget.parentElement?.querySelector(".technical-lightbox-fallback");
+                        if (fallback) (fallback as HTMLElement).style.display = "flex";
+                      }}
+                    />
+                  ) : null}
 
-              {/* Botões de Navegação Anterior / Próximo */}
-              <button
-                onClick={handlePrevLightbox}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/10 backdrop-blur-md cursor-pointer transition-transform hover:scale-110"
-                title="Componente Anterior (Seta Esquerda)"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleNextLightbox}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/10 backdrop-blur-md cursor-pointer transition-transform hover:scale-110"
-                title="Próximo Componente (Seta Direita)"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+                  <div
+                    className={`technical-lightbox-fallback flex-col items-center justify-center text-center p-8 max-w-md ${
+                      lightboxImg ? "hidden" : "flex"
+                    }`}
+                  >
+                    <div className="w-20 h-20 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center shadow-2xl mb-4">
+                      {getComponentTechnicalIcon(lightboxItem.category, lightboxItem.name)}
+                    </div>
+                    <span className="text-[11px] font-mono uppercase tracking-widest text-red-400 mb-1">
+                      Diagrama e Especificação Técnica
+                    </span>
+                    <h4 className="text-lg sm:text-xl font-bold text-white mb-2">
+                      {lightboxItem.name}
+                    </h4>
+                    <p className="text-xs text-gray-400 leading-relaxed max-w-sm mb-4">
+                      Componente catalogado no Guia Oficial de HVAC-R. Nenhuma imagem genérica ou não-técnica é exibida.
+                    </p>
+                    {isProfessor && (
+                      <button
+                        onClick={() => {
+                          const item = lightboxItem;
+                          closeLightbox();
+                          openEditModal(item);
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold cursor-pointer shadow-lg transition-all"
+                      >
+                        <Camera className="w-4 h-4" />
+                        Vincular Fotografia Real de Bancada
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Botões de Navegação Anterior / Próximo */}
+                  <button
+                    onClick={handlePrevLightbox}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/10 backdrop-blur-md cursor-pointer transition-transform hover:scale-110 z-20"
+                    title="Componente Anterior (Seta Esquerda)"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={handleNextLightbox}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/10 backdrop-blur-md cursor-pointer transition-transform hover:scale-110 z-20"
+                    title="Próximo Componente (Seta Direita)"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              );
+            })()}
 
             {/* Rodapé com Explicação Técnica Completa */}
             <div className="p-4 sm:p-5 bg-zinc-900 border-t border-white/10">
@@ -642,25 +825,29 @@ export default function ComponentsPage() {
 
               {/* Aba 3: Galeria Técnica Curada */}
               {uploadTab === "presets" && (
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-400">Escolha uma foto da biblioteca oficial de HVAC:</p>
-                  <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
-                    {Object.entries(HVAC_STOCK_IMAGES).map(([key, url]) => (
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-400">Escolha uma fotografia técnica real do acervo HVAC-R:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-1">
+                    {TECHNICAL_PRESETS.map((preset) => (
                       <button
-                        key={key}
+                        key={preset.url}
                         type="button"
                         onClick={() => {
-                          setPendingPreview(url);
-                          setCustomUrlInput(url);
+                          setPendingPreview(preset.url);
+                          setCustomUrlInput(preset.url);
                         }}
-                        className={`aspect-video rounded-lg overflow-hidden border relative group cursor-pointer ${
-                          pendingPreview === url ? "border-red-500 ring-2 ring-red-500/50" : "border-white/10"
+                        className={`aspect-video rounded-xl overflow-hidden border relative group cursor-pointer text-left transition-all ${
+                          pendingPreview === preset.url
+                            ? "border-red-500 ring-2 ring-red-500/50"
+                            : "border-white/10 hover:border-white/30"
                         }`}
                       >
-                        <img src={url} alt={key} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
-                        {pendingPreview === url && (
-                          <div className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-0.5">
+                        <img src={preset.url} alt={preset.label} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex items-end p-2 pointer-events-none">
+                          <span className="text-[10px] font-medium text-white truncate leading-tight">{preset.label}</span>
+                        </div>
+                        {pendingPreview === preset.url && (
+                          <div className="absolute top-1.5 right-1.5 bg-red-600 text-white rounded-full p-1 shadow">
                             <Check className="w-3 h-3" />
                           </div>
                         )}
