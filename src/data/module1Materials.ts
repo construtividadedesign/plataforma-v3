@@ -13,23 +13,47 @@ export type LessonMaterialSection = {
   };
 };
 
-export type LessonMaterial = {
+export type Lesson = {
   lessonOrder: number;
   titleKey: string; // Palavra-chave para correspondência segura com o título do banco
   fullTitle: string;
   workload: string;
   shortSummary: string; // Explicação técnica exibida diretamente no card da aula
   keyPoints: string[]; // Pontos-chave exibidos no quadro principal quando não há vídeo
-  diagramType: "calor" | "temperatura" | "pressao" | "ciclo" | "seguranca" | "fluidos";
+  diagramType:
+    | "calor"
+    | "temperatura"
+    | "pressao"
+    | "ciclo"
+    | "seguranca"
+    | "fluidos"
+    | "eletricidade_fundamentos"
+    | "eletricidade_instrumentos"
+    | "eletricidade_testes"
+    | "eletricidade_diagrama"
+    | "brasagem"
+    | "flange"
+    | "vacuo"
+    | "balanca"
+    | "comissionamento"
+    | string;
   diagramCaption: string;
   sections: LessonMaterialSection[];
+  videoUrl?: string;
+  videoTitle?: string;
+  videoDescription?: string;
 };
+
+export type LessonMaterial = Lesson;
 
 export const module1MaterialsData: LessonMaterial[] = [
   {
     lessonOrder: 1,
     titleKey: "calor",
     fullTitle: "Aula 01: Fundamentos Físicos do Calor e Transferência Térmica",
+    videoUrl: "",
+    videoTitle: "Calor Sensível vs. Calor Latente e os 3 Mecanismos de Transferência Térmica na Prática",
+    videoDescription: "Demonstrar visualmente a diferença entre variação de temperatura no termômetro e mudança de estado físico na serpentina, ilustrando a convecção forçada e a absorção de calor pelo refrigerante.",
     workload: "2 Horas",
     shortSummary:
       "O calor é a energia térmica em trânsito que se move espontaneamente de um corpo ou sistema com maior temperatura para outro com menor temperatura, até que ambos atinjam o equilíbrio térmico (a mesma temperatura).",
@@ -98,6 +122,9 @@ export const module1MaterialsData: LessonMaterial[] = [
     lessonOrder: 2,
     titleKey: "temperatura",
     fullTitle: "Aula 02: Termometria, Escalas e Medição de Temperatura",
+    videoUrl: "",
+    videoTitle: "Como Medir Corretamente a Temperatura de Sucção com Termômetro de Contato e Isolamento",
+    videoDescription: "Ensinar a fixar o sensor NTC/termopar no tubo de cobre, isolando-o com espuma elastomérica, e demonstrar o erro severo de medição causado pelo uso de termômetro infravermelho (laser) em metais polidos.",
     workload: "2 Horas",
     shortSummary:
       "A temperatura é a grandeza física escalar que mede o grau de agitação térmica das moléculas de um corpo ou fluido, determinando o sentido do fluxo de calor e permitindo o diagnóstico preciso do ciclo frigorífico.",
@@ -162,6 +189,9 @@ export const module1MaterialsData: LessonMaterial[] = [
     lessonOrder: 3,
     titleKey: "press",
     fullTitle: "Aula 03: Grandezas de Pressão, Manometria e Vácuo",
+    videoUrl: "",
+    videoTitle: "Operação do Manifold Analógico e Digital: Relação Pressão x Temperatura de Saturação",
+    videoDescription: "Apresentar a escala dos manômetros de baixa (azul) e alta (vermelho), a escala de vácuo, e provar em bancada que a água ferve à temperatura ambiente sob vácuo.",
     workload: "2 Horas",
     shortSummary:
       "Pressão é a relação física entre uma força aplicada perpendicularmente sobre uma determinada área (P = F / A). Na climatização, o controle da pressão permite manipular a temperatura de saturação (ebulição e condensação) do fluido refrigerante.",
@@ -225,6 +255,9 @@ export const module1MaterialsData: LessonMaterial[] = [
     lessonOrder: 4,
     titleKey: "ciclo",
     fullTitle: "Aula 04: O Ciclo Frigorífico por Compressão Mecânica de Vapor",
+    videoUrl: "",
+    videoTitle: "Animação e Rastreio Real do Ciclo Frigorífico Split: Do Compressor à Válvula de Expansão",
+    videoDescription: "Mapear em um aparelho didático transparente o percurso do fluido, mostrando a fronteira entre alta e baixa pressão e a transição entre vapor superaquecido e líquido subresfriado.",
     workload: "4 Horas",
     shortSummary:
       "O ciclo frigorífico por compressão de vapor é um circuito termodinâmico fechado onde o fluido refrigerante altera continuamente sua pressão e seu estado físico (líquido e vapor) através de 4 componentes fundamentais para promover o transporte de calor.",
@@ -281,6 +314,9 @@ export const module1MaterialsData: LessonMaterial[] = [
     lessonOrder: 5,
     titleKey: "seguran",
     fullTitle: "Aula 05: Procedimentos de Segurança para Recolhimento e Carga",
+    videoUrl: "",
+    videoTitle: "Segurança Operacional em Refrigeração: EPIs, Válvulas Sem Perda e o Perigo Mortal do Oxigênio",
+    videoDescription: "Alertar dramaticamente sobre a proibição letal de pressurizar sistemas com Oxigênio (reação explosiva por dieselização com óleo lubrificante) e demonstrar o uso de luvas e óculos ao engatar mangueiras.",
     workload: "4 Horas",
     shortSummary:
       "Protocolos técnicos e normativos de segurança (NR-10, NR-12 e normas ambientais) aplicáveis ao manuseio de vasos sob pressão, pressurização com nitrogênio, recolhimento de fluidos (Pump Down / Recolhedora) e carga por massa em balança de precisão.",
@@ -346,6 +382,9 @@ export const module1MaterialsData: LessonMaterial[] = [
     lessonOrder: 6,
     titleKey: "fluido",
     fullTitle: "Aula 06: Fluidos Refrigerantes Alternativos e Classificação de Segurança",
+    videoUrl: "",
+    videoTitle: "Diferenças Práticas entre R-410A, R-32 e R-290: Inflamabilidade A2L e Procedimentos Seguros",
+    videoDescription: "Apresentar as características químicas dos novos refrigerantes, a ausência de arraste no R-32 (fluido puro) e os testes de inflamabilidade controlada conforme a norma ASHRAE 34.",
     workload: "2 Horas",
     shortSummary:
       "Estudo técnico e ambiental dos fluidos refrigerantes modernos (HFCs, HFOs e Hidrocarbonetos Naturais), analisando o Potencial de Destruição de Ozônio (ODP), Potencial de Aquecimento Global (GWP), matriz de inflamabilidade ASHRAE 34 e exigências operacionais.",

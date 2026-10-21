@@ -1,4 +1,4 @@
-import { LessonMaterial } from "./module1Materials";
+import { Lesson, LessonMaterial } from "./module1Materials";
 import { ModuleChallengeData } from "./module1Challenge";
 
 export const module2MaterialsData: LessonMaterial[] = [
@@ -6,6 +6,9 @@ export const module2MaterialsData: LessonMaterial[] = [
     lessonOrder: 1,
     titleKey: "fundamentos",
     fullTitle: "Aula 01: Fundamentos de Eletricidade, Lei de Ohm e NBR 5410",
+    videoUrl: "",
+    videoTitle: "Dimensionamento de Circuito Elétrico Exclusivo para Ar-Condicionado conforme NBR 5410",
+    videoDescription: "Demonstrar a montagem correta de disjuntor bipolar curva C no quadro de distribuição, cálculo de queda de tensão em cabos e o papel do condutor de aterramento (PE) contra queima de placas Inverter.",
     workload: "4 Horas",
     shortSummary:
       "Estudo das grandezas elétricas fundamentais (Tensão, Corrente, Resistência e Potência), aplicação prática da Lei de Ohm, distinção entre Corrente Alternada (CA) e Corrente Contínua (Barramento DC Inverter) e critérios normativos da ABNT NBR 5410 para circuitos exclusivos de climatização.",
@@ -86,6 +89,9 @@ export const module2MaterialsData: LessonMaterial[] = [
     lessonOrder: 2,
     titleKey: "instrumentos",
     fullTitle: "Aula 02: Instrumentos de Medição Elétrica e Segurança CAT",
+    videoUrl: "",
+    videoTitle: "Uso Correto do Alicate Amperímetro e Multímetro True RMS: Por que o Cabo PP Marca 0,0 A?",
+    videoDescription: "Demonstrar na prática que a garra amperimétrica deve abraçar apenas uma fase, explicar o que é a tecnologia True RMS para leitura de ondas PWM e reforçar a segurança CAT III.",
     workload: "4 Horas",
     shortSummary:
       "Operação técnica e segura dos instrumentos de diagnóstico elétrico na climatização (Multímetro Digital True RMS, Alicate Amperímetro, Capacímetro e Megômetro), categorias de segurança contra arco elétrico (CAT II, CAT III e CAT IV) e procedimentos corretos de conexão em série, paralelo e indução.",
@@ -174,6 +180,9 @@ export const module2MaterialsData: LessonMaterial[] = [
     lessonOrder: 3,
     titleKey: "testes",
     fullTitle: "Aula 03: Testes Práticos dos Componentes Elétricos e Eletrônicos",
+    videoUrl: "",
+    videoTitle: "Como Testar Compressor Inverter (U-V-W), Compressor Convencional (C-S-R), Sensores NTC e Fuga à Massa",
+    videoDescription: "Realizar na bancada de oficina a medição ôhmica das 3 bobinas simétricas de um compressor Inverter, o teste de isolamento para a carcaça e a curva de resistência do sensor NTC mergulhado em água fria e quente.",
     workload: "4 Horas",
     shortSummary:
       "Protocolos práticos de diagnóstico e laudo técnico em bancada: aferição das bobinas de compressores convencionais (C-S-R) e Inverter BLDC (U-V-W), teste de isolação à massa (fuga para carcaça), medição de capacitores permanentes, sensores termistores NTC e bobinas de válvulas EEV e reversora.",
@@ -246,6 +255,9 @@ export const module2MaterialsData: LessonMaterial[] = [
     lessonOrder: 4,
     titleKey: "diagrama",
     fullTitle: "Aula 04: Diagrama Elétrico de Condicionador de Ar Tipo Split",
+    videoUrl: "",
+    videoTitle: "Como Diagnosticar o Erro de Comunicação Serial (E1) Medindo a Tensão Contínua (VDC) entre Bornes N e S",
+    videoDescription: "Ensinar o técnico a posicionar o multímetro em escala de corrente contínua nos bornes da borneira para observar o pulso de comunicação oscilante e diagnosticar se o defeito está no cabo de sinal, na evaporadora ou na condensadora.",
     workload: "4 Horas",
     shortSummary:
       "Leitura e interpretação de esquemas elétricos de condicionadores de ar Split On/Off e Inverter: simbologia padronizada, arquitetura da borneira de interligação (L, N, S / Comunicação Serial), malha de potência da placa eletrônica (Fusível, Varistor, Ponte Retificadora, PFC e IPM) e diagnóstico do sinal serial.",

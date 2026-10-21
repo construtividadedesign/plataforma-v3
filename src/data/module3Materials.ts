@@ -1,4 +1,4 @@
-import { LessonMaterial } from "./module1Materials";
+import { Lesson, LessonMaterial } from "./module1Materials";
 import { ModuleChallengeData } from "./module1Challenge";
 
 export const module3MaterialsData: LessonMaterial[] = [
@@ -6,6 +6,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 1,
     titleKey: "ferramentas",
     fullTitle: "Aula 01: Ferramentas, EPIs e Planejamento da Infraestrutura",
+    videoUrl: "",
+    videoTitle: "Planejamento e Kit Essencial de Ferramentas para Instalação Profissional de Split",
+    videoDescription: "Apresentar a mala de ferramentas profissional de refrigeração e demonstrar a escolha correta do local de fixação das unidades respeitando distâncias mínimas de circulação e NR-35.",
     workload: "4 Horas",
     shortSummary:
       "Apresentação das ferramentas exclusivas de refrigeração (Manifold, Vacuômetro, Flangeador, Bomba de Vácuo), EPIs obrigatórios (NR-35 e NR-10) e a correta locação da unidade interna e externa respeitando os distanciamentos do fabricante.",
@@ -15,7 +18,7 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Desnível e Comprimento: Respeitar a tabela do manual do fabricante para distância máxima e necessidade de sifão.",
       "Organização de bancada e inspeção prévia de rede elétrica e drenagem antes da furação."
     ],
-    diagramType: "pressao" as any,
+    diagramType: "pressao",
     diagramCaption: "Figura 1.1 — Planejamento de infraestrutura, leitura de pressões de trabalho e zonas de operação.",
     sections: [
       {
@@ -41,6 +44,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 2,
     titleKey: "tubulacao",
     fullTitle: "Aula 02: Tubos de Cobre, Isolamento Térmico e Brasagem",
+    videoUrl: "",
+    videoTitle: "Brasagem Técnica em Tubulação de Cobre com Nitrogênio Passante (Passadiço de N₂)",
+    videoDescription: "Executar duas soldas lado a lado — uma com fluxo de N₂ e outra sem —, cortar os tubos ao meio e mostrar na câmera a formação de carepa preta prejudicial nos tubos soldados sem proteção gasosa.",
     workload: "4 Horas",
     shortSummary:
       "Especificação das bitolas de tubos de cobre fosforoso (1/4, 3/8, 1/2, 5/8), espessura de parede para alta pressão (R-410A e R-32), isolamento térmico elastomérico individual e técnicas de brasagem oxi-acetilênica/Mapp com fluxo passante de Nitrogênio.",
@@ -50,8 +56,8 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Passadiço de Nitrogênio (N₂): Injetar fluxo contínuo de N₂ (1 a 3 PSI) dentro do tubo durante a brasagem impede a formação de carepa (óxido de cobre).",
       "Curvamento técnico: Utilizar molas curvadoras ou curvadores de alavanca para evitar estrangulamento na seção transversal."
     ],
-    diagramType: "temperatura" as any,
-    diagramCaption: "Figura 2.1 — Isolamento elastomérico individual na tubulação de cobre prevenindo condensação e ganho térmico.",
+    diagramType: "brasagem",
+    diagramCaption: "Figura 2.1 — Protocolo de brasagem: regulagem da chama neutra (3.100 °C), fluxo passante de N₂ (1 a 3 PSI) e proteção térmica das válvulas com pano úmido.",
     sections: [
       {
         subtitle: "1. Especificação de Tubos de Cobre e Isolamento Elastomérico",
@@ -64,6 +70,31 @@ export const module3MaterialsData: LessonMaterial[] = [
           title: "REGRA DE OURO NA BRASAGEM: FLUXO PASSANTE DE NITROGÊNIO (N₂)",
           content: "Nunca execute solda em tubulações de climatização sem fazer circular um filete contínuo de Nitrogênio seco pela parte interna do tubo (2 a 3 PSI). O Nitrogênio expulsa o oxigênio interno e garante que a parede interna do cobre permaneça 100% limpa e espelhada após a brasagem."
         }
+      },
+      {
+        subtitle: "2. Tipos de Chama do Maçarico e Proteção Térmica de Válvulas",
+        paragraphs: [
+          "A regulagem correta da chama no maçarico (oxi-acetileno ou gás MAPP) é determinante para a fusão perfeita da liga de enchimento (solda foscoper para cobre-cobre ou solda prata com fluxo para cobre-latão):"
+        ],
+        bullets: [
+          {
+            label: "Chama Redutora / Carburante (Excesso de Combustível/Gás)",
+            text: "Apresenta cone interno luminoso e penugem intermediária amarelada. Possui temperatura inferior e deposita fuligem de carbono sobre o tubo de cobre. Indicada apenas para aquecimento brando."
+          },
+          {
+            label: "Chama Oxidante (Excesso de Oxigênio — PREJUDICIAL)",
+            text: "Apresenta dardo cônico pontiagudo e chiado estridente. O excesso de oxigênio queima o tubo de cobre, gerando fragilidade na parede metálica e porosidades na solda. É proibida na brasagem de refrigeração."
+          },
+          {
+            label: "Chama Neutra ou Normal (Proporção Exata — OBRIGATÓRIA)",
+            text: "Apresenta dardo cônico bem delineado, arredondado e com coloração azul-claro brilhante suave (~3.100 °C). É a única chama correta para brasagem em refrigeração, garantindo aquecimento uniforme e fluidez por capilaridade."
+          }
+        ],
+        highlightBox: {
+          type: "practical",
+          title: "PROTEÇÃO TÉRMICA DAS VÁLVULAS DE SERVIÇO CONTRA DESTRUIÇÃO TÉRMICA",
+          content: "As válvulas de serviço da unidade condensadora contêm retentores internos de teflon e anéis de vedação (O-rings) de borracha sintética. Se submetidas a calor direto ou conduzido pelo tubo de cobre durante a brasagem, essas vedações derretem, inutilizando a máquina. É OBRIGATÓRIO envolver o corpo da válvula com um pano abundantemente encharcado de água fria ou aplicar pasta dissipadora anti-chama profissional antes de aproximar a chama do maçarico."
+        }
       }
     ]
   },
@@ -71,6 +102,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 3,
     titleKey: "flange",
     fullTitle: "Aula 03: Corte, Escareamento e Flangeamento Perfeito",
+    videoUrl: "",
+    videoTitle: "O Passo a Passo do Flange Perfeito para R-410A e R-32 com Flangeador Excêntrico e Torquímetro",
+    videoDescription: "Demonstrar o corte com cortador de roletes, escareamento com o tubo voltado para baixo, projeção na régua, conformação cônica espelhada e aperto na porca utilizando chave torquimétrica aferida em N·m.",
     workload: "4 Horas",
     shortSummary:
       "Execução mecânica de conexões flangeadas de alta pressão: corte em esquadro a 90°, escareamento interno com o tubo voltado para baixo, calibração da projeção na régua e conformação com flangeador excêntrico com catraca de torque.",
@@ -80,8 +114,8 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Flange excêntrico: Produz face interna espelhada e uniforme sem afinar a parede do cobre.",
       "Aperto com Torquímetro: Apertar as porcas flangeadas respeitando o torque em N·m de cada bitola, sem uso de fita veda-rosca."
     ],
-    diagramType: "pressao" as any,
-    diagramCaption: "Figura 3.1 — Controle de pressão e vedação metal-metal nas conexões flangeadas de alta pressão.",
+    diagramType: "flange",
+    diagramCaption: "Figura 3.1 — Geometria do flange perfeito a 45°: projeção de 1,0 a 1,5 mm acima da mesa, lubrificação com gota de óleo POE e aperto calibrado em N·m.",
     sections: [
       {
         subtitle: "1. Vedação Metal-Metal e Tabela de Torque para Porcas Flangeadas",
@@ -96,6 +130,11 @@ export const module3MaterialsData: LessonMaterial[] = [
             ["1/2\"", "12,70 mm", "50 a 62 N·m", "Deformação da sede de latão ou rachadura da porca."],
             ["5/8\"", "15,88 mm", "63 a 77 N·m", "Ruptura estrutural da porca em alta pressão."]
           ]
+        },
+        highlightBox: {
+          type: "practical",
+          title: "PROJEÇÃO DE 1,0 A 1,5 MM E GOTA DE ÓLEO POE NO CONE DO FLANGEADOR",
+          content: "Para atingir o padrão ouro na conformação do flange excêntrico em tubos para R-410A e R-32: 1) O tubo de cobre deve ficar projetado estritamente entre 1,0 mm e 1,5 mm acima da face da mesa/morsa do flangeador antes da fixação da prensa; 2) Aplique UMA GOTA DE ÓLEO REFRIGERANTE SINTÉTICO (POE) na face do cone excêntrico giratório antes de iniciar a prensagem. O óleo reduz o atrito mecânico, previne microrrachaduras no colarinho e assegura um acabamento 100% espelhado e vedante."
         }
       }
     ]
@@ -104,6 +143,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 4,
     titleKey: "suportes",
     fullTitle: "Aula 04: Fixação de Suportes, Nivelamento e Drenagem",
+    videoUrl: "",
+    videoTitle: "Instalação de Suporte com Nível Bolha, Coxins Antivibração e Teste Hidráulico de Drenagem",
+    videoDescription: "Demonstrar a correta fixação mecânica da evaporadora e condensadora, aplicação de buchas adequadas e teste de vazão contínua com 500 ml de água na calha do dreno.",
     workload: "4 Horas",
     shortSummary:
       "Instalação mecânica de suportes da unidade interna e mãos-francesas da condensadora: nivelamento de precisão, dimensionamento de buchas e chumbadores por tipo de alvenaria, amortecimento acústico com coxins e caimento hidráulico do dreno.",
@@ -113,7 +155,7 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Fixação da condensadora: Uso de buchas de expansão de qualidade (8 mm ou 10 mm) ou barra roscada passante em paredes ocas.",
       "Coxins de borracha: Obrigatórios entre os pés da condensadora e o suporte para isolar vibrações estruturais."
     ],
-    diagramType: "ciclo" as any,
+    diagramType: "ciclo",
     diagramCaption: "Figura 4.1 — Posicionamento físico entre Unidade Interna (Evaporadora) e Unidade Externa (Condensadora).",
     sections: [
       {
@@ -128,6 +170,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 5,
     titleKey: "eletrica",
     fullTitle: "Aula 05: Interligação Elétrica de Potência e Comando Serial",
+    videoUrl: "",
+    videoTitle: "Crimpagem de Terminais Ilhós e Interligação da Borneira L-N-S-PE sem Emendas",
+    videoDescription: "Exibir a decapagem técnica, uso do alicate de crimpagem com terminais tipo forquilha/ilhós e montagem firme no prensa-cabos da condensadora.",
     workload: "4 Horas",
     shortSummary:
       "Execução da interligação elétrica entre evaporadora e condensadora com cabo PP multipolar: proibição de emendas no fio de comunicação serial (S), crimpagem de terminais tubulares (ilhós/forquilha), prensa-cabo e aterramento equipotencial (PE).",
@@ -137,7 +182,7 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Correspondência fiel na borneira: Respeitar rigorosamente a sequência L (Fase), N (Neutro/Fase 2), S (Sinal) e PE (Terra).",
       "Prensa-cabo mecânico: Travar a capa externa do cabo PP no prensa-cabo da máquina para evitar tração direta nos bornes."
     ],
-    diagramType: "eletricidade_diagrama" as any,
+    diagramType: "eletricidade_diagrama",
     diagramCaption: "Figura 5.1 — Diagrama de interligação elétrica e malha de comunicação serial (L, N, S, PE) no Split Inverter.",
     sections: [
       {
@@ -152,6 +197,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 6,
     titleKey: "estanqueidade",
     fullTitle: "Aula 06: Teste de Estanqueidade por Pressurização com Nitrogênio",
+    videoUrl: "",
+    videoTitle: "Teste de Estanqueidade com Nitrogênio Seco (N₂) em Degraus até 450 PSIG",
+    videoDescription: "Conectar o cilindro de N₂ com regulador de alta pressão de dois estágios, elevar a pressão em etapas e aplicar líquido detector de bolhas em todos os flanges e soldas da instalação.",
     workload: "4 Horas",
     shortSummary:
       "Procedimento normativo de ensaio de estanqueidade com Nitrogênio seco (N₂) regulado em alta pressão para validação de soldas, flanges e serpentina antes do processo de vácuo, com proibição absoluta de oxigênio ou gases refrigerantes para caça-vazamentos.",
@@ -161,7 +209,7 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Inspeção física: Aplicar solução tensoativa (espuma de sabão neutro) nas porcas flangeadas e pontos de brasagem.",
       "Estabilidade manométrica: Monitorar a pressão estabilizada por no mínimo 20 a 30 minutos (descontando variações de temperatura ambiente)."
     ],
-    diagramType: "seguranca" as any,
+    diagramType: "seguranca",
     diagramCaption: "Figura 6.1 — Segurança na pressurização: uso obrigatório de Nitrogênio seco (N₂) e proibição letal de Oxigênio (O₂).",
     sections: [
       {
@@ -178,6 +226,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 7,
     titleKey: "vacuo",
     fullTitle: "Aula 07: Procedimento de Desidratação por Vácuo Profundo",
+    videoUrl: "",
+    videoTitle: "Como Atingir Vácuo Abaixo de 500 Microns usando Vacuômetro Digital e Extrator de Schrader",
+    videoDescription: "Explicar a limitação do manômetro analógico, operar o vacuômetro digital acoplado diretamente à válvula de serviço e realizar o teste de estanqueidade em vácuo (Decay Test por 15 minutos).",
     workload: "4 Horas",
     shortSummary:
       "Termodinâmica da desidratação a vácuo: remoção de ar, gases não-condensáveis e umidade interna até a meta estrita abaixo de 500 Microns de mercúrio (μmHg), utilizando bomba de vácuo de duplo estágio, extrator de núcleo Schrader e vacuômetro digital.",
@@ -187,7 +238,7 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Aceleração de fluxo: Utilizar extrator de núcleo de válvula Schrader e mangueira específica de vácuo reduz o tempo pela metade.",
       "Teste de quebra de vácuo (Decay Test): Isolar a bomba por 15 minutos e confirmar que a leitura não sobe acima de 500 a 700 Microns."
     ],
-    diagramType: "pressao" as any,
+    diagramType: "vacuo",
     diagramCaption: "Figura 7.1 — Escala absoluta de vácuo e meta técnica de desidratação abaixo de 500 Microns (μmHg).",
     sections: [
       {
@@ -203,6 +254,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 8,
     titleKey: "carga",
     fullTitle: "Aula 08: Carga de Fluido Refrigerante por Massa com Balança Digital",
+    videoUrl: "",
+    videoTitle: "Carga de Gás por Peso na Balança Digital e Cálculo do Adicional por Metro de Tubo",
+    videoDescription: "Posicionar a garrafa de R-410A/R-32 sobre a balança de precisão, tarar, purgar a mangueira de serviço e dosar com exatidão a quantidade de gramas indicada na etiqueta de engenharia.",
     workload: "4 Horas",
     shortSummary:
       "Procedimento de liberação do fluido original da condensadora, cálculo de carga complementar por metro excedente de tubulação, purga das mangueiras de serviço e carga precisa por massa (gramas) em balança eletrônica para fluidos R-410A e R-32.",
@@ -212,7 +266,7 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Cálculo complementar: Adicionar exatos 15 g/m a 20 g/m (conforme manual) para cada metro que ultrapassar a linha padrão de fábrica (ex: 5 m).",
       "Carga total pós-manutenção: Sempre recolher, fazer vácuo e carregar 100% por peso de placa usando balança digital."
     ],
-    diagramType: "seguranca" as any,
+    diagramType: "balanca",
     diagramCaption: "Figura 8.1 — Arranjo técnico de carga de fluido refrigerante por massa utilizando Balança Digital, Manifold e Válvula de Segurança.",
     sections: [
       {
@@ -227,6 +281,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 9,
     titleKey: "rendimento",
     fullTitle: "Aula 09: Análise de Rendimento: Superaquecimento, Subresfriamento e Delta T",
+    videoUrl: "",
+    videoTitle: "Comissionamento e Start-up Técnico: Como Calcular o Superaquecimento (SH) e o Delta T do Ar",
+    videoDescription: "Medir temperatura do tubo de sucção, converter pressão lida em temperatura de evaporação pela régua P-T, calcular o valor de SH e atestar a eficiência da máquina com termômetro no insuflamento e retorno.",
     workload: "4 Horas",
     shortSummary:
       "Diagnóstico termodinâmico de start-up e comissionamento: aferição de Superaquecimento (SH), Subresfriamento (SC), Salto Térmico de ar na evaporadora (Delta T) e conferência da corrente nominal com alicate amperímetro True RMS.",
@@ -236,7 +293,7 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Salto Térmico (ΔT = T_retorno - T_insuflamento): Diferença de temperatura do ar na evaporadora deve situar-se entre 10 °C e 15 °C.",
       "Validação elétrica final: Aferir tensão sob carga e corrente elétrica (A) comparando com a etiqueta nominal do equipamento."
     ],
-    diagramType: "calor" as any,
+    diagramType: "calor",
     diagramCaption: "Figura 9.1 — Comportamento termodinâmico do Calor Sensível e Latente na avaliação de Superaquecimento e Subresfriamento.",
     sections: [
       {
@@ -271,6 +328,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 10,
     titleKey: "recolhimento",
     fullTitle: "Aula 10: Procedimento de Recolhimento de Fluido (Pump Down e Recolhedora)",
+    videoUrl: "",
+    videoTitle: "Procedimento Seguro de Pump Down: Recolhendo o Gás para a Condensadora Passo a Passo",
+    videoDescription: "Demonstrar a manobra de fechamento da válvula de linha de líquido com chave Allen, monitoramento da queda da pressão de baixa até ~2 PSIG e corte instantâneo da válvula de sucção e da alimentação elétrica.",
     workload: "4 Horas",
     shortSummary:
       "Procedimentos seguros de recolhimento de fluido refrigerante para a unidade condensadora (Pump Down) em desinstalações ou manutenções, e uso de máquina recolhedora externa com cilindro próprio para evitar emissões atmosféricas.",
@@ -280,7 +340,7 @@ export const module3MaterialsData: LessonMaterial[] = [
       "Passo 3: Monitorar o manômetro de baixa até a pressão cair próximo a 5 PSIG ~ 0 PSIG (nunca deixar entrar em vácuo profundo).",
       "Passo 4: Fechar rapidamente a válvula de Sucção (tubo grosso) e desligar o disjuntor imediatamente."
     ],
-    diagramType: "ciclo" as any,
+    diagramType: "ciclo",
     diagramCaption: "Figura 10.1 — Confinamento do fluido refrigerante no lado de alta pressão (Condensador) durante a manobra de Pump Down.",
     sections: [
       {
@@ -297,6 +357,9 @@ export const module3MaterialsData: LessonMaterial[] = [
     lessonOrder: 11,
     titleKey: "manutencao",
     fullTitle: "Aula 11: Manutenção Preventiva, Higienização Química e PMOC (Lei 13.589/2018)",
+    videoUrl: "",
+    videoTitle: "Higienização Profissional com Bolsa Coletora, Lavadora de Pressão Regulada e Gestão do PMOC",
+    videoDescription: "Demonstrar a aplicação de detergente desincrustante neutro/bactericida na serpentina e turbina com proteção da placa eletrônica, desobstrução de dreno e preenchimento de checklist normativo do PMOC.",
     workload: "4 Horas",
     shortSummary:
       "Protocolos de manutenção preventiva e corretiva: higienização técnica de serpentinas, turbina e bandeja com bolsa coletora e bactericidas neutros/alcalinos biodegradáveis, revisão elétrica e gestão do PMOC conforme a Lei Federal 13.589/2018 e Resolução ANVISA RE-09.",
@@ -306,7 +369,7 @@ export const module3MaterialsData: LessonMaterial[] = [
       "PMOC Obrigatório (Lei 13.589/2018): Exigido para todos os edifícios de uso público e coletivo climatizados artificialmente.",
       "Checklist de manutenção: Inclui limpeza química, desobstrução de dreno, reaperto de bornes, leitura de corrente (A) e registro no plano."
     ],
-    diagramType: "fluidos" as any,
+    diagramType: "fluidos",
     diagramCaption: "Figura 11.1 — Gestão ambiental, segurança sanitária e conformidade legal na manutenção de sistemas de climatização.",
     sections: [
       {
@@ -315,6 +378,56 @@ export const module3MaterialsData: LessonMaterial[] = [
           "O acúmulo de biofilme (fungos, bactérias e poeira) no rotor tangencial (turbina) e nas aletas do evaporador reduz a vazão de ar em até 45%, provocando congelamento da serpentina, gotejamento de água pela parede, aumento do consumo elétrico e doenças respiratórias nos ocupantes.",
           "Pela Lei Federal nº 13.589/2018 e Portaria MS 3.523/98, todo sistema de climatização de uso coletivo deve possuir um Plano de Manutenção, Operação e Controle (PMOC) atualizado, com rotinas mensais, trimestrais e semestrais documentadas."
         ]
+      }
+    ]  },
+  {
+    lessonOrder: 12,
+    titleKey: "oficina",
+    fullTitle: "Aula 12: Oficina Prática Integrada e Comissionamento Final",
+    videoUrl: "",
+    videoTitle: "Oficina Prática de Start-up: Simulação Real de Bancada do Desafio Integrado",
+    videoDescription: "Execução prática do Desafio das 4 Equipes em bancada: comissionamento autônomo, conformação de flanges, pressurização com N₂, vácuo profundo < 500 Microns, carga por balança e laudo térmico de aprovação.",
+    workload: "4 Horas",
+    shortSummary:
+      "Atividade prática conclusiva do Módulo 3 dedicada à execução autônoma do Desafio das 4 Equipes nas bancadas didáticas: integração dos processos de brasagem com Nitrogênio passante, flangeamento calibrado, teste de estanqueidade a 450 PSIG com N₂, desidratação a vácuo profundo, carga de fluido por massa em balança digital e emissão do laudo técnico com cálculo de Superaquecimento (SH) e Salto Térmico (Delta T).",
+    keyPoints: [
+      "Autonomia de bancada: Execução prática integral dos 4 dossiês técnicos do Desafio das Equipes.",
+      "Conformidade mecânica: Validação de flanges excêntricos calibrados e aperto com torquímetro em N·m.",
+      "Ciclo de desidratação e estanqueidade: Pressurização em degraus com N₂ e meta estrita de vácuo < 500 μmHg.",
+      "Comissionamento termodinâmico: Carga em balança de precisão, cálculo de SH (4 a 8 K) e laudo final de start-up."
+    ],
+    diagramType: "comissionamento",
+    diagramCaption: "Figura 12.1 — Roteiro de comissionamento integrado na bancada: brasagem, estanqueidade N₂, vácuo profundo, carga por balança e laudo termodinâmico.",
+    sections: [
+      {
+        subtitle: "1. Metodologia da Oficina Prática Integrada de Bancada",
+        paragraphs: [
+          "A Aula 12 é o momento em que todas as competências desenvolvidas no curso convergem para uma intervenção real de bancada. Organizados em equipes técnicas, os alunos realizam o ciclo completo de instalação mecânica, testes e partida em um kit didático de condicionador de ar Split Inverter, operando com total autonomia sob supervisão do instrutor.",
+          "O objetivo é simular fielmente a rotina do instalador credenciado de alto padrão, aplicando as boas práticas normativas (NR-10, NR-12, NR-35 e ABNT) e atestando os parâmetros de eficiência do ciclo frigorífico."
+        ],
+        bullets: [
+          {
+            label: "Etapa 1: Preparação Mecânica e Brasagem",
+            text: "Corte em esquadro, escareamento com o tubo voltado para baixo, conformação do flange excêntrico com projeção de 1,0 a 1,5 mm e brasagem foscoper com fluxo contínuo de Nitrogênio (1 a 3 PSI) e proteção térmica das válvulas de serviço."
+          },
+          {
+            label: "Etapa 2: Teste de Pressurização e Vácuo Profundo",
+            text: "Pressurização em degraus com Nitrogênio seco até 400-450 PSIG para caça-vazamentos com espuma neutra, seguida de desidratação por vácuo profundo estabilizado abaixo de 500 Microns (Decay Test por 15 minutos)."
+          },
+          {
+            label: "Etapa 3: Carga por Balança e Start-up Técnico",
+            text: "Quebra do vácuo com fluido original ou carga líquida complementar controlada por massa (gramas) em balança digital, acionamento do equipamento e monitoramento de corrente (A) True RMS."
+          },
+          {
+            label: "Etapa 4: Laudo Termodinâmico e Entrega",
+            text: "Aferição de Superaquecimento Útil (SH entre 4 K e 8 K), Subresfriamento (SC entre 5 K e 10 K), Salto Térmico do ar na evaporadora (ΔT entre 10 °C e 15 °C) e preenchimento da folha de registro do PMOC."
+          }
+        ],
+        highlightBox: {
+          type: "practical",
+          title: "CRITÉRIO DE APROVAÇÃO TÉCNICA NA BANCADA DIDÁTICA",
+          content: "A aprovação do comissionamento exige: 1) Flange sem trincas e sem fita veda-rosca; 2) Ausência de vazamento a 400 PSIG com N₂; 3) Vácuo estável < 500 μmHg por 15 minutos; 4) SH entre 4 °C e 8 °C; 5) Relatório de comissionamento preenchido e assinado pela equipe."
+        }
       }
     ]
   }

@@ -374,6 +374,290 @@ export function TechnicalDiagram({ type }: { type: string }) {
         </svg>
       );
 
+    case "brasagem":
+      return (
+        <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
+          <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+          <text x="350" y="32" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
+            Protocolo Técnico de Brasagem: Tipos de Chama, Nitrogênio Passante e Proteção Térmica
+          </text>
+
+          {/* Quadrante 1: Tipos de Chama */}
+          <rect x="25" y="48" width="280" height="150" rx="8" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
+          <text x="165" y="66" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">
+            1. Regulagem da Chama do Maçarico
+          </text>
+
+          {/* Chama Redutora */}
+          <text x="35" y="90" fill="#b45309" fontSize="10" fontWeight="bold">A. Redutora / Carburante:</text>
+          <text x="165" y="90" fill="#64748b" fontSize="9">Excesso de gás • Fuligem • ~2.800 °C</text>
+          <ellipse cx="65" cy="105" rx="35" ry="8" fill="#fed7aa" />
+          <ellipse cx="55" cy="105" rx="20" ry="5" fill="#f97316" />
+
+          {/* Chama Oxidante */}
+          <text x="35" y="130" fill="#b91c1c" fontSize="10" fontWeight="bold">B. Oxidante (PREJUDICIAL):</text>
+          <text x="165" y="130" fill="#dc2626" fontSize="9">Excesso O₂ • Queima cobre e fura</text>
+          <polygon points="30,145 90,145 105,145 75,140" fill="#38bdf8" />
+          <polygon points="30,145 60,145 68,142" fill="#ffffff" />
+
+          {/* Chama Neutra */}
+          <rect x="30" y="152" width="270" height="38" rx="4" fill="#ecfdf5" stroke="#10b981" strokeWidth="1.5" />
+          <text x="40" y="167" fill="#047857" fontSize="10" fontWeight="bold">C. CHAMA NEUTRA (A ÚNICA CORRETA):</text>
+          <text x="40" y="182" fill="#0f766e" fontSize="9">Dardo cônico azul-claro suave • Fusão homogênea a ~3.100 °C</text>
+
+          {/* Divisor */}
+          <line x1="320" y1="48" x2="320" y2="198" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="3" />
+
+          {/* Quadrante 2: Bancada com N2 e Proteção de Válvula */}
+          <rect x="335" y="48" width="340" height="150" rx="8" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
+          <text x="505" y="66" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">
+            2. Proteção de Válvula e Passadiço de N₂ (1 a 3 PSI)
+          </text>
+
+          {/* Tubo de Cobre */}
+          <rect x="350" y="110" width="180" height="20" rx="2" fill="#d97706" stroke="#92400e" strokeWidth="1.5" />
+          <text x="440" y="124" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold">TUBO DE COBRE LIMPO</text>
+
+          {/* Seta N2 interno */}
+          <path d="M 355 120 L 405 120" stroke="#0284c7" strokeWidth="3" />
+          <polygon points="405,116 415,120 405,124" fill="#0284c7" />
+          <text x="440" y="146" textAnchor="middle" fill="#0284c7" fontSize="9" fontWeight="bold">Fluxo Passante de N₂ (Sem Carepa)</text>
+
+          {/* Ponto de Solda */}
+          <circle cx="490" cy="120" r="14" fill="none" stroke="#ef4444" strokeWidth="2" strokeDasharray="3" />
+          <text x="490" y="98" textAnchor="middle" fill="#dc2626" fontSize="9" fontWeight="bold">Zona de Fusão (3.100°C)</text>
+
+          {/* Válvula de Serviço Envolvida com Pano Úmido */}
+          <rect x="545" y="90" width="115" height="60" rx="6" fill="#e0f2fe" stroke="#0284c7" strokeWidth="2" />
+          <text x="602" y="110" textAnchor="middle" fill="#0369a1" fontSize="10" fontWeight="bold">VÁLVULA SERVIÇO</text>
+          <rect x="550" y="116" width="105" height="26" rx="4" fill="#38bdf8" fillOpacity="0.25" stroke="#0284c7" strokeDasharray="3" />
+          <text x="602" y="130" textAnchor="middle" fill="#0c4a6e" fontSize="9" fontWeight="bold">Pano Úmido / Gel</text>
+          <text x="602" y="140" textAnchor="middle" fill="#0284c7" fontSize="8">(Protege Teflon e O-Ring)</text>
+          
+          <text x="505" y="185" textAnchor="middle" fill="#15803d" fontSize="9" fontWeight="bold">
+            ✓ Solda Espelhada e Vedações Preservadas
+          </text>
+        </svg>
+      );
+
+    case "flange":
+      return (
+        <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
+          <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+          <text x="350" y="32" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
+            Geometria do Flange Perfeito a 45°: Projeção de 1,0 a 1,5 mm e Lubrificação POE
+          </text>
+
+          {/* Quadrante 1: Medida da Projeção na Mesa */}
+          <rect x="30" y="48" width="310" height="150" rx="8" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
+          <text x="185" y="66" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">
+            1. Calibração da Projeção do Tubo na Mesa
+          </text>
+
+          {/* Mesa do Flangeador */}
+          <rect x="50" y="125" width="270" height="40" rx="4" fill="#334155" stroke="#0f172a" strokeWidth="1.5" />
+          <text x="185" y="148" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">MESA / MORSA DO FLANGEADOR</text>
+
+          {/* Tubo de Cobre passando pela morsa */}
+          <rect x="160" y="88" width="50" height="77" fill="#d97706" stroke="#92400e" strokeWidth="1.5" />
+          <text x="185" y="112" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold">TUBO</text>
+
+          {/* Cota da Projeção */}
+          <line x1="225" y1="88" x2="225" y2="125" stroke="#dc2626" strokeWidth="2" />
+          <line x1="220" y1="88" x2="230" y2="88" stroke="#dc2626" strokeWidth="2" />
+          <line x1="220" y1="125" x2="230" y2="125" stroke="#dc2626" strokeWidth="2" />
+          <text x="240" y="110" fill="#dc2626" fontSize="11" fontWeight="bold">1,0 a 1,5 mm</text>
+          <text x="240" y="122" fill="#64748b" fontSize="8">(Projeção exata)</text>
+
+          <text x="185" y="183" textAnchor="middle" fill="#475569" fontSize="9">
+            Tubo cortado em esquadro (90°) e rebarbado com bocal voltado para baixo.
+          </text>
+
+          {/* Quadrante 2: Cone Excêntrico + Gota de Óleo POE */}
+          <rect x="360" y="48" width="310" height="150" rx="8" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
+          <text x="515" y="66" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">
+            2. Prensagem Excêntrica e Lubrificação POE
+          </text>
+
+          {/* Cone Excêntrico */}
+          <polygon points="485,82 545,82 515,120" fill="#94a3b8" stroke="#475569" strokeWidth="2" />
+          <text x="515" y="98" textAnchor="middle" fill="#0f172a" fontSize="9" fontWeight="bold">CONE 45°</text>
+
+          {/* Gota de Óleo */}
+          <ellipse cx="515" cy="126" rx="5" ry="7" fill="#38bdf8" />
+          <text x="555" y="128" fill="#0284c7" fontSize="10" fontWeight="bold">+ 1 GOTA DE ÓLEO POE</text>
+          <text x="555" y="140" fill="#64748b" fontSize="8">(Elimina atrito e trincas)</text>
+
+          {/* Flange Concluído */}
+          <polygon points="460,145 570,145 550,165 480,165" fill="#f59e0b" stroke="#b45309" strokeWidth="1.5" />
+          <text x="515" y="158" textAnchor="middle" fill="#78350f" fontSize="9" fontWeight="bold">Flange Espelhado 45°</text>
+
+          <rect x="375" y="172" width="280" height="20" rx="3" fill="#fee2e2" />
+          <text x="515" y="185" textAnchor="middle" fill="#991b1b" fontSize="9" fontWeight="bold">
+            VEDAÇÃO METAL-METAL CÔNICA • PROIBIDO FITA VEDA-ROSCA
+          </text>
+        </svg>
+      );
+
+    case "vacuo":
+      return (
+        <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
+          <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+          <text x="350" y="32" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
+            Procedimento de Desidratação por Vácuo Profundo e Teste de Estabilidade (Decay Test)
+          </text>
+
+          {/* Display Vacuômetro Digital */}
+          <rect x="35" y="52" width="230" height="140" rx="10" fill="#09090b" stroke="#27272a" strokeWidth="2" />
+          <text x="150" y="74" textAnchor="middle" fill="#a1a1aa" fontSize="10" fontWeight="bold">VACUÔMETRO DIGITAL</text>
+          
+          <rect x="50" y="85" width="200" height="55" rx="6" fill="#18181b" />
+          <text x="150" y="122" textAnchor="middle" fill="#22c55e" fontSize="28" fontWeight="bold" fontFamily="monospace">
+            280
+          </text>
+          <text x="215" y="118" fill="#22c55e" fontSize="11" fontWeight="bold">μmHg</text>
+          <text x="150" y="134" textAnchor="middle" fill="#4ade80" fontSize="9">ESTÁVEL (META &lt; 500)</text>
+
+          <text x="150" y="165" textAnchor="middle" fill="#e4e4e7" fontSize="10" fontWeight="bold">
+            ✓ Sistema Seco e Desidratado
+          </text>
+          <text x="150" y="179" textAnchor="middle" fill="#71717a" fontSize="8">
+            Óleo POE protegido contra acidez
+          </text>
+
+          {/* Linha e Extrator Schrader */}
+          <rect x="290" y="52" width="375" height="140" rx="8" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
+          <text x="477" y="72" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">
+            Conexão com Extrator Schrader e Decay Test (15 min)
+          </text>
+
+          {/* Extrator de Válvula */}
+          <rect x="310" y="90" width="105" height="40" rx="5" fill="#e0f2fe" stroke="#0284c7" strokeWidth="1.5" />
+          <text x="362" y="108" textAnchor="middle" fill="#0369a1" fontSize="9" fontWeight="bold">Extrator Schrader</text>
+          <text x="362" y="122" textAnchor="middle" fill="#0c4a6e" fontSize="8">Sem Núcleo = 4x Mais Rápido</text>
+
+          {/* Mangueira de Vácuo */}
+          <path d="M 415 110 L 485 110" stroke="#0284c7" strokeWidth="6" />
+          <text x="450" y="102" textAnchor="middle" fill="#0369a1" fontSize="8" fontWeight="bold">Mangueira 3/8"</text>
+
+          {/* Bomba de Vácuo */}
+          <rect x="490" y="85" width="155" height="50" rx="6" fill="#fee2e2" stroke="#dc2626" strokeWidth="1.5" />
+          <text x="567" y="106" textAnchor="middle" fill="#991b1b" fontSize="10" fontWeight="bold">Bomba Duplo Estágio</text>
+          <text x="567" y="122" textAnchor="middle" fill="#dc2626" fontSize="8">Com Válvula Gas Ballast</text>
+
+          {/* Decay Test Banner */}
+          <rect x="310" y="148" width="335" height="32" rx="4" fill="#f0fdf4" stroke="#16a34a" strokeWidth="1" />
+          <text x="477" y="163" textAnchor="middle" fill="#15803d" fontSize="9" fontWeight="bold">
+            TESTE DE SUBIDA (DECAY TEST): Isolar a bomba por 15 minutos
+          </text>
+          <text x="477" y="174" textAnchor="middle" fill="#166534" fontSize="8">
+            Se subir e estabilizar abaixo de 700 μmHg = APROVADO | Se subir até atm = VAZAMENTO
+          </text>
+        </svg>
+      );
+
+    case "balanca":
+      return (
+        <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
+          <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+          <text x="350" y="32" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
+            Carga de Fluido Refrigerante por Massa: Balança Digital e Dosagem Exata em Gramas
+          </text>
+
+          {/* Cilindro Invertido */}
+          <rect x="50" y="52" width="180" height="140" rx="8" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
+          <text x="140" y="70" textAnchor="middle" fill="#0f172a" fontSize="10" fontWeight="bold">Garrafa Invertida (Líquido)</text>
+          
+          <rect x="80" y="78" width="120" height="70" rx="10" fill="#fed7aa" stroke="#ea580c" strokeWidth="2" />
+          <text x="140" y="105" textAnchor="middle" fill="#9a3412" fontSize="11" fontWeight="bold">R-410A / R-32</text>
+          <text x="140" y="122" textAnchor="middle" fill="#c2410c" fontSize="9" fontWeight="bold">100% Fase Líquida</text>
+          
+          {/* Válvula inferior da garrafa */}
+          <rect x="130" y="148" width="20" height="15" fill="#334155" />
+          <circle cx="140" cy="168" r="6" fill="#0284c7" />
+
+          {/* Mangueira para balança */}
+          <path d="M 140 168 L 260 168 L 260 120 L 300 120" stroke="#0284c7" strokeWidth="4" fill="none" />
+
+          {/* Balança Digital */}
+          <rect x="305" y="52" width="350" height="140" rx="8" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.5" />
+          <text x="480" y="70" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">
+            Controle de Peso e Carga Adicional de Linha
+          </text>
+
+          {/* Visor da Balança */}
+          <rect x="330" y="85" width="170" height="50" rx="6" fill="#0f172a" />
+          <text x="415" y="118" textAnchor="middle" fill="#38bdf8" fontSize="24" fontWeight="bold" fontFamily="monospace">
+            -0.850
+          </text>
+          <text x="480" y="114" fill="#38bdf8" fontSize="11" fontWeight="bold">kg</text>
+
+          {/* Fórmula Adicional */}
+          <rect x="520" y="85" width="120" height="50" rx="6" fill="#f8fafc" stroke="#cbd5e1" />
+          <text x="580" y="104" textAnchor="middle" fill="#0f172a" fontSize="9" fontWeight="bold">ADICIONAL LINHA</text>
+          <text x="580" y="122" textAnchor="middle" fill="#dc2626" fontSize="11" fontWeight="bold">+20 g/metro</text>
+
+          {/* Aviso Proibitivo */}
+          <rect x="325" y="148" width="315" height="32" rx="4" fill="#fef2f2" stroke="#ef4444" strokeWidth="1" />
+          <text x="482" y="162" textAnchor="middle" fill="#991b1b" fontSize="9" fontWeight="bold">
+            PROIBIDO CARREGAR "NO OLHÔMETRO" PELA PRESSÃO DO MANIFOLD
+          </text>
+          <text x="482" y="174" textAnchor="middle" fill="#b91c1c" fontSize="8">
+            Em compressores Inverter, a Válvula EEV modula e mascara a pressão. Pese sempre na balança.
+          </text>
+        </svg>
+      );
+
+    case "comissionamento":
+      return (
+        <svg viewBox="0 0 700 220" className="w-full h-auto max-h-60 mx-auto">
+          <rect x="10" y="10" width="680" height="200" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+          <text x="350" y="32" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="bold">
+            Roteiro Oficial de Comissionamento e Start-up Técnico em Bancada (Oficina Integrada)
+          </text>
+
+          {/* Card 1: Mecânica & Brasagem */}
+          <rect x="25" y="50" width="150" height="138" rx="8" fill="#ffffff" stroke="#f59e0b" strokeWidth="1.5" />
+          <rect x="25" y="50" width="150" height="24" rx="8" fill="#fef3c7" />
+          <text x="100" y="66" textAnchor="middle" fill="#92400e" fontSize="10" fontWeight="bold">1. MECÂNICA / SOLDA</text>
+          <text x="35" y="92" fill="#334155" fontSize="9">• Flange 1,0-1,5 mm</text>
+          <text x="35" y="112" fill="#334155" fontSize="9">• Óleo POE no cone</text>
+          <text x="35" y="132" fill="#334155" fontSize="9">• N₂ passante (1-3 PSI)</text>
+          <text x="35" y="152" fill="#334155" fontSize="9">• Pano úmido na válvula</text>
+          <text x="35" y="172" fill="#b45309" fontSize="8" fontWeight="bold">✓ Torque N·m aferido</text>
+
+          {/* Card 2: Estanqueidade & Vácuo */}
+          <rect x="185" y="50" width="150" height="138" rx="8" fill="#ffffff" stroke="#0284c7" strokeWidth="1.5" />
+          <rect x="185" y="50" width="150" height="24" rx="8" fill="#e0f2fe" />
+          <text x="260" y="66" textAnchor="middle" fill="#075985" fontSize="10" fontWeight="bold">2. TESTES & VÁCUO</text>
+          <text x="195" y="92" fill="#334155" fontSize="9">• N₂ seco a 450 PSIG</text>
+          <text x="195" y="112" fill="#334155" fontSize="9">• Teste com espuma neutra</text>
+          <text x="195" y="132" fill="#334155" fontSize="9">• Extrator de Schrader</text>
+          <text x="195" y="152" fill="#334155" fontSize="9">• Vácuo &lt; 500 μmHg</text>
+          <text x="195" y="172" fill="#0369a1" fontSize="8" fontWeight="bold">✓ Decay Test por 15 min</text>
+
+          {/* Card 3: Carga de Gás */}
+          <rect x="345" y="50" width="150" height="138" rx="8" fill="#ffffff" stroke="#10b981" strokeWidth="1.5" />
+          <rect x="345" y="50" width="150" height="24" rx="8" fill="#d1fae5" />
+          <text x="420" y="66" textAnchor="middle" fill="#065f46" fontSize="10" fontWeight="bold">3. CARGA EM BALANÇA</text>
+          <text x="355" y="92" fill="#334155" fontSize="9">• Quebra de vácuo c/ fluido</text>
+          <text x="355" y="112" fill="#334155" fontSize="9">• Balança digital calibrada</text>
+          <text x="355" y="132" fill="#334155" fontSize="9">• R-410A em fase líquida</text>
+          <text x="355" y="152" fill="#334155" fontSize="9">• +20g/m adicional tubos</text>
+          <text x="355" y="172" fill="#047857" fontSize="8" fontWeight="bold">✓ Massa de placa exata</text>
+
+          {/* Card 4: Termometria & Laudo */}
+          <rect x="505" y="50" width="170" height="138" rx="8" fill="#ffffff" stroke="#dc2626" strokeWidth="1.5" />
+          <rect x="505" y="50" width="170" height="24" rx="8" fill="#fee2e2" />
+          <text x="590" y="66" textAnchor="middle" fill="#991b1b" fontSize="10" fontWeight="bold">4. LAUDO TÉRMICO</text>
+          <text x="515" y="92" fill="#334155" fontSize="9">• Superaquecimento: 4 a 8 K</text>
+          <text x="515" y="112" fill="#334155" fontSize="9">• Subresfriamento: 5 a 10 K</text>
+          <text x="515" y="132" fill="#334155" fontSize="9">• Salto Térmico ΔT: 10-15 °C</text>
+          <text x="515" y="152" fill="#334155" fontSize="9">• Corrente (A) True RMS</text>
+          <text x="515" y="172" fill="#b91c1c" fontSize="8" fontWeight="bold">✓ Start-up Aprovado e PMOC</text>
+        </svg>
+      );
+
     case "eletricidade_diagrama":
     default:
       return (

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCircle, Clock, Printer, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useTurma } from "@/contexts/TurmaContext";
-import { module1MaterialsData, LessonMaterial } from "@/data/module1Materials";
+import { module1MaterialsData, Lesson, LessonMaterial } from "@/data/module1Materials";
 import { module1ChallengeData } from "@/data/module1Challenge";
 import { module2MaterialsData, module2ChallengeData } from "@/data/module2Materials";
 import { module3MaterialsData, module3ChallengeData } from "@/data/module3Materials";
@@ -144,7 +144,10 @@ export default function ModuleDetailsPage() {
     );
   }
 
-  const isYouTube = activeLesson.video_url && (activeLesson.video_url.includes('youtube.com') || activeLesson.video_url.includes('youtu.be'));
+  const effectiveVideoUrl = activeLesson.video_url || currentMaterial?.videoUrl;
+  const hasEffectiveVideo = Boolean(effectiveVideoUrl && effectiveVideoUrl.trim() !== "");
+  const isYouTube = Boolean(effectiveVideoUrl && (effectiveVideoUrl.includes('youtube.com') || effectiveVideoUrl.includes('youtu.be')));
+  const videoDisplayTitle = currentMaterial?.videoTitle || activeLesson.title;
 
   return (
     <div className="flex flex-col p-4 md:p-6 lg:p-8 w-full max-w-[1400px] mx-auto space-y-6 animate-in fade-in duration-700">
@@ -200,12 +203,12 @@ export default function ModuleDetailsPage() {
           
           <div className="relative w-full aspect-video bg-black/80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex flex-col items-center justify-center group">
             
-            {activeLesson.has_video && activeLesson.video_url ? (
+            {hasEffectiveVideo ? (
               isYouTube ? (
                 <iframe
                   className="w-full h-full border-0"
-                  src={getEmbedUrl(activeLesson.video_url)}
-                  title={activeLesson.title}
+                  src={getEmbedUrl(effectiveVideoUrl!)}
+                  title={videoDisplayTitle}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
@@ -214,7 +217,7 @@ export default function ModuleDetailsPage() {
                   controls 
                   controlsList="nodownload"
                   className="w-full h-full object-cover"
-                  src={activeLesson.video_url}
+                  src={effectiveVideoUrl!}
                 >
                   O seu navegador não suporta a reprodução de vídeo.
                 </video>
@@ -355,13 +358,32 @@ export default function ModuleDetailsPage() {
               </div>
 
               {currentMaterial && (
-                <div className="border-t border-white/10 pt-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-red-400 mb-1">
-                    Conceito Técnico Fundamental:
-                  </p>
-                  <p className="text-sm text-gray-300 leading-relaxed">
-                    {currentMaterial.shortSummary}
-                  </p>
+                <div className="border-t border-white/10 pt-4 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-red-400 mb-1">
+                      Conceito Técnico Fundamental:
+                    </p>
+                    <p className="text-sm text-gray-300 leading-relaxed">
+                      {currentMaterial.shortSummary}
+                    </p>
+                  </div>
+
+                  {currentMaterial.videoTitle && (
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-gray-300">
+                      <div className="flex items-center gap-1.5 text-red-400 font-semibold mb-1">
+                        <PlayCircle className="w-3.5 h-3.5" />
+                        <span>Vídeo Técnico Recomendado:</span>
+                      </div>
+                      <p className="text-white font-medium text-xs sm:text-sm">
+                        {currentMaterial.videoTitle}
+                      </p>
+                      {currentMaterial.videoDescription && (
+                        <p className="text-gray-400 text-xs mt-1 leading-relaxed">
+                          {currentMaterial.videoDescription}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
