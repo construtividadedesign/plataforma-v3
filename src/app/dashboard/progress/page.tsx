@@ -7,7 +7,6 @@ import { Trophy, Clock, Award, CheckCircle2, Loader2, AlertCircle } from "lucide
 
 export default function ProgressPage() {
   const { turmaAtiva, aulasConcluidas } = useTurma();
-  const supabase = createClient();
 
   const [modulesWithLessons, setModulesWithLessons] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +21,7 @@ export default function ProgressPage() {
   useEffect(() => {
     async function fetchAllLessons() {
       setIsLoading(true);
+      const supabase = createClient();
       const { data: lessonsData } = await supabase
         .from("lessons")
         .select("*")
@@ -29,7 +29,7 @@ export default function ProgressPage() {
 
       if (lessonsData) {
         const assembled = modulesMeta.map((mod) => {
-          const modLessons = lessonsData.filter((l) => l.module_id === mod.id);
+          const modLessons = lessonsData.filter((l: any) => l.module_id === mod.id);
           return {
             ...mod,
             lessons: modLessons,
@@ -40,7 +40,7 @@ export default function ProgressPage() {
       setIsLoading(false);
     }
     fetchAllLessons();
-  }, [supabase]);
+  }, []);
 
   // Cálculo Global
   const totalAulasGeral = modulesWithLessons.reduce((acc, m) => acc + m.lessons.length, 0);

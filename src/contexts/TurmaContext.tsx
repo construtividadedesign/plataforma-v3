@@ -225,7 +225,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         .eq("concluida", true);
 
       if (!error && data) {
-        setAulasConcluidas(data.map(p => p.aula_id));
+        setAulasConcluidas(data.map((p: any) => p.aula_id));
       }
     }
     carregarProgresso();

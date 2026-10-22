@@ -25,8 +25,6 @@ export default function ModuleDetailsPage() {
   const params = useParams();
   const moduleId = (params?.id as string) || "mod-1";
   const currentModuleInfo = modulesInfo[moduleId as keyof typeof modulesInfo] || modulesInfo["mod-1"];
-
-  const supabase = createClient();
   
   const { turmaAtiva, aulasConcluidas, isProfessor, alternarConclusaoAula } = useTurma();
   
@@ -40,6 +38,7 @@ export default function ModuleDetailsPage() {
   useEffect(() => {
     async function fetchLessons() {
       setIsLoading(true);
+      const supabase = createClient();
       const { data: lessonsData } = await supabase
         .from('lessons')
         .select('*')
@@ -53,7 +52,7 @@ export default function ModuleDetailsPage() {
       setIsLoading(false);
     }
     fetchLessons();
-  }, [moduleId, supabase]);
+  }, [moduleId]);
 
   const handleToggleComplete = async () => {
     if (!activeLesson || isUpdatingProgress || !isProfessor) return;
