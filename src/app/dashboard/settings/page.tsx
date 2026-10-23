@@ -8,6 +8,7 @@ import { Loader2, User, Mail, LogOut, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
+  const supabase = createClient();
   const router = useRouter();
 
   const [user, setUser] = useState<any>(null);
@@ -18,7 +19,6 @@ export default function SettingsPage() {
   useEffect(() => {
     async function getUserData() {
       setIsLoading(true);
-      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
@@ -26,10 +26,9 @@ export default function SettingsPage() {
       setIsLoading(false);
     }
     getUserData();
-  }, []);
+  }, [supabase]);
 
   const handleLogout = async () => {
-    const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
   };

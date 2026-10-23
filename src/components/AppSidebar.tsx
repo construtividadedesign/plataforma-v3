@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Library, LineChart, Home, Users, ChevronDown, Menu, X, Cpu, Stethoscope, Calculator, Wind, Wrench } from "lucide-react";
+import { LayoutDashboard, Library, LineChart, Home, Users, ChevronDown, Menu, X, Cpu, Stethoscope, Calculator, Wind } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useTurma, getProfessorDisplayName, getProfessorInitial } from "@/contexts/TurmaContext";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -26,7 +26,6 @@ export default function AppSidebar() {
     { name: "Módulos de Aulas", href: "/dashboard/modules", icon: Library },
     { name: "Tipos de Climatização", href: "/dashboard/systems", icon: Wind },
     { name: "Guia de Componentes", href: "/dashboard/components", icon: Cpu },
-    { name: "Kits e Ferramentas (SGT)", href: "/dashboard/inventory", icon: Wrench },
     { name: "Diagnóstico e Falhas", href: "/dashboard/troubleshooting", icon: Stethoscope },
     { name: "Dimensionamento (BTUs)", href: "/dashboard/sizing", icon: Calculator },
     { name: "Meu Progresso", href: "/dashboard/progress", icon: LineChart },
