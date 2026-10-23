@@ -38,7 +38,8 @@ import {
   ThermometerSnowflake,
   Gauge,
   Layers,
-  Flame
+  Flame,
+  Plus
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -142,6 +143,33 @@ function getComponentTechnicalIcon(category: string, name: string) {
   return <Layers className="w-8 h-8 text-zinc-400" />;
 }
 
+const STORAGE_KEY_COMPONENTS = "plataforma_v3_components_data";
+
+function loadSavedComponents(): typeof hvacComponentsData {
+  if (typeof window === "undefined") return hvacComponentsData;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_COMPONENTS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error("Erro ao carregar componentes:", e);
+  }
+  return hvacComponentsData;
+}
+
+function saveComponents(data: typeof hvacComponentsData) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY_COMPONENTS, JSON.stringify(data));
+  } catch (e) {
+    console.error("Erro ao salvar componentes:", e);
+  }
+}
+
 export default function ComponentsPage() {
   const { turmaAtiva, isProfessor } = useTurma();
   const [searchTerm, setSearchTerm] = useState("");
@@ -151,6 +179,16 @@ export default function ComponentsPage() {
 
   // Mapa de imagens customizadas do professor (localStorage)
   const [customImages, setCustomImages] = useState<Record<string, string>>({});
+
+  // Catálogo dinâmico de categorias e componentes (CRUD)
+  const [categories, setCategories] = useState<typeof hvacComponentsData>(hvacComponentsData);
+
+  // Modal de Criação de Novo Componente (Exclusivo Professor)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newCategory, setNewCategory] = useState("Evaporadora");
+  const [customCategory, setCustomCategory] = useState("");
 
   // Lightbox e Zoom
   const [lightboxItem, setLightboxItem] = useState<ComponentItem | null>(null);
@@ -165,10 +203,16 @@ export default function ComponentsPage() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Carrega as imagens customizadas salvas no cliente
+  // Carrega as imagens e catálogo customizados salvos no cliente
   useEffect(() => {
     setCustomImages(loadCustomComponentImages());
+    const saved = loadSavedComponents();
+    if (saved && saved.length > 0) {
+      setCategories(saved);
+    }
   }, []);
+
+  const totalItems = categories.reduce((acc, cat) => acc + cat.items.length, 0);
 
   const handleToggleLiberacao = () => {
     if (!isProfessor) {
@@ -183,8 +227,93 @@ export default function ComponentsPage() {
     }
   };
 
+  // Exclusão de componente pelo instrutor
+  const handleDelete = (itemId: number) => {
+    if (!isProfessor) {
+      toast.error("Ação restrita ao Instrutor.");
+      return;
+    }
+    if (lightboxItem?.id === itemId) {
+      closeLightbox();
+    }
+    if (editingItem?.id === itemId) {
+      closeEditModal();
+    }
+    setCategories((prevCategories) => {
+      const updated = prevCategories.map((cat) => ({
+        ...cat,
+        items: cat.items.filter((item) => item.id !== itemId),
+      }));
+      saveComponents(updated);
+      return updated;
+    });
+    toast.success("Componente excluído com sucesso!");
+  };
+
+  // Adição de novo componente pelo instrutor
+  const handleAddComponent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isProfessor) {
+      toast.error("Ação restrita ao Instrutor.");
+      return;
+    }
+
+    const trimmedName = newName.trim();
+    const trimmedDesc = newDescription.trim();
+    const finalCategory = (newCategory === "Outra" ? customCategory.trim() : newCategory.trim());
+
+    if (!trimmedName || !trimmedDesc || !finalCategory) {
+      toast.error("Por favor, preencha todos os campos obrigatórios (Nome, Descrição e Categoria).");
+      return;
+    }
+
+    const allItems = categories.flatMap((cat) => cat.items);
+    const maxId = allItems.reduce((max, item) => Math.max(max, item.id), 0);
+    const nextId = maxId + 1;
+
+    const newItem: ComponentItem = {
+      id: nextId,
+      name: trimmedName,
+      description: trimmedDesc,
+      category: finalCategory,
+    };
+
+    setCategories((prevCategories) => {
+      const catIndex = prevCategories.findIndex(
+        (c) =>
+          c.items.some((i) => i.category.toLowerCase() === finalCategory.toLowerCase()) ||
+          c.categoryName.toLowerCase().includes(finalCategory.toLowerCase())
+      );
+
+      let updated: typeof hvacComponentsData;
+      if (catIndex !== -1) {
+        updated = prevCategories.map((c, idx) =>
+          idx === catIndex ? { ...c, items: [...c.items, newItem] } : c
+        );
+      } else {
+        updated = [
+          ...prevCategories,
+          {
+            categoryName: `${prevCategories.length + 1}. ${finalCategory}`,
+            description: `Componentes catalogados da categoria ${finalCategory}`,
+            items: [newItem],
+          },
+        ];
+      }
+      saveComponents(updated);
+      return updated;
+    });
+
+    toast.success(`Componente #${nextId} "${trimmedName}" cadastrado com sucesso!`);
+    setNewName("");
+    setNewDescription("");
+    setNewCategory("Evaporadora");
+    setCustomCategory("");
+    setIsAddModalOpen(false);
+  };
+
   // Filtragem dos componentes por nome ou descrição
-  const filteredCategories = hvacComponentsData
+  const filteredCategories = categories
     .map((cat) => {
       const filteredItems = cat.items.filter((item) => {
         const matchesSearch =
@@ -332,7 +461,7 @@ export default function ComponentsPage() {
             <Cpu className="w-3.5 h-3.5 text-red-500" />
             <span>Material Técnico Oficial • Split Hi-Wall Inverter</span>
             <span className="hidden sm:inline text-gray-600">•</span>
-            <span className="hidden sm:inline text-amber-400 font-medium">152 Itens Catalogados • Fotos Reais e Diagramas Técnicos</span>
+            <span className="hidden sm:inline text-amber-400 font-medium">{totalItems} Itens Catalogados • Fotos Reais</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Guia de Componentes do Sistema</h2>
           <p className="text-gray-300 max-w-3xl text-sm leading-relaxed">
@@ -340,21 +469,31 @@ export default function ComponentsPage() {
           </p>
         </div>
 
-        {/* Controlo exclusivo do Professor para Liberar/Bloquear */}
+        {/* Controlo exclusivo do Professor para Liberar/Bloquear e Adicionar */}
         {isProfessor && (
           <div className="flex flex-col items-end gap-2 shrink-0 w-full md:w-auto">
             <span className="text-xs text-gray-400">Controlo do Instrutor:</span>
-            <button
-              onClick={handleToggleLiberacao}
-              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border w-full md:w-auto ${
-                isLiberadoTurma 
-                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30" 
-                  : "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30"
-              }`}
-            >
-              {isLiberadoTurma ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-              {isLiberadoTurma ? "Liberado para a Turma" : "Bloqueado (Oculto)"}
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/30 transition-all cursor-pointer border border-red-500/30 w-full sm:w-auto"
+              >
+                <Plus className="w-4 h-4" />
+                Adicionar Novo Componente
+              </button>
+              <button
+                onClick={handleToggleLiberacao}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border w-full sm:w-auto ${
+                  isLiberadoTurma 
+                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30" 
+                    : "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30"
+                }`}
+              >
+                {isLiberadoTurma ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                {isLiberadoTurma ? "Liberado para a Turma" : "Bloqueado (Oculto)"}
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -516,13 +655,29 @@ export default function ComponentsPage() {
                             </>
                           )}
                         </span>
-                        <button
-                          onClick={() => openLightbox(item)}
-                          className="text-red-400 hover:text-red-300 cursor-pointer font-medium inline-flex items-center gap-1"
-                        >
-                          Detalhes
-                          <ChevronRight className="w-3 h-3" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {isProfessor && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(item.id);
+                              }}
+                              className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
+                              title="Excluir Componente"
+                              aria-label="Excluir Componente"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => openLightbox(item)}
+                            className="text-red-400 hover:text-red-300 cursor-pointer font-medium inline-flex items-center gap-1"
+                          >
+                            Detalhes
+                            <ChevronRight className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -908,6 +1063,119 @@ export default function ComponentsPage() {
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* MODAL DE ADIÇÃO DE NOVO COMPONENTE (EXCLUSIVO PROFESSOR)     */}
+      {/* ============================================================ */}
+      {isAddModalOpen && isProfessor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative w-full max-w-xl bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            
+            {/* Cabeçalho */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-zinc-900">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-red-500/10 text-red-500">
+                  <Plus className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Adicionar Novo Componente</h3>
+                  <p className="text-xs text-gray-400">Cadastre um item técnico no acervo oficial</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-gray-400 hover:text-white p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Formulário */}
+            <form onSubmit={handleAddComponent} className="p-5 space-y-4">
+              {/* Nome */}
+              <div>
+                <label className="text-xs font-medium text-gray-300 block mb-1.5">
+                  Nome do Componente <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Ex: Sensor NTC de Degelo, Válvula de Expansão..."
+                  className="w-full bg-black/50 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600/50 focus:border-red-500 transition-all"
+                />
+              </div>
+
+              {/* Categoria */}
+              <div>
+                <label className="text-xs font-medium text-gray-300 block mb-1.5">
+                  Categoria Técnica <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full bg-zinc-900 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-red-600/50 focus:border-red-500 transition-all cursor-pointer"
+                >
+                  <option value="Evaporadora">1. Unidade Interna — Evaporadora</option>
+                  <option value="Condensadora">2. Unidade Externa — Condensadora</option>
+                  <option value="Frigorífico">3. Circuito Frigorífico</option>
+                  <option value="Instalação">4. Tubulações e Instalação</option>
+                  <option value="Sensores">5. Sensores e Controle</option>
+                  <option value="Eletrônica">6. Eletrônica Inverter</option>
+                  <option value="Quente/Frio">7. Modelos Quente/Frio</option>
+                  <option value="Manutenção">8. Manutenção e Serviço</option>
+                  <option value="Outra">Outra Categoria (Personalizada)</option>
+                </select>
+                {newCategory === "Outra" && (
+                  <input
+                    type="text"
+                    required
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    placeholder="Digite o nome da nova categoria"
+                    className="mt-2 w-full bg-black/50 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600/50 focus:border-red-500 transition-all"
+                  />
+                )}
+              </div>
+
+              {/* Descrição */}
+              <div>
+                <label className="text-xs font-medium text-gray-300 block mb-1.5">
+                  Descrição Técnica e Função <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  placeholder="Descreva a função técnica, princípio de funcionamento e aplicação no sistema..."
+                  className="w-full bg-black/50 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600/50 focus:border-red-500 transition-all resize-none"
+                />
+              </div>
+
+              {/* Rodapé de Ações */}
+              <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-gray-300 hover:text-white rounded-lg hover:bg-white/5 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg cursor-pointer shadow-lg shadow-red-900/20 flex items-center gap-1.5 transition-all"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  Cadastrar Componente
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
