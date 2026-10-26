@@ -171,11 +171,11 @@ function saveComponents(data: typeof hvacComponentsData) {
 }
 
 export default function ComponentsPage() {
-  const { turmaAtiva, isProfessor } = useTurma();
+  const { turmaAtiva, isProfessor, alternarLiberacaoComponentes } = useTurma();
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Estado local para o professor liberar ou bloquear o conteúdo para a turma
-  const [isLiberadoTurma, setIsLiberadoTurma] = useState(true);
+  // Status de liberação sincronizado universalmente pelo Supabase atrelado à turma ativa
+  const isLiberadoTurma = turmaAtiva ? (turmaAtiva.componentes_liberados !== false) : true;
 
   // Mapa de imagens customizadas do professor (localStorage)
   const [customImages, setCustomImages] = useState<Record<string, string>>({});
@@ -214,16 +214,25 @@ export default function ComponentsPage() {
 
   const totalItems = categories.reduce((acc, cat) => acc + cat.items.length, 0);
 
-  const handleToggleLiberacao = () => {
+  const handleToggleLiberacao = async () => {
     if (!isProfessor) {
       toast.error("Ação restrita ao Instrutor.");
       return;
     }
-    setIsLiberadoTurma(!isLiberadoTurma);
-    if (!isLiberadoTurma) {
-      toast.success("Guia de Componentes liberado para a turma!");
+    if (!turmaAtiva) {
+      toast.error("Nenhuma turma ativa selecionada.");
+      return;
+    }
+    const novoStatus = !isLiberadoTurma;
+    const sucesso = await alternarLiberacaoComponentes(turmaAtiva.id, novoStatus);
+    if (sucesso) {
+      if (novoStatus) {
+        toast.success("Guia de Componentes liberado para a turma!");
+      } else {
+        toast.info("Guia de Componentes ocultado da turma.");
+      }
     } else {
-      toast.info("Guia de Componentes ocultado da turma.");
+      toast.error("Erro ao sincronizar status de liberação com o banco de dados.");
     }
   };
 

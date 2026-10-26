@@ -30,6 +30,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Blindagem de Segurança: Oculta o cabeçalho X-Powered-By
   poweredByHeader: false,
+  // Bloqueio explícito de Source Maps em produção para evitar vazamento de código
+  productionBrowserSourceMaps: false,
   // Cabeçalhos HTTP de Proteção e Blindagem
   async headers() {
     return [

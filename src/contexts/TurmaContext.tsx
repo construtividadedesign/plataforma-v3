@@ -54,6 +54,7 @@ export type Turma = {
   professor_email?: string;
   created_at: string;
   status?: "ativa" | "arquivada";
+  componentes_liberados?: boolean;
 };
 
 export type AlunoSolicitacao = {
@@ -83,6 +84,7 @@ type TurmaContextType = {
   arquivarTurma: (turmaId: string) => void;
   excluirTurma: (turmaId: string) => Promise<void>;
   alternarConclusaoAula: (moduloId: string, aulaId: string, isConcluida: boolean) => Promise<void>;
+  alternarLiberacaoComponentes: (turmaId: string, liberado: boolean) => Promise<boolean>;
 };
 
 const TurmaContext = createContext<TurmaContextType | undefined>(undefined);
@@ -154,6 +156,8 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         error = fallbackAll.error;
       }
 
+      let ativasList: Turma[] = [];
+
       if (!error && data) {
         let turmasFiltradas = data;
 
@@ -176,7 +180,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
           "[]"
         );
         
-        const ativasList = turmasFiltradas.filter((t: Turma) => !arquivadasIds.includes(t.id));
+        ativasList = turmasFiltradas.filter((t: Turma) => !arquivadasIds.includes(t.id));
         const arquivadasList = turmasFiltradas.filter((t: Turma) => arquivadasIds.includes(t.id));
 
         setTurmas(ativasList);
@@ -189,17 +193,36 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Carrega solicitações de alunos salvas
-      const savedPendentes = JSON.parse(localStorage.getItem("hvac_alunos_solicitacoes") || "[]");
-      setAlunosPendentes(savedPendentes);
+      // Carrega solicitações de alunos persistidas no Supabase
+      try {
+        const { data: solData, error: solError } = await supabase
+          .from("solicitacoes_alunos")
+          .select("*");
 
-      if (!ehProf && emailAtual) {
-        const meuVinculo = savedPendentes.find((s: AlunoSolicitacao) => s.email === emailAtual);
-        if (meuVinculo) {
-          setAlunoStatusAprovacao(meuVinculo.status);
-        } else {
-          setAlunoStatusAprovacao("nao_solicitado");
+        if (!solError && solData) {
+          const formatadas: AlunoSolicitacao[] = solData.map((s: any) => ({
+            turmaId: s.turma_id,
+            email: s.email,
+            nome: s.nome,
+            status: s.status as "pendente" | "aprovado",
+            professor_email: s.professor_email,
+          }));
+          setAlunosPendentes(formatadas);
+
+          if (!ehProf && emailAtual && ativasList.length > 0) {
+            const primeiraId = ativasList[0].id;
+            const meuVinculo = formatadas.find(
+              (s: AlunoSolicitacao) => s.email.toLowerCase() === emailAtual.toLowerCase() && s.turmaId === primeiraId
+            );
+            if (meuVinculo) {
+              setAlunoStatusAprovacao(meuVinculo.status);
+            } else {
+              setAlunoStatusAprovacao("nao_solicitado");
+            }
+          }
         }
+      } catch (err) {
+        console.error("Erro ao carregar solicitações de alunos do Supabase:", err);
       }
 
       setIsLoadingTurmas(false);
@@ -236,8 +259,9 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     if (turma) {
       setTurmaAtiva(turma);
       if (!isProfessor && userEmail) {
-        const savedPendentes = JSON.parse(localStorage.getItem("hvac_alunos_solicitacoes") || "[]");
-        const meuVinculo = savedPendentes.find((s: AlunoSolicitacao) => s.email === userEmail && s.turmaId === id);
+        const meuVinculo = alunosPendentes.find(
+          (s: AlunoSolicitacao) => s.email.toLowerCase() === userEmail.toLowerCase() && s.turmaId === id
+        );
         if (meuVinculo) {
           setAlunoStatusAprovacao(meuVinculo.status);
         } else {
@@ -247,7 +271,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const solicitarAcessoTurma = (turmaId: string) => {
+  const solicitarAcessoTurma = async (turmaId: string) => {
     if (!userEmail || isProfessor) return;
     const turmaAlvo = turmas.find(t => t.id === turmaId);
     const novaSolicitacao: AlunoSolicitacao = {
@@ -258,29 +282,70 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
       professor_email: turmaAlvo?.professor_email
     };
 
-    const atualizadas = [...alunosPendentes.filter(s => !(s.email === userEmail && s.turmaId === turmaId)), novaSolicitacao];
-    setAlunosPendentes(atualizadas);
-    localStorage.setItem("hvac_alunos_solicitacoes", JSON.stringify(atualizadas));
+    setAlunosPendentes(prev => [
+      ...prev.filter(s => !(s.email.toLowerCase() === userEmail.toLowerCase() && s.turmaId === turmaId)),
+      novaSolicitacao
+    ]);
     setAlunoStatusAprovacao("pendente");
+
+    // Persistência segura no Supabase
+    const supabase = createClient();
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase
+        .from("solicitacoes_alunos")
+        .upsert({
+          turma_id: turmaId,
+          user_id: user?.id,
+          email: userEmail.toLowerCase().trim(),
+          nome: userName || "Aluno",
+          status: "pendente",
+          professor_email: turmaAlvo?.professor_email
+        }, { onConflict: "turma_id, email" });
+    } catch (e) {
+      console.error("Erro ao solicitar acesso no Supabase:", e);
+    }
   };
 
-  const aprovarAluno = (email: string, turmaId: string) => {
+  const aprovarAluno = async (email: string, turmaId: string) => {
     if (!isProfessor) return;
-    const atualizadas = alunosPendentes.map(s => {
-      if (s.email === email && s.turmaId === turmaId) {
+    const emailLimpo = email.toLowerCase().trim();
+    setAlunosPendentes(prev => prev.map(s => {
+      if (s.email.toLowerCase().trim() === emailLimpo && s.turmaId === turmaId) {
         return { ...s, status: "aprovado" as const };
       }
       return s;
-    });
-    setAlunosPendentes(atualizadas);
-    localStorage.setItem("hvac_alunos_solicitacoes", JSON.stringify(atualizadas));
+    }));
+
+    // Persistência segura no Supabase
+    const supabase = createClient();
+    try {
+      await supabase
+        .from("solicitacoes_alunos")
+        .update({ status: "aprovado", updated_at: new Date().toISOString() })
+        .eq("turma_id", turmaId)
+        .eq("email", emailLimpo);
+    } catch (e) {
+      console.error("Erro ao aprovar aluno no Supabase:", e);
+    }
   };
 
-  const rejeitarAluno = (email: string, turmaId: string) => {
+  const rejeitarAluno = async (email: string, turmaId: string) => {
     if (!isProfessor) return;
-    const atualizadas = alunosPendentes.filter(s => !(s.email === email && s.turmaId === turmaId));
-    setAlunosPendentes(atualizadas);
-    localStorage.setItem("hvac_alunos_solicitacoes", JSON.stringify(atualizadas));
+    const emailLimpo = email.toLowerCase().trim();
+    setAlunosPendentes(prev => prev.filter(s => !(s.email.toLowerCase().trim() === emailLimpo && s.turmaId === turmaId)));
+
+    // Exclusão segura no Supabase
+    const supabase = createClient();
+    try {
+      await supabase
+        .from("solicitacoes_alunos")
+        .delete()
+        .eq("turma_id", turmaId)
+        .eq("email", emailLimpo);
+    } catch (e) {
+      console.error("Erro ao rejeitar aluno no Supabase:", e);
+    }
   };
 
   const criarTurma = async (nome: string) => {
@@ -409,6 +474,33 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const alternarLiberacaoComponentes = async (turmaId: string, liberado: boolean): Promise<boolean> => {
+    if (!isProfessor) return false;
+
+    // Atualização otimista no estado local
+    setTurmas(prev => prev.map(t => t.id === turmaId ? { ...t, componentes_liberados: liberado } : t));
+    if (turmaAtiva?.id === turmaId) {
+      setTurmaAtiva(prev => prev ? { ...prev, componentes_liberados: liberado } : null);
+    }
+
+    const supabase = createClient();
+    try {
+      const { error } = await supabase
+        .from("turmas")
+        .update({ componentes_liberados: liberado })
+        .eq("id", turmaId);
+
+      if (error) {
+        console.error("Erro ao gravar liberação de componentes no Supabase:", error);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.error("Exceção ao gravar liberação no Supabase:", e);
+      return false;
+    }
+  };
+
   return (
     <TurmaContext.Provider value={{ 
       turmas, 
@@ -428,7 +520,8 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
       criarTurma,
       arquivarTurma,
       excluirTurma,
-      alternarConclusaoAula 
+      alternarConclusaoAula,
+      alternarLiberacaoComponentes
     }}>
       {children}
     </TurmaContext.Provider>
