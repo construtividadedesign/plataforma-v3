@@ -1,6 +1,7 @@
 import { ClimateBackground } from "@/components/ClimateBackground";
 import AppSidebar from "@/components/AppSidebar";
 import { TurmaProvider } from "@/contexts/TurmaContext";
+import DashboardRouteGuard from "@/components/DashboardRouteGuard";
 
 export default function DashboardLayout({
   children,
@@ -18,9 +19,11 @@ export default function DashboardLayout({
           {/* A Barra Lateral (Adaptativa para Mobile e Desktop) */}
           <AppSidebar />
 
-          {/* A Área Central */}
+          {/* A Área Central com Proteção de Rotas para Alunos */}
           <main className="flex-1 w-full overflow-y-auto">
-            {children}
+            <DashboardRouteGuard>
+              {children}
+            </DashboardRouteGuard>
           </main>
         </div>
       </TurmaProvider>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Library, LineChart, Home, Users, ChevronDown, Menu, X, Cpu, Stethoscope, Calculator, Wind } from "lucide-react";
+import { LayoutDashboard, Library, LineChart, Home, Users, ChevronDown, Menu, X, Cpu, Stethoscope, Calculator, Wind, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useTurma, getProfessorDisplayName, getProfessorInitial } from "@/contexts/TurmaContext";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -13,7 +13,7 @@ export default function AppSidebar() {
   const router = useRouter();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const { turmas, turmaAtiva, selecionarTurma, isProfessor, userName, userEmail } = useTurma();
+  const { turmas, turmaAtiva, selecionarTurma, isProfessor, userName, userEmail, alunoStatusAprovacao } = useTurma();
 
   // Fecha o menu mobile automaticamente ao trocar de rota
   useEffect(() => {
@@ -152,6 +152,25 @@ export default function AppSidebar() {
                   pathname === item.href ||
                   (item.href !== "/dashboard" && pathname?.startsWith(item.href + "/"));
                 const Icon = item.icon;
+
+                const isPublicStudentRoute = item.href === "/dashboard" || item.href === "/dashboard/welcome";
+                const isLocked = !isProfessor && (!turmaAtiva || alunoStatusAprovacao !== "aprovado") && !isPublicStudentRoute;
+
+                if (isLocked) {
+                  return (
+                    <div
+                      key={item.name}
+                      title="Conteúdo restrito: aguarde aprovação do Instrutor na turma ativa"
+                      className="flex items-center justify-between px-4 py-3 rounded-xl opacity-40 cursor-not-allowed select-none bg-slate-100/50 dark:bg-white/[0.02] text-slate-400 dark:text-gray-500"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-5 h-5 shrink-0" />
+                        <span className="text-sm font-medium">{item.name}</span>
+                      </div>
+                      <Lock className="w-3.5 h-3.5 text-amber-500/80 shrink-0" />
+                    </div>
+                  );
+                }
 
                 return (
                   <Link
