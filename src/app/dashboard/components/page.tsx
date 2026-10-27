@@ -42,6 +42,7 @@ import {
   Plus
 } from "lucide-react";
 import { toast } from "sonner";
+import ConteudoBloqueadoCard from "@/components/ConteudoBloqueadoCard";
 
 const TECHNICAL_PRESETS = [
   { label: "Serpentina de Cobre / Alumínio", url: "/components/serpentina.jpg" },
@@ -171,11 +172,11 @@ function saveComponents(data: typeof hvacComponentsData) {
 }
 
 export default function ComponentsPage() {
-  const { turmaAtiva, isProfessor, alternarLiberacaoComponentes } = useTurma();
+  const { turmaAtiva, isProfessor, alternarLiberacaoComponentes, isConteudoLiberado } = useTurma();
   const [searchTerm, setSearchTerm] = useState("");
   
   // Status de liberação sincronizado universalmente pelo Supabase atrelado à turma ativa
-  const isLiberadoTurma = turmaAtiva ? (turmaAtiva.componentes_liberados !== false) : true;
+  const isLiberadoTurma = isConteudoLiberado("componentes", "ferramenta");
 
   // Mapa de imagens customizadas do professor (localStorage)
   const [customImages, setCustomImages] = useState<Record<string, string>>({});
@@ -448,17 +449,16 @@ export default function ComponentsPage() {
   // Se for aluno e o professor tiver bloqueado/ocultado a visualização
   if (!isProfessor && !isLiberadoTurma) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-[70vh] p-6 text-center animate-in fade-in duration-700">
-        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4 text-red-500">
-          <Lock className="w-8 h-8" />
-        </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Conteúdo em Breve</h2>
-        <p className="text-gray-400 max-w-md text-sm leading-relaxed">
-          O Guia Técnico de Componentes ainda não foi liberado pelo Instrutor para esta turma. Aguarde a liberação em aula.
-        </p>
+      <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
+        <ConteudoBloqueadoCard
+          titulo="Guia Técnico de Componentes (152+ Peças Reais)"
+          categoria="ferramenta"
+          descricaoDetalhada="Laboratório virtual de componentes de climatização com fotos reais, testes de bancada e especificações."
+        />
       </div>
     );
   }
+
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">

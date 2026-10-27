@@ -13,7 +13,7 @@ export default function AppSidebar() {
   const router = useRouter();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const { turmas, turmaAtiva, selecionarTurma, isProfessor, userName, userEmail, alunoStatusAprovacao } = useTurma();
+  const { turmas, turmaAtiva, selecionarTurma, isProfessor, userName, userEmail, alunoStatusAprovacao, isConteudoLiberado } = useTurma();
 
   // Fecha o menu mobile automaticamente ao trocar de rota
   useEffect(() => {
@@ -172,18 +172,32 @@ export default function AppSidebar() {
                   );
                 }
 
+                const toolKeyMap: Record<string, string> = {
+                  "/dashboard/systems": "climatizacao",
+                  "/dashboard/components": "componentes",
+                  "/dashboard/troubleshooting": "diagnostico",
+                  "/dashboard/sizing": "dimensionamento",
+                };
+                const toolKey = toolKeyMap[item.href];
+                const isItemLiberado = !toolKey || isConteudoLiberado(toolKey, "ferramenta");
+
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer ${
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer ${
                       isActive
                         ? "bg-red-600 text-white shadow-lg shadow-red-900/30 font-semibold"
                         : "text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white font-medium"
                     }`}
                   >
-                    <Icon className="w-5 h-5 shrink-0" />
-                    <span className="text-sm">{item.name}</span>
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-5 h-5 shrink-0" />
+                      <span className="text-sm">{item.name}</span>
+                    </div>
+                    {!isProfessor && !isItemLiberado && (
+                      <Lock className="w-3.5 h-3.5 text-amber-500/80 shrink-0" />
+                    )}
                   </Link>
                 );
               })}

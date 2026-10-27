@@ -5,6 +5,7 @@ import { Zap, Pin, Plus, ShieldCheck, CheckCircle2, XCircle, Clock, Archive, Tra
 import { useState } from "react";
 import { useTurma, getProfessorDisplayName } from "@/contexts/TurmaContext";
 import { toast } from "sonner";
+import ControlePermissoesTurma from "@/components/ControlePermissoesTurma";
 
 export default function DashboardPage() {
   const {
@@ -391,6 +392,11 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+
+          {/* PAINEL PEDAGÓGICO: CONTROLE DE LIBERAÇÃO DE CONTEÚDOS E FERRAMENTAS */}
+          {isProfessor && turmaAtiva && (
+            <ControlePermissoesTurma />
+          )}
 
           {/* TURMAS ARQUIVADAS (Se houver e for Professor) */}
           {isProfessor && turmasArquivadas.length > 0 && (

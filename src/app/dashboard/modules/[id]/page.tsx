@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCircle, Clock, Printer, Sparkles, Users } from "lucide-react";
+import { CheckCircle2, Circle, FileDown, Loader2, PlayCircle, BookOpen, AlertCircle, Clock, Printer, Sparkles, Users, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTurma } from "@/contexts/TurmaContext";
 import { module1MaterialsData, Lesson, LessonMaterial } from "@/data/module1Materials";
@@ -14,6 +14,7 @@ import { module2MaterialsData, module2ChallengeData } from "@/data/module2Materi
 import { module3MaterialsData, module3ChallengeData } from "@/data/module3Materials";
 import PrintableLessonModal from "@/components/PrintableLessonModal";
 import PrintableChallengeModal from "@/components/PrintableChallengeModal";
+import ConteudoBloqueadoCard from "@/components/ConteudoBloqueadoCard";
 
 const modulesInfo = {
   "mod-1": { title: "Fundamentos de Climatização", description: "Conceitos de calor, temperatura, pressão, ciclo frigorífico e manuseio seguro de fluidos." },
@@ -28,7 +29,7 @@ export default function ModuleDetailsPage() {
 
   const supabase = createClient();
   
-  const { turmaAtiva, aulasConcluidas, isProfessor, alternarConclusaoAula } = useTurma();
+  const { turmaAtiva, aulasConcluidas, isProfessor, alternarConclusaoAula, isConteudoLiberado } = useTurma();
   
   const [lessons, setLessons] = useState<any[]>([]);
   const [activeLesson, setActiveLesson] = useState<any>(null);
@@ -36,6 +37,22 @@ export default function ModuleDetailsPage() {
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
+
+  // Verificação granular de permissão do módulo e das aulas
+  const isModuloLiberado = isConteudoLiberado(moduleId, "modulo");
+
+  const getLessonKey = (lesson: any) => {
+    if (lesson?.id && String(lesson.id).startsWith("mod-")) return lesson.id;
+    return `${moduleId}-aula-${lesson?.lesson_order}`;
+  };
+
+  const isLessonLiberada = (lesson: any) => {
+    if (isProfessor) return true;
+    if (!isModuloLiberado) return false;
+    return isConteudoLiberado(getLessonKey(lesson), "aula");
+  };
+
+  const isCurrentLessonLiberada = activeLesson ? isLessonLiberada(activeLesson) : true;
 
   useEffect(() => {
     async function fetchLessons() {
@@ -203,7 +220,20 @@ export default function ModuleDetailsPage() {
           
           <div className="relative w-full aspect-video bg-black/80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl flex flex-col items-center justify-center group">
             
-            {hasEffectiveVideo ? (
+            {/* Se o conteúdo estiver bloqueado para o aluno */}
+            {!isProfessor && (!isModuloLiberado || !isCurrentLessonLiberada) ? (
+              <div className="w-full h-full p-6 sm:p-10 flex items-center justify-center bg-black/80">
+                <ConteudoBloqueadoCard
+                  titulo={
+                    !isModuloLiberado
+                      ? currentModuleInfo.title
+                      : `Aula ${activeLesson.lesson_order}: ${activeLesson.title}`
+                  }
+                  categoria={!isModuloLiberado ? "modulo" : "aula"}
+                  compacto={false}
+                />
+              </div>
+            ) : hasEffectiveVideo ? (
               isYouTube ? (
                 <iframe
                   className="w-full h-full border-0"
@@ -298,7 +328,16 @@ export default function ModuleDetailsPage() {
                 </div>
                 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-                  {currentMaterial ? (
+                  {!isProfessor && (!isModuloLiberado || !isCurrentLessonLiberada) ? (
+                    <Button
+                      variant="outline"
+                      disabled
+                      className="w-full sm:w-auto bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed opacity-60"
+                    >
+                      <Lock className="w-4 h-4 mr-2" />
+                      Material Bloqueado
+                    </Button>
+                  ) : currentMaterial ? (
                     <Button
                       variant="outline"
                       onClick={() => setIsModalOpen(true)}
@@ -339,6 +378,10 @@ export default function ModuleDetailsPage() {
                         <><Circle className="w-4 h-4 mr-2" /> Marcar Conclusão</>
                       )}
                     </Button>
+                  ) : !isCurrentLessonLiberada ? (
+                    <div className="inline-flex items-center justify-center px-4 py-2 rounded-md text-xs sm:text-sm font-medium border bg-amber-500/10 text-amber-400 border-amber-500/30">
+                      <Lock className="w-4 h-4 mr-2" /> Bloqueada pelo Instrutor
+                    </div>
                   ) : (
                     <div
                       className={`inline-flex items-center justify-center px-4 py-2 rounded-md text-xs sm:text-sm font-medium border select-none ${
@@ -357,7 +400,8 @@ export default function ModuleDetailsPage() {
                 </div>
               </div>
 
-              {currentMaterial && (
+              {/* Informações detalhadas da aula apenas se liberada para o aluno ou se for professor */}
+              {(isProfessor || isCurrentLessonLiberada) && currentMaterial && (
                 <div className="border-t border-white/10 pt-4 space-y-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-red-400 mb-1">
@@ -411,6 +455,7 @@ export default function ModuleDetailsPage() {
                 {lessons.map((lesson) => {
                   const isActive = activeLesson?.id === lesson.id;
                   const isCompleted = aulasConcluidas.includes(lesson.id);
+                  const isLiberada = isLessonLiberada(lesson);
                   
                   return (
                     <button
@@ -421,10 +466,13 @@ export default function ModuleDetailsPage() {
                         ${isActive 
                           ? 'bg-red-500/10 border-l-4 border-l-red-500' 
                           : 'hover:bg-white/5 border-l-4 border-l-transparent'}
+                        ${!isProfessor && !isLiberada ? 'opacity-70' : ''}
                       `}
                     >
                       <div className="mt-0.5 shrink-0">
-                        {isCompleted ? (
+                        {!isProfessor && !isLiberada ? (
+                          <Lock className="w-5 h-5 text-amber-500" />
+                        ) : isCompleted ? (
                           <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                         ) : isActive ? (
                           <PlayCircle className="w-5 h-5 text-red-500 animate-pulse" />
@@ -434,9 +482,16 @@ export default function ModuleDetailsPage() {
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium leading-snug ${isActive ? 'text-white font-semibold' : 'text-gray-400'}`}>
-                          {lesson.lesson_order}. {lesson.title}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className={`text-sm font-medium leading-snug ${isActive ? 'text-white font-semibold' : 'text-gray-400'}`}>
+                            {lesson.lesson_order}. {lesson.title}
+                          </p>
+                          {!isProfessor && !isLiberada && (
+                            <span className="shrink-0 text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                              Bloqueada
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
                           <span>{lesson.has_video ? '📺 Vídeo' : '📄 Leitura'}</span>
                           <span>•</span>

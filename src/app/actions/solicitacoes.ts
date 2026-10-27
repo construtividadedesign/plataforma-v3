@@ -411,3 +411,45 @@ export async function carregarSolicitacoesAction(): Promise<{
     return { success: false, solicitacoes: [], error: err.message };
   }
 }
+
+/**
+ * ETAPA 1: Atualizar Permissões de Conteúdo (Aulas, Módulos e Ferramentas) da Turma
+ */
+export async function atualizarPermissoesTurmaAction(params: {
+  turmaId: string;
+  permissoes: any;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const adminClient = getSupabaseAdminClient();
+    const userClient = await getSupabaseUserClient();
+    const { data: { user } } = await userClient.auth.getUser();
+
+    const callerEmail = user?.email?.toLowerCase().trim() || "";
+    const isProf = isProfessorEmail(callerEmail);
+
+    if (!isProf && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return { success: false, error: "Apenas instrutores autorizados podem alterar permissões." };
+    }
+
+    const clientToUse = adminClient || userClient;
+
+    const { error } = await clientToUse
+      .from("turmas")
+      .update({
+        permissoes_conteudo: params.permissoes,
+        ...(params.permissoes?.ferramentas?.componentes !== undefined
+          ? { componentes_liberados: params.permissoes.ferramentas.componentes }
+          : {}),
+      })
+      .eq("id", params.turmaId);
+
+    if (error) {
+      console.error("Erro ao atualizar permissoes_conteudo:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}

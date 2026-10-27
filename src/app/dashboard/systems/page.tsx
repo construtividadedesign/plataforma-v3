@@ -22,6 +22,8 @@ import {
   FileText,
 } from "lucide-react";
 import { hvacSystemsData, HVACSystemType } from "@/data/hvacSystemsData";
+import { useTurma } from "@/contexts/TurmaContext";
+import ConteudoBloqueadoCard from "@/components/ConteudoBloqueadoCard";
 
 // Imagens de alta fidelidade técnica locais (garantem 100% de disponibilidade e zero falhas de carregamento)
 const SYSTEM_FALLBACK_IMAGES: Record<string, string> = {
@@ -45,6 +47,8 @@ const resolveSystemImage = (url: string) => {
 };
 
 export default function SystemsPage() {
+  const { isProfessor, isConteudoLiberado } = useTurma();
+  const isLiberado = isConteudoLiberado("climatizacao", "ferramenta");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("Todas");
   const [selectedSystemModal, setSelectedSystemModal] = useState<HVACSystemType | null>(null);
@@ -91,6 +95,19 @@ export default function SystemsPage() {
   const handlePrint = () => {
     window.print();
   };
+
+  if (!isProfessor && !isLiberado) {
+    return (
+      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-500">
+        <ConteudoBloqueadoCard
+          titulo="Tipos de Climatização"
+          categoria="ferramenta"
+          descricaoDetalhada="Catálogo técnico de sistemas Split Hi-Wall, Multi-Split, Cassete, Piso-Teto, VRF e Chiller."
+        />
+      </div>
+    );
+  }
+
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-500">

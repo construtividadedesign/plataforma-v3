@@ -3,7 +3,8 @@ import {
   solicitarAcessoAction,
   aprovarAlunoAction,
   rejeitarAlunoAction,
-  carregarSolicitacoesAction
+  carregarSolicitacoesAction,
+  atualizarPermissoesTurmaAction
 } from '@/app/actions/solicitacoes';
 
 export async function GET(request: NextRequest) {
@@ -80,6 +81,19 @@ export async function POST(request: NextRequest) {
         turmaNome: res.turmaNome,
         alunos_solicitacoes: res.alunos_solicitacoes
       }, { status: 200 });
+    }
+
+    if (action === "atualizar_permissoes") {
+      const res = await atualizarPermissoesTurmaAction({
+        turmaId,
+        permissoes: body.permissoes,
+      });
+
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || "Erro ao atualizar permissões da turma" }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true }, { status: 200 });
     }
 
     return NextResponse.json({ error: "Ação inválida" }, { status: 400 });

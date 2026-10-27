@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { hvacErrorCodesData, ErrorDiagnosticItem } from "@/data/hvacErrorCodes";
+import { useTurma } from "@/contexts/TurmaContext";
+import ConteudoBloqueadoCard from "@/components/ConteudoBloqueadoCard";
 import {
   Search,
   AlertTriangle,
@@ -20,6 +22,8 @@ import {
 } from "lucide-react";
 
 export default function TroubleshootingPage() {
+  const { isProfessor, isConteudoLiberado } = useTurma();
+  const isLiberado = isConteudoLiberado("diagnostico", "ferramenta");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<string>("Todas");
   const [selectedSeverity, setSelectedSeverity] = useState<string>("Todas");
@@ -86,6 +90,18 @@ export default function TroubleshootingPage() {
     const prevIndex = (currentIndex - 1 + filteredCodes.length) % filteredCodes.length;
     setModalItem(filteredCodes[prevIndex]);
   };
+
+  if (!isProfessor && !isLiberado) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
+        <ConteudoBloqueadoCard
+          titulo="Diagnóstico e Falhas (Troubleshooting)"
+          categoria="ferramenta"
+          descricaoDetalhada="Central de códigos de erro, sintomas e procedimentos de reparo prático em bancada."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">

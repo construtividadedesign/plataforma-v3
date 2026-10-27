@@ -33,8 +33,12 @@ import {
   SizingCaseStudy,
 } from "@/data/hvacSizingData";
 import PrintableSizingModal, { SizingReportData } from "@/components/PrintableSizingModal";
+import { useTurma } from "@/contexts/TurmaContext";
+import ConteudoBloqueadoCard from "@/components/ConteudoBloqueadoCard";
 
 export default function SizingPage() {
+  const { isProfessor, isConteudoLiberado } = useTurma();
+  const isLiberado = isConteudoLiberado("dimensionamento", "ferramenta");
   // Estado das Abas Principais
   const [activeTab, setActiveTab] = useState<"calc" | "theory" | "cases" | "tables">("calc");
 
@@ -283,6 +287,18 @@ export default function SizingPage() {
       hvacSizingCaseStudies[0]
     );
   }, [selectedCaseId]);
+
+  if (!isProfessor && !isLiberado) {
+    return (
+      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-500">
+        <ConteudoBloqueadoCard
+          titulo="Dimensionamento de Carga Térmica (BTUs)"
+          categoria="ferramenta"
+          descricaoDetalhada="Calculadora interativa NBR 5858, simulação de ambientes e relatórios de engenharia."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8 animate-in fade-in duration-500">

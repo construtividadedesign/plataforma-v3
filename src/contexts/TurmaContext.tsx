@@ -6,6 +6,7 @@ import {
   solicitarAcessoAction,
   aprovarAlunoAction,
   rejeitarAlunoAction,
+  atualizarPermissoesTurmaAction,
 } from "@/app/actions/solicitacoes";
 
 /**
@@ -54,6 +55,17 @@ export type AlunoSolicitacao = {
   professor_email?: string;
 };
 
+export type PermissoesConteudo = {
+  aulas?: Record<string, boolean>; // e.g. "mod-1-aula-1": true
+  modulos?: Record<string, boolean>; // e.g. "mod-1": true
+  ferramentas?: {
+    climatizacao?: boolean;
+    componentes?: boolean;
+    diagnostico?: boolean;
+    dimensionamento?: boolean;
+  };
+};
+
 export type Turma = {
   id: string;
   nome: string;
@@ -63,6 +75,7 @@ export type Turma = {
   status?: "ativa" | "arquivada";
   componentes_liberados?: boolean;
   alunos_solicitacoes?: AlunoSolicitacao[];
+  permissoes_conteudo?: PermissoesConteudo;
 };
 
 type TurmaContextType = {
@@ -82,6 +95,16 @@ type TurmaContextType = {
   aprovarAluno: (email: string, turmaId: string) => Promise<{ success: boolean; error?: string }>;
   rejeitarAluno: (email: string, turmaId: string) => Promise<{ success: boolean; error?: string }>;
   removerAlunoAprovado: (email: string, turmaId: string) => Promise<{ success: boolean; error?: string }>;
+  atualizarPermissaoTurma: (
+    turmaId: string,
+    chaveConteudo: string,
+    statusLiberado: boolean,
+    categoria?: "aula" | "ferramenta" | "modulo"
+  ) => Promise<boolean>;
+  isConteudoLiberado: (
+    chaveConteudo: string,
+    categoria?: "aula" | "ferramenta" | "modulo"
+  ) => boolean;
   criarTurma: (nome: string) => Promise<boolean>;
   arquivarTurma: (turmaId: string) => void;
   excluirTurma: (turmaId: string) => Promise<void>;
@@ -711,6 +734,138 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const atualizarPermissaoTurma = async (
+    turmaId: string,
+    chaveConteudo: string,
+    statusLiberado: boolean,
+    categoria: "aula" | "ferramenta" | "modulo" = "ferramenta"
+  ): Promise<boolean> => {
+    if (!isProfessor) return false;
+    const cleanTurmaId = turmaId.trim();
+
+    const turmaAlvo = turmas.find(t => t.id === cleanTurmaId) || turmaAtiva;
+    const currentPerms: PermissoesConteudo = turmaAlvo?.permissoes_conteudo || {
+      aulas: {},
+      modulos: { "mod-1": true, "mod-2": true, "mod-3": true },
+      ferramentas: {
+        climatizacao: true,
+        componentes: turmaAlvo?.componentes_liberados !== false,
+        diagnostico: true,
+        dimensionamento: true,
+      },
+    };
+
+    const updatedPerms: PermissoesConteudo = {
+      aulas: { ...(currentPerms.aulas || {}) },
+      modulos: { ...(currentPerms.modulos || {}) },
+      ferramentas: { ...(currentPerms.ferramentas || {}) },
+    };
+
+    if (
+      categoria === "ferramenta" ||
+      ["climatizacao", "componentes", "diagnostico", "dimensionamento"].includes(chaveConteudo)
+    ) {
+      if (!updatedPerms.ferramentas) updatedPerms.ferramentas = {};
+      (updatedPerms.ferramentas as any)[chaveConteudo] = statusLiberado;
+    } else if (
+      categoria === "modulo" ||
+      (chaveConteudo.startsWith("mod-") && !chaveConteudo.includes("aula"))
+    ) {
+      if (!updatedPerms.modulos) updatedPerms.modulos = {};
+      updatedPerms.modulos[chaveConteudo] = statusLiberado;
+    } else {
+      if (!updatedPerms.aulas) updatedPerms.aulas = {};
+      updatedPerms.aulas[chaveConteudo] = statusLiberado;
+    }
+
+    // Atualização otimista imediata no estado local
+    setTurmas(prev =>
+      prev.map(t =>
+        t.id === cleanTurmaId
+          ? {
+              ...t,
+              permissoes_conteudo: updatedPerms,
+              ...(chaveConteudo === "componentes" ? { componentes_liberados: statusLiberado } : {}),
+            }
+          : t
+      )
+    );
+
+    setTurmaAtiva(prev =>
+      prev && prev.id === cleanTurmaId
+        ? {
+            ...prev,
+            permissoes_conteudo: updatedPerms,
+            ...(chaveConteudo === "componentes" ? { componentes_liberados: statusLiberado } : {}),
+          }
+        : prev
+    );
+
+    // Grava no Supabase via Server Action com fallback para API Route
+    try {
+      const res = await atualizarPermissoesTurmaAction({
+        turmaId: cleanTurmaId,
+        permissoes: updatedPerms,
+      });
+
+      if (!res.success) {
+        await fetch("/api/solicitacoes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "atualizar_permissoes",
+            turmaId: cleanTurmaId,
+            permissoes: updatedPerms,
+          }),
+        });
+      }
+      return true;
+    } catch (err) {
+      console.error("Erro ao atualizar permissões da turma:", err);
+      return false;
+    }
+  };
+
+  const isConteudoLiberado = useCallback(
+    (chaveConteudo: string, categoria: "aula" | "ferramenta" | "modulo" = "ferramenta"): boolean => {
+      if (isProfessor) return true;
+      if (!turmaAtiva) return false;
+
+      const perms = turmaAtiva.permissoes_conteudo;
+      if (!perms) {
+        if (chaveConteudo === "componentes") {
+          return turmaAtiva.componentes_liberados !== false;
+        }
+        return true;
+      }
+
+      if (categoria === "ferramenta") {
+        if (chaveConteudo === "componentes" && turmaAtiva.componentes_liberados === false) {
+          return false;
+        }
+        const val = perms.ferramentas?.[chaveConteudo as keyof typeof perms.ferramentas];
+        return val !== false;
+      }
+
+      if (categoria === "modulo") {
+        const val = perms.modulos?.[chaveConteudo];
+        return val !== false;
+      }
+
+      if (categoria === "aula") {
+        const modMatch = chaveConteudo.match(/^(mod-\d+)/);
+        if (modMatch && perms.modulos?.[modMatch[1]] === false) {
+          return false;
+        }
+        const val = perms.aulas?.[chaveConteudo];
+        return val !== false;
+      }
+
+      return true;
+    },
+    [isProfessor, turmaAtiva]
+  );
+
   const recarregarDados = async () => {
     await carregarDados(true);
   };
@@ -733,6 +888,8 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
       aprovarAluno,
       rejeitarAluno,
       removerAlunoAprovado,
+      atualizarPermissaoTurma,
+      isConteudoLiberado,
       criarTurma,
       arquivarTurma,
       excluirTurma,
