@@ -24,7 +24,8 @@ function getSupabaseAdminClient() {
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.SUPABASE_SERVICE_KEY ||
     process.env.SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SECRET_KEY;
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.SUPABASE_ADMIN_KEY;
 
   if (!serviceKey) {
     console.warn("SUPABASE_SERVICE_ROLE_KEY não encontrada nas variáveis de ambiente. Usando anon key como fallback.");
@@ -76,38 +77,86 @@ export type ActionResponse = {
   success: boolean;
   error?: string;
   turmaId?: string;
+  turmaNome?: string;
   alunos_solicitacoes?: any[];
 };
 
 /**
- * Localiza a turma no banco por ID (UUID) ou Nome
+ * Busca flexível de turmas em memória (evita erros de UUID do Postgres)
+ * + Auto-Healing (Auto-Upsert) se a turma não existir no banco de dados.
  */
-async function buscarTurma(adminClient: any, turmaId: string, turmaNome?: string) {
-  const cleanId = String(turmaId || "").trim();
-  const cleanNome = String(turmaNome || "").trim();
+async function localizarOuCriarTurma(
+  adminClient: any,
+  turmaId?: string,
+  turmaNome?: string,
+  novoAluno?: any,
+  professorEmailPadrao?: string
+): Promise<{ turma: any; isNew: boolean; error?: string }> {
+  const cleanId = String(turmaId || "").trim().toLowerCase();
+  const cleanNome = String(turmaNome || "").trim().toLowerCase();
 
-  if (cleanId) {
-    const { data } = await adminClient
-      .from("turmas")
-      .select("id, nome, professor_email, alunos_solicitacoes")
-      .eq("id", cleanId)
-      .maybeSingle();
+  // 1. Busca todas as turmas cadastradas (sem filtrar por id no SQL para não gerar erro de sintaxe UUID)
+  const { data: todasTurmas, error: fetchErr } = await adminClient
+    .from("turmas")
+    .select("*");
 
-    if (data) return data;
+  if (fetchErr) {
+    console.warn("Aviso ao buscar todas as turmas:", fetchErr.message);
   }
 
-  const queryName = cleanNome || cleanId;
-  if (queryName) {
-    const { data } = await adminClient
-      .from("turmas")
-      .select("id, nome, professor_email, alunos_solicitacoes")
-      .ilike("nome", queryName)
-      .maybeSingle();
+  // 2. Localiza em memória com normalização flexível (id, nome ou cruzado)
+  let turmaEncontrada = (todasTurmas || []).find((t: any) => {
+    const tId = String(t.id || "").trim().toLowerCase();
+    const tNome = String(t.nome || "").trim().toLowerCase();
 
-    if (data) return data;
+    const matchId = cleanId && (tId === cleanId || tNome === cleanId);
+    const matchNome = cleanNome && (tNome === cleanNome || tId === cleanNome);
+
+    return Boolean(matchId || matchNome);
+  });
+
+  if (turmaEncontrada) {
+    return { turma: turmaEncontrada, isNew: false };
   }
 
-  return null;
+  // 3. AUTO-HEALING: Se não encontrou, cria a turma automaticamente no banco
+  const nomeFinal = (turmaNome || turmaId || "Turma").trim();
+  const profEmail = (professorEmailPadrao || ADMIN_EMAILS[0]).toLowerCase().trim();
+  const initialArray = novoAluno ? [novoAluno] : [];
+
+  const { data: novaTurma, error: insertErr } = await adminClient
+    .from("turmas")
+    .insert([
+      {
+        nome: nomeFinal,
+        professor_email: profEmail,
+        alunos_solicitacoes: initialArray,
+        componentes_liberados: true,
+      },
+    ])
+    .select()
+    .single();
+
+  if (insertErr) {
+    console.warn("Aviso na auto-criação com professor_email, tentando fallback simples:", insertErr.message);
+    const { data: fallbackTurma, error: fallbackErr } = await adminClient
+      .from("turmas")
+      .insert([
+        {
+          nome: nomeFinal,
+          alunos_solicitacoes: initialArray,
+        },
+      ])
+      .select()
+      .single();
+
+    if (fallbackErr) {
+      return { turma: null, isNew: false, error: fallbackErr.message };
+    }
+    return { turma: fallbackTurma, isNew: true };
+  }
+
+  return { turma: novaTurma, isNew: true };
 }
 
 /**
@@ -119,6 +168,7 @@ export async function solicitarAcessoAction(params: {
   turmaNome?: string;
   nome?: string;
   email?: string;
+  professorEmail?: string;
 }): Promise<ActionResponse> {
   try {
     const userClient = await getSupabaseUserClient();
@@ -137,15 +187,6 @@ export async function solicitarAcessoAction(params: {
     ).trim();
 
     const adminClient = getSupabaseAdminClient();
-    const turma = await buscarTurma(adminClient, params.turmaId, params.turmaNome);
-
-    if (!turma) {
-      return { success: false, error: "Turma não encontrada no banco de dados." };
-    }
-
-    const currentArray: any[] = Array.isArray(turma.alunos_solicitacoes)
-      ? turma.alunos_solicitacoes
-      : [];
 
     const novoObjetoAluno = {
       id: crypto.randomUUID(),
@@ -155,7 +196,34 @@ export async function solicitarAcessoAction(params: {
       data_solicitacao: new Date().toISOString(),
     };
 
-    // Remove qualquer solicitação prévia deste aluno e adiciona o novo pedido (append)
+    // Localiza ou auto-cria a turma com a solicitação incluída
+    const { turma, isNew, error } = await localizarOuCriarTurma(
+      adminClient,
+      params.turmaId,
+      params.turmaNome,
+      novoObjetoAluno,
+      params.professorEmail
+    );
+
+    if (!turma) {
+      return { success: false, error: error || "Não foi possível localizar ou criar a turma no banco." };
+    }
+
+    // Se foi criada agora (Auto-Healing), a solicitação já está gravada
+    if (isNew) {
+      return {
+        success: true,
+        turmaId: turma.id,
+        turmaNome: turma.nome,
+        alunos_solicitacoes: [novoObjetoAluno],
+      };
+    }
+
+    // Se a turma já existia, faz o append com substituição de registros antigos deste mesmo aluno
+    const currentArray: any[] = Array.isArray(turma.alunos_solicitacoes)
+      ? turma.alunos_solicitacoes
+      : [];
+
     const filtered = currentArray.filter(
       (a: any) => String(a.email || "").toLowerCase().trim() !== studentEmail
     );
@@ -174,6 +242,7 @@ export async function solicitarAcessoAction(params: {
     return {
       success: true,
       turmaId: turma.id,
+      turmaNome: turma.nome,
       alunos_solicitacoes: updatedArray,
     };
   } catch (err: any) {
@@ -188,6 +257,7 @@ export async function solicitarAcessoAction(params: {
  */
 export async function aprovarAlunoAction(params: {
   turmaId: string;
+  turmaNome?: string;
   email: string;
 }): Promise<ActionResponse> {
   try {
@@ -202,9 +272,9 @@ export async function aprovarAlunoAction(params: {
       return { success: false, error: "Apenas instrutores autorizados podem aprovar alunos." };
     }
 
-    const turma = await buscarTurma(adminClient, params.turmaId);
+    const { turma, error } = await localizarOuCriarTurma(adminClient, params.turmaId, params.turmaNome);
     if (!turma) {
-      return { success: false, error: "Turma não encontrada." };
+      return { success: false, error: error || "Turma não encontrada." };
     }
 
     const currentArray: any[] = Array.isArray(turma.alunos_solicitacoes)
@@ -237,6 +307,7 @@ export async function aprovarAlunoAction(params: {
     return {
       success: true,
       turmaId: turma.id,
+      turmaNome: turma.nome,
       alunos_solicitacoes: updatedArray,
     };
   } catch (err: any) {
@@ -250,6 +321,7 @@ export async function aprovarAlunoAction(params: {
  */
 export async function rejeitarAlunoAction(params: {
   turmaId: string;
+  turmaNome?: string;
   email: string;
 }): Promise<ActionResponse> {
   try {
@@ -264,9 +336,9 @@ export async function rejeitarAlunoAction(params: {
       return { success: false, error: "Apenas instrutores autorizados podem revogar alunos." };
     }
 
-    const turma = await buscarTurma(adminClient, params.turmaId);
+    const { turma, error } = await localizarOuCriarTurma(adminClient, params.turmaId, params.turmaNome);
     if (!turma) {
-      return { success: false, error: "Turma não encontrada." };
+      return { success: false, error: error || "Turma não encontrada." };
     }
 
     const currentArray: any[] = Array.isArray(turma.alunos_solicitacoes)
@@ -292,6 +364,7 @@ export async function rejeitarAlunoAction(params: {
     return {
       success: true,
       turmaId: turma.id,
+      turmaNome: turma.nome,
       alunos_solicitacoes: updatedArray,
     };
   } catch (err: any) {

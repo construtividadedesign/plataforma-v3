@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { action, turmaId, turmaNome, emailAluno, nomeAluno } = body;
+    const { action, turmaId, turmaNome, emailAluno, nomeAluno, professorEmail } = body;
 
     if (action === "solicitar") {
       const res = await solicitarAcessoAction({
@@ -29,15 +29,17 @@ export async function POST(request: NextRequest) {
         turmaNome,
         nome: nomeAluno,
         email: emailAluno,
+        professorEmail,
       });
 
       if (!res.success) {
-        return NextResponse.json({ error: res.error || "Erro ao atualizar alunos_solicitacoes" }, { status: 500 });
+        return NextResponse.json({ error: res.error || "Erro ao processar solicitação de acesso" }, { status: 500 });
       }
 
       return NextResponse.json({
         success: true,
         turmaId: res.turmaId,
+        turmaNome: res.turmaNome,
         alunos_solicitacoes: res.alunos_solicitacoes
       }, { status: 200 });
     }
@@ -45,6 +47,7 @@ export async function POST(request: NextRequest) {
     if (action === "aprovar") {
       const res = await aprovarAlunoAction({
         turmaId,
+        turmaNome,
         email: emailAluno,
       });
 
@@ -55,6 +58,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         turmaId: res.turmaId,
+        turmaNome: res.turmaNome,
         alunos_solicitacoes: res.alunos_solicitacoes
       }, { status: 200 });
     }
@@ -62,6 +66,7 @@ export async function POST(request: NextRequest) {
     if (action === "rejeitar" || action === "excluir" || action === "revogar") {
       const res = await rejeitarAlunoAction({
         turmaId,
+        turmaNome,
         email: emailAluno,
       });
 
@@ -72,6 +77,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         turmaId: res.turmaId,
+        turmaNome: res.turmaNome,
         alunos_solicitacoes: res.alunos_solicitacoes
       }, { status: 200 });
     }

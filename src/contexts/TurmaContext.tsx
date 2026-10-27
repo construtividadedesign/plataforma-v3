@@ -340,9 +340,10 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     );
 
     const cleanTurmaId = turmaAlvo ? turmaAlvo.id.trim() : turmaId.trim();
-    const cleanTurmaNome = turmaAlvo ? turmaAlvo.nome.trim() : "";
+    const cleanTurmaNome = turmaAlvo ? turmaAlvo.nome.trim() : (turmaAtiva?.nome || turmaId).trim();
     const cleanEmail = userEmail.toLowerCase().trim();
     const cleanName = userName || "Aluno";
+    const profEmail = turmaAlvo?.professor_email || turmaAtiva?.professor_email;
 
     try {
       // 1. Executa a Server Action com bypass seguro de RLS
@@ -351,9 +352,12 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         turmaNome: cleanTurmaNome,
         nome: cleanName,
         email: cleanEmail,
+        professorEmail: profEmail,
       });
 
       let updatedSolicitacoes = res.alunos_solicitacoes;
+      let realTurmaId = res.turmaId || cleanTurmaId;
+      let realTurmaNome = res.turmaNome || cleanTurmaNome;
 
       if (!res.success) {
         // Fallback para rota de API
@@ -366,6 +370,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
             turmaNome: cleanTurmaNome,
             emailAluno: cleanEmail,
             nomeAluno: cleanName,
+            professorEmail: profEmail,
           }),
         });
 
@@ -379,18 +384,44 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
 
         const json = await apiRes.json();
         updatedSolicitacoes = json.alunos_solicitacoes;
+        realTurmaId = json.turmaId || realTurmaId;
+        realTurmaNome = json.turmaNome || realTurmaNome;
       }
 
-      // SUCESSO: Atualiza imediatamente a turma ativa com o array retornado da coluna JSONB
+      // SUCESSO: Atualiza imediatamente a turma ativa e a lista de turmas
       if (Array.isArray(updatedSolicitacoes)) {
-        setTurmas(prev =>
-          prev.map(t => (t.id === cleanTurmaId ? { ...t, alunos_solicitacoes: updatedSolicitacoes } : t))
-        );
-        setTurmaAtiva(prev =>
-          prev && (prev.id === cleanTurmaId || prev.id === turmaAlvo?.id)
-            ? { ...prev, alunos_solicitacoes: updatedSolicitacoes }
-            : prev
-        );
+        setTurmas(prev => {
+          const exists = prev.some(
+            t => t.id === realTurmaId || t.nome.toLowerCase().trim() === realTurmaNome.toLowerCase().trim()
+          );
+          if (exists) {
+            return prev.map(t =>
+              t.id === realTurmaId || t.nome.toLowerCase().trim() === realTurmaNome.toLowerCase().trim()
+                ? { ...t, id: realTurmaId, nome: realTurmaNome || t.nome, alunos_solicitacoes: updatedSolicitacoes }
+                : t
+            );
+          }
+          const nova: Turma = {
+            id: realTurmaId,
+            nome: realTurmaNome || cleanTurmaId,
+            instrutor_id: "",
+            professor_email: profEmail,
+            created_at: new Date().toISOString(),
+            componentes_liberados: true,
+            alunos_solicitacoes: updatedSolicitacoes,
+          };
+          return [nova, ...prev];
+        });
+
+        setTurmaAtiva(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            id: realTurmaId,
+            nome: realTurmaNome || prev.nome,
+            alunos_solicitacoes: updatedSolicitacoes,
+          };
+        });
       }
 
       return { success: true };
@@ -407,10 +438,16 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     if (!isProfessor) return { success: false, error: "Ação restrita ao Instrutor." };
     const cleanEmail = email.toLowerCase().trim();
     const cleanTurmaId = turmaId.trim();
+    const cleanTurmaNome = turmaAtiva?.nome || "";
 
     try {
-      const res = await aprovarAlunoAction({ turmaId: cleanTurmaId, email: cleanEmail });
+      const res = await aprovarAlunoAction({
+        turmaId: cleanTurmaId,
+        turmaNome: cleanTurmaNome,
+        email: cleanEmail
+      });
       let updatedSolicitacoes = res.alunos_solicitacoes;
+      let realTurmaId = res.turmaId || cleanTurmaId;
 
       if (!res.success) {
         const apiRes = await fetch("/api/solicitacoes", {
@@ -419,6 +456,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({
             action: "aprovar",
             turmaId: cleanTurmaId,
+            turmaNome: cleanTurmaNome,
             emailAluno: cleanEmail,
           }),
         });
@@ -433,14 +471,15 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
 
         const json = await apiRes.json();
         updatedSolicitacoes = json.alunos_solicitacoes;
+        realTurmaId = json.turmaId || realTurmaId;
       }
 
       if (Array.isArray(updatedSolicitacoes)) {
         setTurmas(prev =>
-          prev.map(t => (t.id === cleanTurmaId ? { ...t, alunos_solicitacoes: updatedSolicitacoes } : t))
+          prev.map(t => (t.id === realTurmaId || t.id === cleanTurmaId ? { ...t, alunos_solicitacoes: updatedSolicitacoes } : t))
         );
         setTurmaAtiva(prev =>
-          prev && prev.id === cleanTurmaId ? { ...prev, alunos_solicitacoes: updatedSolicitacoes } : prev
+          prev && (prev.id === realTurmaId || prev.id === cleanTurmaId) ? { ...prev, alunos_solicitacoes: updatedSolicitacoes } : prev
         );
       }
 
@@ -457,10 +496,16 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     if (!isProfessor) return { success: false, error: "Ação restrita ao Instrutor." };
     const cleanEmail = email.toLowerCase().trim();
     const cleanTurmaId = turmaId.trim();
+    const cleanTurmaNome = turmaAtiva?.nome || "";
 
     try {
-      const res = await rejeitarAlunoAction({ turmaId: cleanTurmaId, email: cleanEmail });
+      const res = await rejeitarAlunoAction({
+        turmaId: cleanTurmaId,
+        turmaNome: cleanTurmaNome,
+        email: cleanEmail
+      });
       let updatedSolicitacoes = res.alunos_solicitacoes;
+      let realTurmaId = res.turmaId || cleanTurmaId;
 
       if (!res.success) {
         const apiRes = await fetch("/api/solicitacoes", {
@@ -469,6 +514,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({
             action: "rejeitar",
             turmaId: cleanTurmaId,
+            turmaNome: cleanTurmaNome,
             emailAluno: cleanEmail,
           }),
         });
@@ -483,14 +529,15 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
 
         const json = await apiRes.json();
         updatedSolicitacoes = json.alunos_solicitacoes;
+        realTurmaId = json.turmaId || realTurmaId;
       }
 
       if (Array.isArray(updatedSolicitacoes)) {
         setTurmas(prev =>
-          prev.map(t => (t.id === cleanTurmaId ? { ...t, alunos_solicitacoes: updatedSolicitacoes } : t))
+          prev.map(t => (t.id === realTurmaId || t.id === cleanTurmaId ? { ...t, alunos_solicitacoes: updatedSolicitacoes } : t))
         );
         setTurmaAtiva(prev =>
-          prev && prev.id === cleanTurmaId ? { ...prev, alunos_solicitacoes: updatedSolicitacoes } : prev
+          prev && (prev.id === realTurmaId || prev.id === cleanTurmaId) ? { ...prev, alunos_solicitacoes: updatedSolicitacoes } : prev
         );
       }
 
