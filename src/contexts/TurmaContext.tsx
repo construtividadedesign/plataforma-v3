@@ -6,7 +6,6 @@ import {
   solicitarAcessoAction,
   aprovarAlunoAction,
   rejeitarAlunoAction,
-  carregarSolicitacoesAction
 } from "@/app/actions/solicitacoes";
 
 /**
@@ -43,6 +42,18 @@ export function getProfessorInitial(email?: string | null, name?: string | null)
   return name ? name.charAt(0).toUpperCase() : "P";
 }
 
+export type AlunoSolicitacao = {
+  id?: string;
+  nome: string;
+  email: string;
+  status: "pendente" | "aprovado" | "rejeitado" | "excluido";
+  data_solicitacao?: string;
+  data_aprovacao?: string;
+  turmaId?: string;
+  turmaNome?: string;
+  professor_email?: string;
+};
+
 export type Turma = {
   id: string;
   nome: string;
@@ -51,56 +62,8 @@ export type Turma = {
   created_at: string;
   status?: "ativa" | "arquivada";
   componentes_liberados?: boolean;
-  alunos_solicitacoes?: any[];
+  alunos_solicitacoes?: AlunoSolicitacao[];
 };
-
-export type AlunoSolicitacao = {
-  id?: string;
-  turmaId: string;
-  turmaNome?: string;
-  email: string;
-  nome: string;
-  status: "pendente" | "aprovado" | "rejeitado" | "excluido";
-  professor_email?: string;
-};
-
-export function matchesTurma(
-  solTurmaId?: string,
-  solTurmaNome?: string,
-  turma?: Turma | null
-): boolean {
-  if (!turma) return false;
-  const cleanTurmaId = String(turma.id || "").toLowerCase().trim();
-  const cleanTurmaNome = String(turma.nome || "").toLowerCase().trim();
-
-  if (solTurmaId) {
-    const cleanId = String(solTurmaId).toLowerCase().trim();
-    if (cleanId === cleanTurmaId || cleanId === cleanTurmaNome) return true;
-  }
-
-  if (solTurmaNome) {
-    const cleanName = String(solTurmaNome).toLowerCase().trim();
-    if (cleanName === cleanTurmaNome || cleanName === cleanTurmaId) return true;
-  }
-
-  return false;
-}
-
-export function getAlunoStatusNaTurma(
-  solicitacoes: AlunoSolicitacao[],
-  email: string | null | undefined,
-  turma: Turma | null | undefined
-): "pendente" | "aprovado" | "rejeitado" | "excluido" | "nao_solicitado" {
-  if (!email || !turma) return "nao_solicitado";
-  const cleanEmail = email.toLowerCase().trim();
-
-  const match = solicitacoes.find(s => {
-    if (s.email.toLowerCase().trim() !== cleanEmail) return false;
-    return matchesTurma(s.turmaId, s.turmaNome, turma);
-  });
-
-  return match ? match.status : "nao_solicitado";
-}
 
 type TurmaContextType = {
   turmas: Turma[];
@@ -139,142 +102,11 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
 
-  const [alunoStatusAprovacao, setAlunoStatusAprovacao] = useState<
-    "pendente" | "aprovado" | "rejeitado" | "excluido" | "nao_solicitado"
-  >("nao_solicitado");
-  const [todasSolicitacoes, setTodasSolicitacoes] = useState<AlunoSolicitacao[]>([]);
-
-  // Refs de controle para evitar loops de renderização e estado instável
+  // Refs de controle para estabilidade de renderização
   const isInitialLoadDoneRef = useRef(false);
-  const turmasRef = useRef<Turma[]>([]);
-  const turmaAtivaRef = useRef<Turma | null>(null);
-  const userEmailRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    turmasRef.current = turmas;
-  }, [turmas]);
-
-  useEffect(() => {
-    turmaAtivaRef.current = turmaAtiva;
-  }, [turmaAtiva]);
-
-  useEffect(() => {
-    userEmailRef.current = userEmail;
-  }, [userEmail]);
-
-  // Carrega e sincroniza todas as solicitações (com redundância entre Server Action, Supabase e API Route)
-  const carregarSolicitacoes = useCallback(async () => {
-    const currentTurmaAtiva = turmaAtivaRef.current;
-    const currentEmail = userEmailRef.current;
-    const currentTurmas = turmasRef.current;
-
-    let solicitacoes: AlunoSolicitacao[] = [];
-
-    // 1. Tenta carregar via Server Action consolidada (com Service Role Key)
-    try {
-      const res = await carregarSolicitacoesAction();
-      if (res.success && Array.isArray(res.solicitacoes) && res.solicitacoes.length > 0) {
-        solicitacoes = res.solicitacoes.map((s: any) => ({
-          id: s.id,
-          turmaId: String(s.turma_id || s.turmaId || "").trim(),
-          turmaNome: s.turma_nome || s.turmaNome ? String(s.turma_nome || s.turmaNome).trim() : undefined,
-          email: String(s.email || "").toLowerCase().trim(),
-          nome: String(s.nome || "").trim(),
-          status: s.status as any,
-          professor_email: s.professor_email ? String(s.professor_email).toLowerCase().trim() : undefined,
-        }));
-      }
-    } catch (err) {
-      console.warn("Aviso ao buscar solicitações via Server Action:", err);
-    }
-
-    // 2. Fallback via /api/solicitacoes se necessário
-    if (solicitacoes.length === 0) {
-      try {
-        const apiRes = await fetch("/api/solicitacoes", { cache: "no-store" });
-        if (apiRes.ok) {
-          const json = await apiRes.json();
-          if (Array.isArray(json.solicitacoes) && json.solicitacoes.length > 0) {
-            solicitacoes = json.solicitacoes.map((s: any) => ({
-              id: s.id,
-              turmaId: String(s.turma_id || s.turmaId || "").trim(),
-              turmaNome: s.turma_nome || s.turmaNome ? String(s.turma_nome || s.turmaNome).trim() : undefined,
-              email: String(s.email || "").toLowerCase().trim(),
-              nome: String(s.nome || "").trim(),
-              status: s.status as any,
-              professor_email: s.professor_email ? String(s.professor_email).toLowerCase().trim() : undefined,
-            }));
-          }
-        }
-      } catch (apiErr) {
-        console.warn("Aviso ao buscar via /api/solicitacoes:", apiErr);
-      }
-    }
-
-    // 3. Fallback via Supabase Client direto
-    if (solicitacoes.length === 0) {
-      try {
-        const supabase = createClient();
-        const { data: solData } = await supabase
-          .from("solicitacoes_alunos")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (solData && solData.length > 0) {
-          solicitacoes = solData.map((s: any) => ({
-            id: s.id,
-            turmaId: String(s.turma_id || "").trim(),
-            turmaNome: s.turma_nome ? String(s.turma_nome).trim() : undefined,
-            email: String(s.email || "").toLowerCase().trim(),
-            nome: String(s.nome || "").trim(),
-            status: s.status as any,
-            professor_email: s.professor_email ? String(s.professor_email).toLowerCase().trim() : undefined,
-          }));
-        }
-      } catch {}
-    }
-
-    // 4. Fallback via turmas em memória
-    if (solicitacoes.length === 0 && currentTurmas.length > 0) {
-      for (const t of currentTurmas) {
-        if (Array.isArray(t.alunos_solicitacoes)) {
-          for (const s of t.alunos_solicitacoes) {
-            solicitacoes.push({
-              turmaId: String(s.turmaId || t.id).trim(),
-              turmaNome: String(s.turmaNome || t.nome).trim(),
-              email: String(s.email || "").toLowerCase().trim(),
-              nome: String(s.nome || "").trim(),
-              status: s.status as any,
-              professor_email: s.professor_email ? String(s.professor_email).toLowerCase().trim() : undefined,
-            });
-          }
-        }
-      }
-    }
-
-    // Atualização estável: evita re-render caso a lista não tenha sofrido alterações
-    setTodasSolicitacoes(prev => {
-      if (JSON.stringify(prev) === JSON.stringify(solicitacoes)) {
-        return prev;
-      }
-      return solicitacoes;
-    });
-
-    // Atualiza status do aluno ativo para a turma ativa
-    if (currentEmail && !isProfessorEmail(currentEmail)) {
-      const activeT = currentTurmaAtiva || (currentTurmas.length > 0 ? currentTurmas[0] : null);
-      if (activeT) {
-        const status = getAlunoStatusNaTurma(solicitacoes, currentEmail, activeT);
-        setAlunoStatusAprovacao(prev => (prev === status ? prev : status));
-      }
-    }
-
-    return solicitacoes;
-  }, []);
-
-  // 1. Carregar Utilizador, Turmas com Isolamento Multi-Tenant e Estado de Aprovação
+  // 1. Carregar Utilizador, Turmas com coluna JSONB alunos_solicitacoes
   const carregarDados = useCallback(async (isBackground = false) => {
-    // JAMAIS setar isLoadingTurmas = true se for background ou se já houver turmas em memória
     if (!isBackground && !isInitialLoadDoneRef.current) {
       setIsLoadingTurmas(true);
     }
@@ -331,10 +163,11 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (!error && data) {
-        let turmasFiltradas = data.map((t: any) => ({
+        let turmasFiltradas: Turma[] = data.map((t: any) => ({
           ...t,
           id: String(t.id).trim(),
           nome: String(t.nome || "").trim(),
+          alunos_solicitacoes: Array.isArray(t.alunos_solicitacoes) ? t.alunos_solicitacoes : [],
         }));
 
         if (ehProf) {
@@ -371,21 +204,25 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
           return arquivadasList;
         });
 
-        // Preserva a seleção da turma ativa de forma estável (Merge de estado, não Reset)
+        // Atualização da turma ativa: detecta alterações na coluna alunos_solicitacoes
         setTurmaAtiva(prev => {
           if (ativasList.length === 0) return null;
           if (!prev) return ativasList[0];
 
           const found = ativasList.find(t => t.id === prev.id);
           if (found) {
+            const solicitacoesIguais =
+              JSON.stringify(found.alunos_solicitacoes) === JSON.stringify(prev.alunos_solicitacoes);
+
             if (
+              solicitacoesIguais &&
               found.nome === prev.nome &&
               found.componentes_liberados === prev.componentes_liberados &&
               found.professor_email === prev.professor_email
             ) {
               return prev; // Mesma referência, evita re-render desnecessário
             }
-            return found;
+            return found; // Atualiza com os novos dados de alunos_solicitacoes!
           }
 
           const foundByName = ativasList.find(
@@ -408,22 +245,17 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
 
   // Efeito de montagem inicial único
   useEffect(() => {
-    async function init() {
-      await carregarDados(false);
-      await carregarSolicitacoes();
-    }
-    init();
-  }, [carregarDados, carregarSolicitacoes]);
+    carregarDados(false);
+  }, [carregarDados]);
 
-  // Polling automático em segundo plano e sincronização ao focar na janela
+  // Polling automático em segundo plano a cada 5 segundos e ao focar na janela
   useEffect(() => {
     const interval = setInterval(() => {
-      // Background refetch silencioso: JAMAIS mexe em isLoadingTurmas
-      carregarSolicitacoes();
+      carregarDados(true);
     }, 5000);
 
     const handleFocus = () => {
-      carregarSolicitacoes();
+      carregarDados(true);
     };
     window.addEventListener("focus", handleFocus);
 
@@ -431,7 +263,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
       clearInterval(interval);
       window.removeEventListener("focus", handleFocus);
     };
-  }, [carregarSolicitacoes]);
+  }, [carregarDados]);
 
   // 2. Carregar Progresso da Turma Ativa
   useEffect(() => {
@@ -467,13 +299,36 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     );
     if (turma) {
       setTurmaAtiva(turma);
-      if (!isProfessor && userEmail) {
-        const status = getAlunoStatusNaTurma(todasSolicitacoes, userEmail, turma);
-        setAlunoStatusAprovacao(status);
-      }
     }
   };
 
+  /**
+   * ETAPA 2: Fonte Única de Verdade (Single Source of Truth)
+   * Alunos Pendentes e Aprovados derivados exclusivamente da coluna alunos_solicitacoes de turmaAtiva.
+   */
+  const listaAlunosTurmaAtiva: AlunoSolicitacao[] = Array.isArray(turmaAtiva?.alunos_solicitacoes)
+    ? turmaAtiva.alunos_solicitacoes
+    : [];
+
+  const alunosPendentes = listaAlunosTurmaAtiva.filter(a => a.status === "pendente");
+  const alunosAprovados = listaAlunosTurmaAtiva.filter(a => a.status === "aprovado");
+
+  /**
+   * Status do Aluno derivado em tempo real da turma ativa
+   */
+  const alunoStatusAprovacao: "pendente" | "aprovado" | "rejeitado" | "excluido" | "nao_solicitado" = (() => {
+    if (!userEmail || isProfessor || !turmaAtiva) return "nao_solicitado";
+    const cleanEmail = userEmail.toLowerCase().trim();
+    const aluno = listaAlunosTurmaAtiva.find(
+      a => String(a.email || "").toLowerCase().trim() === cleanEmail
+    );
+    if (!aluno) return "nao_solicitado";
+    return aluno.status || "pendente";
+  })();
+
+  /**
+   * Solicitar Acesso à Turma
+   */
   const solicitarAcessoTurma = async (turmaId: string): Promise<{ success: boolean; error?: string }> => {
     if (!userEmail || isProfessor) {
       return { success: false, error: "Apenas alunos podem solicitar acesso à turma." };
@@ -496,8 +351,9 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         turmaNome: cleanTurmaNome,
         nome: cleanName,
         email: cleanEmail,
-        professorEmail: turmaAlvo?.professor_email,
       });
+
+      let updatedSolicitacoes = res.alunos_solicitacoes;
 
       if (!res.success) {
         // Fallback para rota de API
@@ -510,7 +366,6 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
             turmaNome: cleanTurmaNome,
             emailAluno: cleanEmail,
             nomeAluno: cleanName,
-            professorEmail: turmaAlvo?.professor_email,
           }),
         });
 
@@ -521,25 +376,22 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
             error: errData.error || res.error || "Não foi possível registrar a solicitação no banco.",
           };
         }
+
+        const json = await apiRes.json();
+        updatedSolicitacoes = json.alunos_solicitacoes;
       }
 
-      // SUCESSO VALIDADO NO BACKEND: Atualiza o estado da interface
-      const novaSolicitacao: AlunoSolicitacao = {
-        turmaId: cleanTurmaId,
-        turmaNome: cleanTurmaNome,
-        email: cleanEmail,
-        nome: cleanName,
-        status: "pendente",
-        professor_email: turmaAlvo?.professor_email?.toLowerCase().trim(),
-      };
-
-      setTodasSolicitacoes(prev => [
-        ...prev.filter(
-          s => !(s.email.toLowerCase().trim() === cleanEmail && matchesTurma(s.turmaId, s.turmaNome, turmaAlvo))
-        ),
-        novaSolicitacao,
-      ]);
-      setAlunoStatusAprovacao("pendente");
+      // SUCESSO: Atualiza imediatamente a turma ativa com o array retornado da coluna JSONB
+      if (Array.isArray(updatedSolicitacoes)) {
+        setTurmas(prev =>
+          prev.map(t => (t.id === cleanTurmaId ? { ...t, alunos_solicitacoes: updatedSolicitacoes } : t))
+        );
+        setTurmaAtiva(prev =>
+          prev && (prev.id === cleanTurmaId || prev.id === turmaAlvo?.id)
+            ? { ...prev, alunos_solicitacoes: updatedSolicitacoes }
+            : prev
+        );
+      }
 
       return { success: true };
     } catch (err: any) {
@@ -548,6 +400,9 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * Aprovar Aluno na Turma Ativa
+   */
   const aprovarAluno = async (email: string, turmaId: string): Promise<{ success: boolean; error?: string }> => {
     if (!isProfessor) return { success: false, error: "Ação restrita ao Instrutor." };
     const cleanEmail = email.toLowerCase().trim();
@@ -555,6 +410,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const res = await aprovarAlunoAction({ turmaId: cleanTurmaId, email: cleanEmail });
+      let updatedSolicitacoes = res.alunos_solicitacoes;
 
       if (!res.success) {
         const apiRes = await fetch("/api/solicitacoes", {
@@ -574,20 +430,19 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
             error: errData.error || res.error || "Erro ao aprovar aluno no banco.",
           };
         }
+
+        const json = await apiRes.json();
+        updatedSolicitacoes = json.alunos_solicitacoes;
       }
 
-      setTodasSolicitacoes(prev =>
-        prev.map(s => {
-          const matchEmail = s.email.toLowerCase().trim() === cleanEmail;
-          const matchTurma =
-            s.turmaId.toLowerCase().trim() === cleanTurmaId.toLowerCase() ||
-            (s.turmaNome && turmaAtiva && s.turmaNome.toLowerCase().trim() === turmaAtiva.nome.toLowerCase().trim());
-          if (matchEmail && matchTurma) {
-            return { ...s, status: "aprovado" as const };
-          }
-          return s;
-        })
-      );
+      if (Array.isArray(updatedSolicitacoes)) {
+        setTurmas(prev =>
+          prev.map(t => (t.id === cleanTurmaId ? { ...t, alunos_solicitacoes: updatedSolicitacoes } : t))
+        );
+        setTurmaAtiva(prev =>
+          prev && prev.id === cleanTurmaId ? { ...prev, alunos_solicitacoes: updatedSolicitacoes } : prev
+        );
+      }
 
       return { success: true };
     } catch (err: any) {
@@ -595,6 +450,9 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * Rejeitar Aluno na Turma Ativa
+   */
   const rejeitarAluno = async (email: string, turmaId: string): Promise<{ success: boolean; error?: string }> => {
     if (!isProfessor) return { success: false, error: "Ação restrita ao Instrutor." };
     const cleanEmail = email.toLowerCase().trim();
@@ -602,6 +460,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const res = await rejeitarAlunoAction({ turmaId: cleanTurmaId, email: cleanEmail });
+      let updatedSolicitacoes = res.alunos_solicitacoes;
 
       if (!res.success) {
         const apiRes = await fetch("/api/solicitacoes", {
@@ -621,17 +480,19 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
             error: errData.error || res.error || "Erro ao recusar aluno no banco.",
           };
         }
+
+        const json = await apiRes.json();
+        updatedSolicitacoes = json.alunos_solicitacoes;
       }
 
-      setTodasSolicitacoes(prev =>
-        prev.filter(s => {
-          const matchEmail = s.email.toLowerCase().trim() === cleanEmail;
-          const matchTurma =
-            s.turmaId.toLowerCase().trim() === cleanTurmaId.toLowerCase() ||
-            (s.turmaNome && turmaAtiva && s.turmaNome.toLowerCase().trim() === turmaAtiva.nome.toLowerCase().trim());
-          return !(matchEmail && matchTurma);
-        })
-      );
+      if (Array.isArray(updatedSolicitacoes)) {
+        setTurmas(prev =>
+          prev.map(t => (t.id === cleanTurmaId ? { ...t, alunos_solicitacoes: updatedSolicitacoes } : t))
+        );
+        setTurmaAtiva(prev =>
+          prev && prev.id === cleanTurmaId ? { ...prev, alunos_solicitacoes: updatedSolicitacoes } : prev
+        );
+      }
 
       return { success: true };
     } catch (err: any) {
@@ -660,7 +521,8 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
       .insert([{ 
         nome: nome.trim(), 
         instrutor_id: user.id,
-        professor_email: emailAtual 
+        professor_email: emailAtual,
+        alunos_solicitacoes: []
       }])
       .select()
       .single();
@@ -670,7 +532,8 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         .from("turmas")
         .insert([{ 
           nome: nome.trim(), 
-          instrutor_id: user.id 
+          instrutor_id: user.id,
+          alunos_solicitacoes: []
         }])
         .select()
         .single();
@@ -683,7 +546,8 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         ...data,
         id: String(data.id).trim(),
         nome: String(data.nome || "").trim(),
-        professor_email: data.professor_email || emailAtual
+        professor_email: data.professor_email || emailAtual,
+        alunos_solicitacoes: Array.isArray(data.alunos_solicitacoes) ? data.alunos_solicitacoes : []
       };
       setTurmas(prev => [turmaCompleta, ...prev]);
       setTurmaAtiva(turmaCompleta);
@@ -722,11 +586,6 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Remove solicitações em cascata
-    try {
-      await supabase.from("solicitacoes_alunos").delete().eq("turma_id", cleanId);
-    } catch {}
-
     let deleteQuery = supabase.from("turmas").delete().eq("id", cleanId);
     if (user?.id) {
       deleteQuery = deleteQuery.eq("instrutor_id", user.id);
@@ -736,7 +595,6 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
     if (!error) {
       setTurmas(prev => prev.filter(t => t.id !== cleanId));
       setTurmasArquivadas(prev => prev.filter(t => t.id !== cleanId));
-      setTodasSolicitacoes(prev => prev.filter(s => s.turmaId !== cleanId));
 
       if (turmaAtiva?.id === cleanId) {
         setTurmaAtiva(prev => {
@@ -808,17 +666,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
 
   const recarregarDados = async () => {
     await carregarDados(true);
-    await carregarSolicitacoes();
   };
-
-  // Separa alunos pendentes e aprovados para a turma ativa
-  const alunosPendentes = turmaAtiva 
-    ? todasSolicitacoes.filter(s => matchesTurma(s.turmaId, s.turmaNome, turmaAtiva) && s.status === "pendente")
-    : [];
-
-  const alunosAprovados = turmaAtiva
-    ? todasSolicitacoes.filter(s => matchesTurma(s.turmaId, s.turmaNome, turmaAtiva) && s.status === "aprovado")
-    : [];
 
   return (
     <TurmaContext.Provider value={{ 

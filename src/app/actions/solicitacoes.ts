@@ -26,7 +26,15 @@ function getSupabaseAdminClient() {
     process.env.SERVICE_ROLE_KEY ||
     process.env.SUPABASE_SECRET_KEY;
 
-  if (!serviceKey) return null;
+  if (!serviceKey) {
+    console.warn("SUPABASE_SERVICE_ROLE_KEY não encontrada nas variáveis de ambiente. Usando anon key como fallback.");
+    return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+  }
 
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
     auth: {
@@ -37,7 +45,7 @@ function getSupabaseAdminClient() {
 }
 
 /**
- * Cria cliente Supabase de servidor com a sessão/cookies do usuário.
+ * Cria cliente Supabase com sessão/cookies do usuário.
  */
 async function getSupabaseUserClient() {
   const cookieStore = await cookies();
@@ -67,24 +75,55 @@ async function getSupabaseUserClient() {
 export type ActionResponse = {
   success: boolean;
   error?: string;
-  data?: any;
+  turmaId?: string;
+  alunos_solicitacoes?: any[];
 };
 
 /**
- * Solicitar acesso à turma com bypass seguro de RLS via Service Role Key
+ * Localiza a turma no banco por ID (UUID) ou Nome
+ */
+async function buscarTurma(adminClient: any, turmaId: string, turmaNome?: string) {
+  const cleanId = String(turmaId || "").trim();
+  const cleanNome = String(turmaNome || "").trim();
+
+  if (cleanId) {
+    const { data } = await adminClient
+      .from("turmas")
+      .select("id, nome, professor_email, alunos_solicitacoes")
+      .eq("id", cleanId)
+      .maybeSingle();
+
+    if (data) return data;
+  }
+
+  const queryName = cleanNome || cleanId;
+  if (queryName) {
+    const { data } = await adminClient
+      .from("turmas")
+      .select("id, nome, professor_email, alunos_solicitacoes")
+      .ilike("nome", queryName)
+      .maybeSingle();
+
+    if (data) return data;
+  }
+
+  return null;
+}
+
+/**
+ * ETAPA 1: Solicitar Acesso à Turma
+ * Fonte única de verdade: coluna alunos_solicitacoes (JSONB) na tabela turmas.
  */
 export async function solicitarAcessoAction(params: {
   turmaId: string;
   turmaNome?: string;
   nome?: string;
   email?: string;
-  professorEmail?: string;
 }): Promise<ActionResponse> {
   try {
     const userClient = await getSupabaseUserClient();
     const { data: { user } } = await userClient.auth.getUser();
 
-    // Determina dados do aluno
     const studentEmail = (user?.email || params.email || "").toLowerCase().trim();
     if (!studentEmail) {
       return { success: false, error: "Usuário não autenticado. Faça login para solicitar acesso." };
@@ -97,135 +136,55 @@ export async function solicitarAcessoAction(params: {
       "Aluno"
     ).trim();
 
-    const studentUserId = user?.id || null;
-
-    // Seleciona o cliente: prioriza Service Role Key para bypass de RLS
     const adminClient = getSupabaseAdminClient();
-    const clientToUse = adminClient || userClient;
+    const turma = await buscarTurma(adminClient, params.turmaId, params.turmaNome);
 
-    const rawTurmaId = String(params.turmaId || "").trim();
-    const rawTurmaNome = String(params.turmaNome || "").trim();
-
-    // Localiza a turma de forma precisa para garantir UUID válido
-    let targetTurmaId = rawTurmaId;
-    let targetTurmaNome = rawTurmaNome;
-    let targetProfEmail = (params.professorEmail || "").toLowerCase().trim();
-    let turmaRowFound: any = null;
-
-    try {
-      // Tenta buscar por ID ou Nome na tabela turmas
-      let query = clientToUse.from("turmas").select("id, nome, professor_email, alunos_solicitacoes");
-      if (rawTurmaId) {
-        query = query.or(`id.eq.${rawTurmaId},nome.ilike.%${rawTurmaNome || rawTurmaId}%`);
-      } else if (rawTurmaNome) {
-        query = query.ilike("nome", `%${rawTurmaNome}%`);
-      }
-
-      const { data: found } = await query.limit(1).maybeSingle();
-      if (found) {
-        turmaRowFound = found;
-        targetTurmaId = String(found.id).trim();
-        targetTurmaNome = String(found.nome || "").trim();
-        if (found.professor_email) {
-          targetProfEmail = String(found.professor_email).toLowerCase().trim();
-        }
-      }
-    } catch (e) {
-      console.warn("Aviso na busca da turma para solicitação:", e);
+    if (!turma) {
+      return { success: false, error: "Turma não encontrada no banco de dados." };
     }
 
-    const payload = {
-      turma_id: targetTurmaId,
-      turma_nome: targetTurmaNome,
-      user_id: studentUserId,
-      email: studentEmail,
+    const currentArray: any[] = Array.isArray(turma.alunos_solicitacoes)
+      ? turma.alunos_solicitacoes
+      : [];
+
+    const novoObjetoAluno = {
+      id: crypto.randomUUID(),
       nome: studentName,
+      email: studentEmail,
       status: "pendente",
-      professor_email: targetProfEmail,
-      updated_at: new Date().toISOString(),
+      data_solicitacao: new Date().toISOString(),
     };
 
-    let inserted = false;
-    let lastError: string | null = null;
+    // Remove qualquer solicitação prévia deste aluno e adiciona o novo pedido (append)
+    const filtered = currentArray.filter(
+      (a: any) => String(a.email || "").toLowerCase().trim() !== studentEmail
+    );
+    const updatedArray = [...filtered, novoObjetoAluno];
 
-    // 1. Tenta gravar na tabela solicitacoes_alunos
-    try {
-      const { error: solErr } = await clientToUse
-        .from("solicitacoes_alunos")
-        .upsert(payload, { onConflict: "turma_id, email" });
+    const { error: updateErr } = await adminClient
+      .from("turmas")
+      .update({ alunos_solicitacoes: updatedArray })
+      .eq("id", turma.id);
 
-      if (!solErr) {
-        inserted = true;
-      } else {
-        lastError = solErr.message;
-        console.warn("Aviso ao inserir em solicitacoes_alunos:", solErr.message);
-      }
-    } catch (solEx: any) {
-      lastError = solEx.message;
+    if (updateErr) {
+      console.error("Erro ao atualizar alunos_solicitacoes em turmas:", updateErr);
+      return { success: false, error: updateErr.message };
     }
 
-    // 2. Tenta espelhar no JSONB alunos_solicitacoes da turma
-    if (targetTurmaId) {
-      try {
-        let currentSolicitacoes: any[] = [];
-        if (turmaRowFound && Array.isArray(turmaRowFound.alunos_solicitacoes)) {
-          currentSolicitacoes = turmaRowFound.alunos_solicitacoes;
-        } else {
-          const { data: tRow } = await clientToUse
-            .from("turmas")
-            .select("alunos_solicitacoes")
-            .eq("id", targetTurmaId)
-            .maybeSingle();
-          if (tRow && Array.isArray(tRow.alunos_solicitacoes)) {
-            currentSolicitacoes = tRow.alunos_solicitacoes;
-          }
-        }
-
-        const updated = [
-          ...currentSolicitacoes.filter((s: any) => String(s.email).toLowerCase().trim() !== studentEmail),
-          {
-            turmaId: targetTurmaId,
-            turmaNome: targetTurmaNome,
-            email: studentEmail,
-            nome: studentName,
-            status: "pendente",
-            professor_email: targetProfEmail,
-            updated_at: new Date().toISOString(),
-          },
-        ];
-
-        const { error: updErr } = await clientToUse
-          .from("turmas")
-          .update({ alunos_solicitacoes: updated })
-          .eq("id", targetTurmaId);
-
-        if (!updErr) {
-          inserted = true;
-        } else if (!inserted) {
-          lastError = updErr.message;
-        }
-      } catch (jsonbEx: any) {
-        console.warn("Aviso ao espelhar JSONB na turma:", jsonbEx);
-        if (!inserted) lastError = jsonbEx.message;
-      }
-    }
-
-    if (!inserted) {
-      return {
-        success: false,
-        error: lastError || "Não foi possível registrar a solicitação no banco de dados.",
-      };
-    }
-
-    return { success: true, data: payload };
+    return {
+      success: true,
+      turmaId: turma.id,
+      alunos_solicitacoes: updatedArray,
+    };
   } catch (err: any) {
     console.error("Exceção em solicitarAcessoAction:", err);
-    return { success: false, error: err.message || "Erro interno do servidor ao processar solicitação." };
+    return { success: false, error: err.message || "Erro interno do servidor." };
   }
 }
 
 /**
- * Aprovar solicitação de aluno
+ * ETAPA 3: Aprovação de Aluno
+ * Atualiza status para 'aprovado' dentro do array JSONB da turma.
  */
 export async function aprovarAlunoAction(params: {
   turmaId: string;
@@ -239,72 +198,55 @@ export async function aprovarAlunoAction(params: {
     const callerEmail = user?.email?.toLowerCase().trim() || "";
     const isProf = isProfessorEmail(callerEmail);
 
-    if (!isProf && adminClient === null) {
+    if (!isProf && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return { success: false, error: "Apenas instrutores autorizados podem aprovar alunos." };
     }
 
-    const clientToUse = adminClient || userClient;
+    const turma = await buscarTurma(adminClient, params.turmaId);
+    if (!turma) {
+      return { success: false, error: "Turma não encontrada." };
+    }
+
+    const currentArray: any[] = Array.isArray(turma.alunos_solicitacoes)
+      ? turma.alunos_solicitacoes
+      : [];
+
     const targetEmail = String(params.email || "").toLowerCase().trim();
-    const targetTurmaId = String(params.turmaId || "").trim();
 
-    let updated = false;
-    let lastError: string | null = null;
-
-    // 1. Atualiza na tabela solicitacoes_alunos
-    try {
-      const { error: solErr } = await clientToUse
-        .from("solicitacoes_alunos")
-        .update({ status: "aprovado", updated_at: new Date().toISOString() })
-        .eq("turma_id", targetTurmaId)
-        .eq("email", targetEmail);
-
-      if (!solErr) {
-        updated = true;
-      } else {
-        lastError = solErr.message;
+    const updatedArray = currentArray.map((a: any) => {
+      if (String(a.email || "").toLowerCase().trim() === targetEmail) {
+        return {
+          ...a,
+          status: "aprovado",
+          data_aprovacao: new Date().toISOString(),
+        };
       }
-    } catch (e: any) {
-      lastError = e.message;
+      return a;
+    });
+
+    const { error: updateErr } = await adminClient
+      .from("turmas")
+      .update({ alunos_solicitacoes: updatedArray })
+      .eq("id", turma.id);
+
+    if (updateErr) {
+      console.error("Erro ao aprovar aluno no JSONB da turma:", updateErr);
+      return { success: false, error: updateErr.message };
     }
 
-    // 2. Atualiza no JSONB alunos_solicitacoes da turma
-    try {
-      const { data: turmaRow } = await clientToUse
-        .from("turmas")
-        .select("alunos_solicitacoes")
-        .eq("id", targetTurmaId)
-        .maybeSingle();
-
-      if (turmaRow && Array.isArray(turmaRow.alunos_solicitacoes)) {
-        const list = turmaRow.alunos_solicitacoes.map((s: any) =>
-          String(s.email).toLowerCase().trim() === targetEmail
-            ? { ...s, status: "aprovado", updated_at: new Date().toISOString() }
-            : s
-        );
-
-        const { error: updErr } = await clientToUse
-          .from("turmas")
-          .update({ alunos_solicitacoes: list })
-          .eq("id", targetTurmaId);
-
-        if (!updErr) updated = true;
-      }
-    } catch (e: any) {
-      if (!updated) lastError = e.message;
-    }
-
-    if (!updated) {
-      return { success: false, error: lastError || "Não foi possível aprovar o aluno no banco." };
-    }
-
-    return { success: true };
+    return {
+      success: true,
+      turmaId: turma.id,
+      alunos_solicitacoes: updatedArray,
+    };
   } catch (err: any) {
     return { success: false, error: err.message || "Erro interno ao aprovar aluno." };
   }
 }
 
 /**
- * Rejeitar ou revogar acesso de aluno
+ * ETAPA 3: Revogação / Rejeição de Aluno
+ * Remove o aluno do array JSONB da turma.
  */
 export async function rejeitarAlunoAction(params: {
   turmaId: string;
@@ -318,70 +260,47 @@ export async function rejeitarAlunoAction(params: {
     const callerEmail = user?.email?.toLowerCase().trim() || "";
     const isProf = isProfessorEmail(callerEmail);
 
-    if (!isProf && adminClient === null) {
-      return { success: false, error: "Apenas instrutores autorizados podem rejeitar/revogar alunos." };
+    if (!isProf && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return { success: false, error: "Apenas instrutores autorizados podem revogar alunos." };
     }
 
-    const clientToUse = adminClient || userClient;
+    const turma = await buscarTurma(adminClient, params.turmaId);
+    if (!turma) {
+      return { success: false, error: "Turma não encontrada." };
+    }
+
+    const currentArray: any[] = Array.isArray(turma.alunos_solicitacoes)
+      ? turma.alunos_solicitacoes
+      : [];
+
     const targetEmail = String(params.email || "").toLowerCase().trim();
-    const targetTurmaId = String(params.turmaId || "").trim();
 
-    let deleted = false;
-    let lastError: string | null = null;
+    const updatedArray = currentArray.filter(
+      (a: any) => String(a.email || "").toLowerCase().trim() !== targetEmail
+    );
 
-    // 1. Remove ou atualiza em solicitacoes_alunos
-    try {
-      const { error: solErr } = await clientToUse
-        .from("solicitacoes_alunos")
-        .delete()
-        .eq("turma_id", targetTurmaId)
-        .eq("email", targetEmail);
+    const { error: updateErr } = await adminClient
+      .from("turmas")
+      .update({ alunos_solicitacoes: updatedArray })
+      .eq("id", turma.id);
 
-      if (!solErr) {
-        deleted = true;
-      } else {
-        lastError = solErr.message;
-      }
-    } catch (e: any) {
-      lastError = e.message;
+    if (updateErr) {
+      console.error("Erro ao revogar aluno no JSONB da turma:", updateErr);
+      return { success: false, error: updateErr.message };
     }
 
-    // 2. Remove do JSONB alunos_solicitacoes da turma
-    try {
-      const { data: turmaRow } = await clientToUse
-        .from("turmas")
-        .select("alunos_solicitacoes")
-        .eq("id", targetTurmaId)
-        .maybeSingle();
-
-      if (turmaRow && Array.isArray(turmaRow.alunos_solicitacoes)) {
-        const list = turmaRow.alunos_solicitacoes.filter(
-          (s: any) => String(s.email).toLowerCase().trim() !== targetEmail
-        );
-
-        const { error: updErr } = await clientToUse
-          .from("turmas")
-          .update({ alunos_solicitacoes: list })
-          .eq("id", targetTurmaId);
-
-        if (!updErr) deleted = true;
-      }
-    } catch (e: any) {
-      if (!deleted) lastError = e.message;
-    }
-
-    if (!deleted) {
-      return { success: false, error: lastError || "Não foi possível revogar o aluno no banco." };
-    }
-
-    return { success: true };
+    return {
+      success: true,
+      turmaId: turma.id,
+      alunos_solicitacoes: updatedArray,
+    };
   } catch (err: any) {
     return { success: false, error: err.message || "Erro interno ao revogar aluno." };
   }
 }
 
 /**
- * Carregar todas as solicitações de alunos com dados consolidados
+ * Consulta todas as solicitações extraídas da coluna alunos_solicitacoes da tabela turmas
  */
 export async function carregarSolicitacoesAction(): Promise<{
   success: boolean;
@@ -390,60 +309,31 @@ export async function carregarSolicitacoesAction(): Promise<{
 }> {
   try {
     const adminClient = getSupabaseAdminClient();
-    const userClient = await getSupabaseUserClient();
-    const clientToUse = adminClient || userClient;
+    const { data: turmas, error } = await adminClient
+      .from("turmas")
+      .select("id, nome, professor_email, alunos_solicitacoes");
 
-    let solicitacoes: any[] = [];
-
-    // 1. Consulta solicitacoes_alunos
-    try {
-      const { data, error } = await clientToUse
-        .from("solicitacoes_alunos")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data && data.length > 0) {
-        solicitacoes = data;
-      }
-    } catch (e) {
-      console.warn("Aviso ao ler solicitacoes_alunos:", e);
+    if (error) {
+      return { success: false, solicitacoes: [], error: error.message };
     }
 
-    // 2. Consolida com turmas.alunos_solicitacoes
-    try {
-      const { data: turmasData } = await clientToUse
-        .from("turmas")
-        .select("id, nome, alunos_solicitacoes");
-
-      if (turmasData) {
-        for (const t of turmasData) {
-          if (Array.isArray(t.alunos_solicitacoes)) {
-            for (const s of t.alunos_solicitacoes) {
-              const solEmail = String(s.email || "").toLowerCase().trim();
-              const solTurmaId = String(s.turmaId || t.id).trim().toLowerCase();
-
-              const alreadyExists = solicitacoes.some(
-                item =>
-                  String(item.email || "").toLowerCase().trim() === solEmail &&
-                  String(item.turma_id || item.turmaId || "").toLowerCase().trim() === solTurmaId
-              );
-
-              if (!alreadyExists) {
-                solicitacoes.push({
-                  ...s,
-                  turma_id: s.turmaId || t.id,
-                  turma_nome: s.turmaNome || t.nome,
-                });
-              }
-            }
+    const todas: any[] = [];
+    if (turmas) {
+      for (const t of turmas) {
+        if (Array.isArray(t.alunos_solicitacoes)) {
+          for (const a of t.alunos_solicitacoes) {
+            todas.push({
+              ...a,
+              turmaId: t.id,
+              turmaNome: t.nome,
+              professor_email: t.professor_email,
+            });
           }
         }
       }
-    } catch (e) {
-      console.warn("Aviso ao consolidar JSONB das turmas:", e);
     }
 
-    return { success: true, solicitacoes };
+    return { success: true, solicitacoes: todas };
   } catch (err: any) {
     return { success: false, solicitacoes: [], error: err.message };
   }
