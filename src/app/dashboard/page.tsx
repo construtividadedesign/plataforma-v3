@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Zap, Pin, Plus, ShieldCheck, CheckCircle2, XCircle, Clock, Archive, Trash2, Lock, RefreshCw, UserCheck } from "lucide-react";
@@ -153,8 +153,12 @@ export default function DashboardPage() {
             ) : (
               <button
                 onClick={async () => {
-                  await solicitarAcessoTurma(turmaAtiva.id);
-                  toast.success("Solicitação enviada ao instrutor!");
+                  const res = await solicitarAcessoTurma(turmaAtiva.id);
+                  if (res.success) {
+                    toast.success("Solicitação enviada ao instrutor!");
+                  } else {
+                    toast.error(res.error || "Não foi possível enviar a solicitação. Tente novamente.");
+                  }
                 }}
                 className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition-colors cursor-pointer shadow-lg shadow-red-900/30"
               >
@@ -287,8 +291,12 @@ export default function DashboardPage() {
                           <div className="flex items-center gap-2 shrink-0">
                             <button
                               onClick={async () => {
-                                await aprovarAluno(aluno.email, turmaAtiva.id);
-                                toast.success(`Aluno ${aluno.nome} aprovado com sucesso!`);
+                                const res = await aprovarAluno(aluno.email, turmaAtiva.id);
+                                if (res.success) {
+                                  toast.success(`Aluno ${aluno.nome} aprovado com sucesso!`);
+                                } else {
+                                  toast.error(res.error || "Erro ao aprovar aluno.");
+                                }
                               }}
                               className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5"
                               title="Aprovar Aluno"
@@ -297,8 +305,12 @@ export default function DashboardPage() {
                             </button>
                             <button
                               onClick={async () => {
-                                await rejeitarAluno(aluno.email, turmaAtiva.id);
-                                toast.info("Solicitação rejeitada.");
+                                const res = await rejeitarAluno(aluno.email, turmaAtiva.id);
+                                if (res.success) {
+                                  toast.info("Solicitação recusada.");
+                                } else {
+                                  toast.error(res.error || "Erro ao recusar solicitação.");
+                                }
                               }}
                               className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5"
                               title="Rejeitar"
@@ -337,8 +349,12 @@ export default function DashboardPage() {
                           <button
                             onClick={async () => {
                               if (confirm(`Deseja revogar o acesso do aluno ${aluno.nome} (${aluno.email}) a esta turma?`)) {
-                                await removerAlunoAprovado(aluno.email, turmaAtiva.id);
-                                toast.info(`Acesso de ${aluno.nome} revogado.`);
+                                const res = await removerAlunoAprovado(aluno.email, turmaAtiva.id);
+                                if (res.success) {
+                                  toast.info(`Acesso de ${aluno.nome} revogado.`);
+                                } else {
+                                  toast.error(res.error || "Erro ao revogar acesso do aluno.");
+                                }
                               }
                             }}
                             className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
