@@ -23,6 +23,11 @@ export default function PrintableChallengeModal({ isOpen, onClose, challengeData
     });
   };
 
+  // Higienização e neutralização estrita de marca para tela e impressão
+  const neutralizedSubtitle = data.subtitle
+    .replace("Metodologia SENAI de Oficina", "Metodologia Oficial de Oficina Técnica").replace(/\bSENAI\b/g, "Ensino Técnico")
+    .replace(/\bMSEP\b/g, "Metodologia Oficial de Ensino Técnico");
+
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto print:static print:bg-white print:p-0 print:block">
       <div className="bg-zinc-950 border border-white/15 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden print:max-w-none print:max-h-none print:border-none print:rounded-none print:bg-white">
@@ -64,7 +69,7 @@ export default function PrintableChallengeModal({ isOpen, onClose, challengeData
                   {data.title}
                 </h1>
                 <p className="text-xs text-slate-600 font-medium mt-1">
-                  {data.subtitle} • Autor: Prof. Cleverson Leonardo
+                  {neutralizedSubtitle} • Autor: Prof. Cleverson Leonardo
                 </p>
               </div>
               <div className="bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-right shrink-0">
@@ -112,11 +117,9 @@ export default function PrintableChallengeModal({ isOpen, onClose, challengeData
                   </div>
 
                   <h4 className="text-sm font-bold text-slate-900">{g.groupTitle}</h4>
-
-                  <div className="bg-white border border-slate-200 p-3 rounded-lg text-xs text-slate-700 leading-relaxed">
-                    <strong className="text-slate-900 block mb-1">Cenário do Dossiê de Campo:</strong>
-                    {g.scenario}
-                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed italic bg-white p-3 rounded-lg border border-slate-200">
+                    "{g.scenario}"
+                  </p>
 
                   <div className="space-y-1 pt-1">
                     <span className="text-[11px] font-bold uppercase text-slate-600 block">Missões da Equipe:</span>
@@ -138,7 +141,7 @@ export default function PrintableChallengeModal({ isOpen, onClose, challengeData
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
                 <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                   <ClipboardCheck className="w-5 h-5 text-red-600" />
-                  Matriz de Avaliação Técnica e Veredito de Bancada (SENAI)
+                  Matriz de Avaliação Técnica e Veredito de Bancada (Metodologia de Oficina Técnica)
                 </h3>
                 <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
                   Escala Avaliativa: 0 a 10 Pontos

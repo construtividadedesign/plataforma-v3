@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { useTurma } from "@/contexts/TurmaContext";
 import { AlertCircle, Lock } from "lucide-react";
+import DiretrizesCompetenciaCard from "@/components/DiretrizesCompetenciaCard";
+import { COMPETENCIAS_MODULOS } from "@/data/competenciasData";
 
 export default function ModulesPage() {
   const { turmaAtiva, aulasConcluidas, isProfessor, isConteudoLiberado } = useTurma();
@@ -105,8 +107,19 @@ export default function ModulesPage() {
                   {module.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow" />
-              <CardFooter className="pt-5 pb-5 flex justify-between items-center mt-auto">
+
+              {/* Matriz Pedagógica de Competências */}
+              <CardContent className="pt-4 pb-2 space-y-3 flex-grow">
+                {COMPETENCIAS_MODULOS[module.id] && (
+                  <DiretrizesCompetenciaCard
+                    data={COMPETENCIAS_MODULOS[module.id]}
+                    defaultExpanded={false}
+                    className="border-white/5 bg-black/20"
+                  />
+                )}
+              </CardContent>
+
+              <CardFooter className="pt-5 pb-5 flex justify-between items-center mt-auto border-t border-white/5">
                 <span className="text-sm text-gray-500 font-medium">
                   Módulo 0{index + 1} de 03
                 </span>

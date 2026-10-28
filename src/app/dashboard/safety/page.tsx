@@ -39,6 +39,8 @@ import { toast } from "sonner";
 import { useTurma } from "@/contexts/TurmaContext";
 import ConteudoBloqueadoCard from "@/components/ConteudoBloqueadoCard";
 import { printHtml } from "@/lib/printUtils";
+import DiretrizesCompetenciaCard from "@/components/DiretrizesCompetenciaCard";
+import { COMPETENCIAS_MODULOS } from "@/data/competenciasData";
 
 // ============================================================================
 // DADOS OPERACIONAIS E ESTATÍSTICOS (1º SEMESTRE DE 2026)
@@ -250,11 +252,11 @@ const VIDEOS_DATA: VideoCardItem[] = [
   {
     id: 4,
     title: "Como Preencher e Usar a APR (Análise Preliminar de Risco) na Prática",
-    tag: "Gestão de Risco & SENAI",
+    tag: "Gestão de Risco & SST",
     duration: "16 min",
     description:
       "Passo a passo de como documentar os riscos antes de iniciar o serviço, protegendo sua integridade física e blindando sua empresa juridicamente.",
-    query: "analise preliminar de risco apr climatizacao refrigeracao senai",
+    query: "analise preliminar de risco apr climatizacao refrigeracao",
     keyPoints: [
       "Mapeamento de riscos no ambiente do cliente (redes elétricas, altura e piso)",
       "Como assinar e colher o ciente do cliente ou condomínio",
@@ -607,7 +609,7 @@ export default function SafetyPage() {
             <td style="width: 33%; text-align: center; vertical-align: bottom; padding: 10px;">
               <div style="border-bottom: 1px solid #000; margin-bottom: 4px; height: 35px;"></div>
               <strong>SUPERVISOR / INSTRUTOR TÉCNICO</strong><br/>
-              <span>Registro CFT / CREA / SENAI</span>
+              <span>Registro CFT / CREA / Conselho Profissional</span>
             </td>
             <td style="width: 33%; text-align: center; vertical-align: bottom; padding: 10px;">
               <div style="border-bottom: 1px solid #000; margin-bottom: 4px; height: 35px;"></div>
@@ -710,6 +712,9 @@ export default function SafetyPage() {
           </div>
         </div>
       </div>
+
+      {/* DIRETRIZES DE COMPETÊNCIA PROFISSIONAL (MATRIZ MSEP / SST) */}
+      <DiretrizesCompetenciaCard data={COMPETENCIAS_MODULOS["seguranca_sst"]} defaultExpanded={false} />
 
       {/* ============================================================ */}
       {/* 2. PAINEL ESTATÍSTICO REAL (1º SEMESTRE DE 2026)             */}

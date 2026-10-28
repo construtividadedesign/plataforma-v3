@@ -15,6 +15,8 @@ import { module3MaterialsData, module3ChallengeData } from "@/data/module3Materi
 import PrintableLessonModal from "@/components/PrintableLessonModal";
 import PrintableChallengeModal from "@/components/PrintableChallengeModal";
 import ConteudoBloqueadoCard from "@/components/ConteudoBloqueadoCard";
+import DiretrizesCompetenciaCard from "@/components/DiretrizesCompetenciaCard";
+import { COMPETENCIAS_MODULOS } from "@/data/competenciasData";
 
 const modulesInfo = {
   "mod-1": { title: "Fundamentos de Climatização", description: "Conceitos de calor, temperatura, pressão, ciclo frigorífico e manuseio seguro de fluidos." },
@@ -212,6 +214,11 @@ export default function ModuleDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Diretrizes de Competência Profissional (Matriz MSEP) */}
+      {COMPETENCIAS_MODULOS[moduleId] && (
+        <DiretrizesCompetenciaCard data={COMPETENCIAS_MODULOS[moduleId]} defaultExpanded={false} />
+      )}
 
       <div className="flex flex-col lg:flex-row gap-6">
         

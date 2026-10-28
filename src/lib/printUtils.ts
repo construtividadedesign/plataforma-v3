@@ -2,6 +2,7 @@
  * Utilitário profissional de impressão e geração de PDF para A4
  * Isola o conteúdo HTML em um iframe limpo e injeta estilos normalizados de impressão,
  * evitando páginas em branco, conflitos de modo escuro e cortes por overflow.
+ * Inclui filtro de neutralização de marca para garantir total conformidade institucional.
  */
 
 export interface PrintOptions {
@@ -27,7 +28,16 @@ export function printElementById(elementId: string, options?: PrintOptions): boo
 export function printHtml(contentHtml: string, options?: PrintOptions): boolean {
   if (typeof window === "undefined") return false;
 
-  const title = options?.title || "Documento Técnico Oficial • Plataforma de Climatização";
+  // Sanitização e neutralização de marcas institucionais em documentos impressos e exportações A4 / PDF
+  const neutralizedHtml = contentHtml
+    .replace(/\bSENAI\b/g, "Plataforma de Climatização • Oficina Técnica")
+    .replace(/\bMSEP\b/g, "Metodologia Oficial de Ensino Técnico");
+
+  const rawTitle = options?.title || "Documento Técnico Oficial • Plataforma de Climatização";
+  const sanitizedTitle = rawTitle
+    .replace(/\bSENAI\b/g, "Oficina Técnica")
+    .replace(/\bMSEP\b/g, "Metodologia Oficial");
+
   const pageMargin = options?.pageMargin || "12mm 10mm";
   const orientation = options?.landscape ? "landscape" : "portrait";
 
@@ -219,7 +229,7 @@ export function printHtml(contentHtml: string, options?: PrintOptions): boolean 
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>${title}</title>
+        <title>${sanitizedTitle}</title>
         ${activeStyles}
         <style>
           ${normalizedPrintCss}
@@ -227,7 +237,7 @@ export function printHtml(contentHtml: string, options?: PrintOptions): boolean 
       </head>
       <body>
         <div class="print-document-container">
-          ${contentHtml}
+          ${neutralizedHtml}
         </div>
       </body>
     </html>
