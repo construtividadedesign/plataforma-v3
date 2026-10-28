@@ -63,6 +63,7 @@ export type PermissoesConteudo = {
     componentes?: boolean;
     diagnostico?: boolean;
     dimensionamento?: boolean;
+    seguranca_sst?: boolean;
   };
 };
 
@@ -752,6 +753,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
         componentes: turmaAlvo?.componentes_liberados !== false,
         diagnostico: true,
         dimensionamento: true,
+        seguranca_sst: true,
       },
     };
 
@@ -763,7 +765,7 @@ export function TurmaProvider({ children }: { children: React.ReactNode }) {
 
     if (
       categoria === "ferramenta" ||
-      ["climatizacao", "componentes", "diagnostico", "dimensionamento"].includes(chaveConteudo)
+      ["climatizacao", "componentes", "diagnostico", "dimensionamento", "seguranca_sst"].includes(chaveConteudo)
     ) {
       if (!updatedPerms.ferramentas) updatedPerms.ferramentas = {};
       (updatedPerms.ferramentas as any)[chaveConteudo] = statusLiberado;

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Library, LineChart, Home, Users, ChevronDown, Menu, X, Cpu, Stethoscope, Calculator, Wind, Lock } from "lucide-react";
+import { LayoutDashboard, Library, LineChart, Home, Users, ChevronDown, Menu, X, Cpu, Stethoscope, Calculator, Wind, Lock, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useTurma, getProfessorDisplayName, getProfessorInitial } from "@/contexts/TurmaContext";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -24,6 +24,7 @@ export default function AppSidebar() {
     { name: "Boas-Vindas", href: "/dashboard/welcome", icon: Home },
     { name: "Painel da Turma", href: "/dashboard", icon: LayoutDashboard },
     { name: "Módulos de Aulas", href: "/dashboard/modules", icon: Library },
+    { name: "Segurança e Vida (SST)", href: "/dashboard/safety", icon: ShieldAlert },
     { name: "Tipos de Climatização", href: "/dashboard/systems", icon: Wind },
     { name: "Guia de Componentes", href: "/dashboard/components", icon: Cpu },
     { name: "Diagnóstico e Falhas", href: "/dashboard/troubleshooting", icon: Stethoscope },
@@ -173,6 +174,7 @@ export default function AppSidebar() {
                 }
 
                 const toolKeyMap: Record<string, string> = {
+                  "/dashboard/safety": "seguranca_sst",
                   "/dashboard/systems": "climatizacao",
                   "/dashboard/components": "componentes",
                   "/dashboard/troubleshooting": "diagnostico",

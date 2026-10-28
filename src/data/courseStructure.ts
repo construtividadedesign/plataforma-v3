@@ -17,7 +17,7 @@ export type CourseModuleItem = {
 };
 
 export type CourseToolItem = {
-  id: "climatizacao" | "componentes" | "diagnostico" | "dimensionamento";
+  id: "seguranca_sst" | "climatizacao" | "componentes" | "diagnostico" | "dimensionamento";
   title: string;
   description: string;
   href: string;
@@ -25,6 +25,13 @@ export type CourseToolItem = {
 };
 
 export const COURSE_TOOLS: CourseToolItem[] = [
+  {
+    id: "seguranca_sst",
+    title: "Segurança e Vida (SST)",
+    description: "Tolerância zero em NR-35, NR-10, fluidos A2L, simulador financeiro de acidentes e APR.",
+    href: "/dashboard/safety",
+    badge: "Sobrevivência & SST",
+  },
   {
     id: "climatizacao",
     title: "Tipos de Climatização",

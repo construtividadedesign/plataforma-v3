@@ -19,7 +19,8 @@ import {
   Layers,
   Wrench,
   CheckSquare,
-  Square
+  Square,
+  ShieldAlert
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -125,6 +126,8 @@ export default function ControlePermissoesTurma() {
 
   const getToolIcon = (id: string) => {
     switch (id) {
+      case "seguranca_sst":
+        return <ShieldAlert className="w-5 h-5 text-amber-500" />;
       case "climatizacao":
         return <Wind className="w-5 h-5 text-sky-400" />;
       case "componentes":
