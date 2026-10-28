@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { X, Printer, Users, Award } from "lucide-react";
+import { X, Printer, Users, Award, ClipboardCheck } from "lucide-react";
 import { module1ChallengeData, ModuleChallengeData } from "@/data/module1Challenge";
+import { printElementById } from "@/lib/printUtils";
 
 type Props = {
   isOpen: boolean;
@@ -16,40 +17,17 @@ export default function PrintableChallengeModal({ isOpen, onClose, challengeData
   const data = challengeData || module1ChallengeData;
 
   const handlePrint = () => {
-    window.print();
+    printElementById("printable-challenge-sheet", {
+      title: `${data.title} • Atividade Prática Oficial A4`,
+      pageMargin: "10mm 10mm",
+    });
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto print:static print:bg-white print:p-0 print:block">
-      <style jsx global>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          #printable-challenge-sheet,
-          #printable-challenge-sheet * {
-            visibility: visible;
-          }
-          #printable-challenge-sheet {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            background: #ffffff !important;
-            color: #0f172a !important;
-            box-shadow: none !important;
-            margin: 0 !important;
-            padding: 12mm !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-
       <div className="bg-zinc-950 border border-white/15 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden print:max-w-none print:max-h-none print:border-none print:rounded-none print:bg-white">
         
-        <div className="no-print flex items-center justify-between px-6 py-4 bg-black/80 border-b border-white/10 shrink-0">
+        <div className="no-print print:hidden flex items-center justify-between px-6 py-4 bg-black/80 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-2.5">
             <Users className="w-5 h-5 text-red-500" />
             <span className="text-sm font-semibold text-white">Desafio Prático Oficial • Formato A4 Imprimível</span>
@@ -122,7 +100,10 @@ export default function PrintableChallengeModal({ isOpen, onClose, challengeData
               </h3>
 
               {data.groups.map((g) => (
-                <div key={g.groupNumber} className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 space-y-2.5">
+                <div
+                  key={g.groupNumber}
+                  className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 space-y-2.5 break-inside-avoid print-break-inside-avoid dossier-card"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-extrabold px-2.5 py-1 rounded bg-red-600 text-white">
                       Equipe {g.groupNumber}
@@ -150,6 +131,107 @@ export default function PrintableChallengeModal({ isOpen, onClose, challengeData
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Matriz Oficial de Avaliação e Pontuação de Bancada */}
+            <div className="space-y-3 pt-2 border-t border-slate-200 break-inside-avoid print-break-inside-avoid">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                  <ClipboardCheck className="w-5 h-5 text-red-600" />
+                  Matriz de Avaliação Técnica e Veredito de Bancada (SENAI)
+                </h3>
+                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+                  Escala Avaliativa: 0 a 10 Pontos
+                </span>
+              </div>
+
+              <div className="overflow-x-auto rounded-lg border border-slate-300">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-100 text-slate-900">
+                      <th className="border border-slate-300 p-2 font-bold">Critério Técnico Avaliativo</th>
+                      <th className="border border-slate-300 p-2 font-bold w-20 text-center">Peso</th>
+                      <th className="border border-slate-300 p-2 font-bold w-14 text-center">Eq. 1</th>
+                      <th className="border border-slate-300 p-2 font-bold w-14 text-center">Eq. 2</th>
+                      <th className="border border-slate-300 p-2 font-bold w-14 text-center">Eq. 3</th>
+                      <th className="border border-slate-300 p-2 font-bold w-14 text-center">Eq. 4</th>
+                      <th className="border border-slate-300 p-2 font-bold">Parecer / Veredito do Instrutor</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 text-slate-700 bg-white">
+                    <tr>
+                      <td className="border border-slate-300 p-2 font-medium">
+                        1. Domínio Conceitual e Diagnóstico Técnico
+                        <span className="block text-[10px] text-slate-500">Fundamentação correta baseada no ciclo, grandezas e apostilas oficiais.</span>
+                      </td>
+                      <td className="border border-slate-300 p-2 text-center font-bold">2,5 pts</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-[10px] text-slate-500 italic">Visto do Docente</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-slate-300 p-2 font-medium">
+                        2. Segurança e Conformidade Normativa (ABNT / NR)
+                        <span className="block text-[10px] text-slate-500">Respeito às normas de segurança, EPIs, NBR 5410, NBR 16655 e NR-10/NR-35.</span>
+                      </td>
+                      <td className="border border-slate-300 p-2 text-center font-bold">2,5 pts</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-[10px] text-slate-500 italic">Visto do Docente</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-slate-300 p-2 font-medium">
+                        3. Resolução Completa das Missões do Dossiê
+                        <span className="block text-[10px] text-slate-500">Assertividade nas respostas, cálculos, manobras e identificação da causa-raiz.</span>
+                      </td>
+                      <td className="border border-slate-300 p-2 text-center font-bold">2,5 pts</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-[10px] text-slate-500 italic">Visto do Docente</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-slate-300 p-2 font-medium">
+                        4. Apresentação em Grupo e Raciocínio Clínico
+                        <span className="block text-[10px] text-slate-500">Clareza na defesa técnica perante a turma e postura profissional na bancada.</span>
+                      </td>
+                      <td className="border border-slate-300 p-2 text-center font-bold">2,5 pts</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono text-slate-400">___</td>
+                      <td className="border border-slate-300 p-2 text-[10px] text-slate-500 italic">Visto do Docente</td>
+                    </tr>
+                    <tr className="bg-slate-50 font-bold text-slate-900">
+                      <td className="border border-slate-300 p-2 text-right">Nota Final / Homologação da Equipe:</td>
+                      <td className="border border-slate-300 p-2 text-center">10,0 pts</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono">/ 10</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono">/ 10</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono">/ 10</td>
+                      <td className="border border-slate-300 p-2 text-center font-mono">/ 10</td>
+                      <td className="border border-slate-300 p-2 text-[10px] font-semibold text-red-700">
+                        [ ] Aprovado &nbsp; [ ] Em Revisão
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 text-xs text-slate-600">
+                <div className="border-t border-slate-300 pt-2">
+                  <span className="font-bold text-slate-800 block">Data da Atividade Prática:</span>
+                  <span>___/___/2026 • Bancadas de Climatização</span>
+                </div>
+                <div className="border-t border-slate-300 pt-2 sm:text-right">
+                  <span className="font-bold text-slate-800 block">Instrutor Responsável:</span>
+                  <span>Prof. Cleverson Leonardo • Docente de Refrigeração</span>
+                </div>
+              </div>
             </div>
 
             <div className="border-t-2 border-slate-300 pt-4 mt-8 text-center space-y-1">

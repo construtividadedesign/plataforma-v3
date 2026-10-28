@@ -171,3 +171,99 @@ html:not(.dark) select.bg-black\/50 {
 html:not(.dark) input.bg-black\/50::placeholder {
   color: #94a3b8 !important;
 }
+
+/* ============================================================ */
+/* REGRAS DE IMPRESSÃO A4 E GERAÇÃO DE PDF PROFISSIONAL         */
+/* ============================================================ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm;
+  }
+
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Oculta navegação do dashboard, sidebar e fundos dinâmicos */
+  aside,
+  nav,
+  header,
+  footer,
+  .no-print,
+  [data-no-print],
+  canvas,
+  #climate-background {
+    display: none !important;
+  }
+
+  /* Libera containers de overflow para permitir paginação natural */
+  main,
+  div[class*="overflow-"],
+  div[class*="min-h-screen"],
+  div[class*="h-screen"],
+  div[class*="max-h-"] {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Desativa posicionamento fixo do modal para impressão */
+  .fixed.inset-0 {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  /* Remove moldura e fundos pretos do modal */
+  .bg-zinc-950,
+  .bg-zinc-900\/60,
+  .bg-black\/80,
+  .bg-black\/85 {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Garante que o documento técnico ocupe toda a folha A4 */
+  #printable-challenge-sheet,
+  #printable-technical-sheet,
+  #printable-sizing-sheet {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    visibility: visible !important;
+    display: block !important;
+  }
+
+  /* Prevenção de quebra de página no meio de seções críticas */
+  .break-inside-avoid,
+  .print-break-inside-avoid,
+  .dossier-card,
+  table,
+  tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+

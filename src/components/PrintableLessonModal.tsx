@@ -3,6 +3,7 @@
 import React from "react";
 import { X, Printer, ShieldAlert, Info, Wrench, BookOpen } from "lucide-react";
 import { LessonMaterial } from "@/data/module1Materials";
+import { printElementById } from "@/lib/printUtils";
 
 type Props = {
   material: LessonMaterial | null;
@@ -698,40 +699,17 @@ export default function PrintableLessonModal({ material, moduleTitle, onClose }:
   if (!material) return null;
 
   const handlePrint = () => {
-    window.print();
+    printElementById("printable-technical-sheet", {
+      title: `${material.fullTitle} • Apostila Técnica A4`,
+      pageMargin: "10mm 10mm",
+    });
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto print:static print:bg-white print:p-0 print:block">
-      <style jsx global>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          #printable-technical-sheet,
-          #printable-technical-sheet * {
-            visibility: visible;
-          }
-          #printable-technical-sheet {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            background: #ffffff !important;
-            color: #0f172a !important;
-            box-shadow: none !important;
-            margin: 0 !important;
-            padding: 12mm !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-
       <div className="bg-zinc-950 border border-white/15 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden print:max-w-none print:max-h-none print:border-none print:rounded-none print:bg-white">
         
-        <div className="no-print flex items-center justify-between px-6 py-4 bg-black/80 border-b border-white/10 shrink-0">
+        <div className="no-print print:hidden flex items-center justify-between px-6 py-4 bg-black/80 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-2.5">
             <BookOpen className="w-5 h-5 text-red-500" />
             <span className="text-sm font-semibold text-white">Apostila Técnica Oficial • Formato A4 Imprimível</span>

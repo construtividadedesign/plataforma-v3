@@ -3,6 +3,7 @@
 import React from "react";
 import { X, Printer, Calculator, ShieldCheck, ThermometerSnowflake, Zap, Users, Sun, Wrench } from "lucide-react";
 import { SizingCaseStudy } from "@/data/hvacSizingData";
+import { printElementById } from "@/lib/printUtils";
 
 export interface SizingReportData {
   projectName: string;
@@ -57,7 +58,10 @@ export default function PrintableSizingModal({
   if (!isOpen) return null;
 
   const handlePrint = () => {
-    window.print();
+    printElementById("printable-sizing-sheet", {
+      title: "Memorial Técnico de Cálculo e Carga Térmica • HVAC",
+      pageMargin: "10mm 10mm",
+    });
   };
 
   const currentDate = new Date().toLocaleDateString("pt-BR", {
@@ -72,7 +76,7 @@ export default function PrintableSizingModal({
       <div className="relative w-full max-w-4xl max-h-[95vh] bg-white text-slate-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 print:border-none print:shadow-none print:max-h-none print:w-full print:rounded-none">
         
         {/* BARRA SUPERIOR DE AÇÕES (Oculta na impressão) */}
-        <div className="flex items-center justify-between px-6 py-4 bg-slate-900 text-white border-b border-slate-800 print:hidden shrink-0">
+        <div className="no-print flex items-center justify-between px-6 py-4 bg-slate-900 text-white border-b border-slate-800 print:hidden shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-500">
               <Calculator className="w-5 h-5" />
@@ -106,7 +110,7 @@ export default function PrintableSizingModal({
         </div>
 
         {/* CORPO DO DOCUMENTO A4 SCROLLÁVEL */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-10 print:p-8 print:overflow-visible font-sans leading-normal">
+        <div id="printable-sizing-sheet" className="flex-1 overflow-y-auto p-6 sm:p-10 print:p-8 print:overflow-visible font-sans leading-normal">
           
           {/* CABEÇALHO OFICIAL DO LAUDO */}
           <div className="border-b-2 border-red-600 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
